@@ -24,6 +24,7 @@
 | INF-07 | Arquitectura Técnica Consolidada | 1.1 | ✅ APROBADO | docs/INF/INF-07_v1.1_Arquitectura_Tecnica_Consolidada.md | INF-01 a INF-06 | v1.0 (docs/ARCHIVE) |
 | INF-08 | Especificación de APIs | 2.0 | ✅ APROBADO (auditoría Fase 2 sin cambios) | docs/INF/INF-08_v2.0_Especificacion_de_APIs.md | CAP-05, CAP-06, INF-05, INF-06 | v1.0, v1.1 (Histórico en Drive) |
 | INF-08 (auditoría) | Informe de Auditoría Final | 1.0 | ✅ APROBADO | docs/INF/INF-08_Informe_de_Auditoria_Final.md | INF-08 v2.0 | — |
+| INF-09 | Arquitectura Frontend | 1.0 | 🟡 PENDIENTE DE REVISIÓN DEL CTO | docs/INF/INF-09_Arquitectura_Frontend.md | CAP-05, CAP-06, INF-05, INF-06, INF-08 | — |
 
 ## DECISION_LOG
 
@@ -44,3 +45,5 @@ Carpetas creadas y listas para recibir documentación (`docs/ADR/`, `docs/LEGAL/
 ## Verificación de sincronización — 0 documentos pendientes
 
 Todos los documentos oficiales listados en las tablas anteriores están sincronizados en este repositorio, en su versión vigente. No queda ningún documento oficial pendiente de sincronización.
+
+*(INF-09 se añade en estado "pendiente de revisión del CTO"; no se considera aún documento aprobado.)*
