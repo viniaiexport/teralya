@@ -1,6 +1,6 @@
 -- =====================================================================
 -- TERALYA — Esquema de Base de Datos (INF-05)
--- PostgreSQL · Versión 1.0 · Julio 2026
+-- PostgreSQL · Versión 1.1 · Julio 2026
 -- Autor: Claude · Basado en: Capítulo 1 - Entidades del MVP
 -- Decisión CTO aplicada: Usuario Base + Usuario fusionados en "usuario".
 --   Comprador = extensión 1:1. Bodega = entidad independiente, 1:N con
