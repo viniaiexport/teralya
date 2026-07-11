@@ -1283,4 +1283,4 @@ Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido 
 ---
 
 
-*INF-08 v2.0 — 29 endpoints en 9 módulos, consecuencia directa de CAP-05 (Pantallas del MVP) y CAP-06 (Casos de Uso). Documento coherente con CAP-01 a CAP-08. Pendiente de aprobación definitiva del CTO.*
+*INF-08 v2.0 — 29 endpoints en 9 módulos, consecuencia directa de CAP-05 (Pantallas del MVP) y CAP-06 (Casos de Uso). Documento coherente con CAP-01 a CAP-08. Estado: APROBADO.*
