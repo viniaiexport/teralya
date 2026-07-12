@@ -9,17 +9,18 @@ Evolución mínima de INF-06 v1.0 para documentar la entidad funcional Incidenci
 | Versión | Fecha | Autor | Estado | Cambios |
 |---|---|---|---|---|
 | 1.0 | Julio 2026 | Claude | APROBADO | Diccionario correspondiente a INF-05 v1.1. |
-| 1.1 | 11/07/2026 | Arquitecto de Datos Teralya | EN REVISIÓN | Incorpora exclusivamente Incidencia y actualiza la trazabilidad a INF-05 v1.2. |
+| 1.1 | 11/07/2026 | Arquitecto de Datos Teralya | EN REVISIÓN | Incorpora Incidencia, solicitud de recuperación y trazabilidad aprobada de mayoría de edad y condiciones de alcohol; actualiza la referencia a INF-05 v1.2. |
 
 ## Trazabilidad
 
 - Fuente funcional: `docs/CAP/CAP-01-Entidades-del-Sistema.pdf`, versión 1.0, estado APROBADO, sección **Incidencia** y matriz de relaciones.
 - Fuente técnica: `teralya_schema_v1.2_EN_REVISION.sql`, versión 1.2, estado EN REVISIÓN.
+- Decisiones CEO de 11/07/2026: fecha de nacimiento obligatoria, registro de declaraciones/aceptaciones y entidad mínima de recuperación de contraseña.
 - Documento base: INF-06 v1.0.
 
 ## Índice
 
-1. BODEGA · 2. USUARIO · 3. COMPRADOR · 4. CUENTA_STRIPE_CONNECT · 5. VINO · 6. IMAGEN · 7. DIRECCION · 8. CARRITO · 9. CARRITO_ITEM · 10. PEDIDO · 11. PAGO · 12. SUBPEDIDO · 13. PEDIDO_ITEM · 14. INCIDENCIA · 15. NOTIFICACION · 16. AUDITORIA
+1. BODEGA · 2. USUARIO · 3. COMPRADOR · 4. CUENTA_STRIPE_CONNECT · 5. VINO · 6. IMAGEN · 7. DIRECCION · 8. CARRITO · 9. CARRITO_ITEM · 10. PEDIDO · 11. PAGO · 12. SUBPEDIDO · 13. PEDIDO_ITEM · 14. INCIDENCIA · 15. NOTIFICACION · 16. AUDITORIA · 17. SOLICITUD_RECUPERACION_PASSWORD
 
 ---
 
@@ -114,8 +115,6 @@ Evolución mínima de INF-06 v1.0 para documentar la entidad funcional Incidenci
 | `fecha_ultimo_cambio_password` | timestamptz | No | — | Fecha del último cambio de contraseña. |
 | `intentos_fallidos` | integer | Sí | 0 | Contador de intentos de inicio de sesión fallidos. |
 | `cuenta_bloqueada` | boolean | Sí | false | Indica si la cuenta está bloqueada por seguridad. |
-| `token_recuperacion` | text | No | — | Token temporal para recuperación de contraseña. |
-| `token_recuperacion_caducidad` | timestamptz | No | — | Fecha de caducidad del token de recuperación. |
 | `doble_factor_activo` | boolean | Sí | false | Indica si el usuario tiene 2FA activo (funcionalidad futura). |
 | `created_at` | timestamptz | Sí | now() | Fecha y hora de creación del registro. |
 | `updated_at` | timestamptz | Sí | now() | Fecha y hora de la última actualización del registro. |
@@ -148,7 +147,12 @@ Evolución mínima de INF-06 v1.0 para documentar la entidad funcional Incidenci
 | Campo | Tipo | Obligatorio | Default | Descripción |
 |---|---|---|---|---|
 | `usuario_id` | uuid | Sí | — | Usuario del que este comprador es una extensión 1:1. |
-| `fecha_nacimiento` | date | No | — | Fecha de nacimiento (opcional en el MVP). |
+| `fecha_nacimiento` | date | Sí | — | Fecha de nacimiento obligatoria, usada para comprobar la edad mínima aplicable. |
+| `declaracion_mayoria_edad` | boolean | Sí | false | Confirmación expresa del comprador de que cumple la edad mínima aplicable. |
+| `declaracion_mayoria_edad_at` | timestamptz | No | — | Fecha y hora en que se registró la declaración de mayoría de edad. |
+| `aceptacion_condiciones_alcohol` | boolean | Sí | false | Aceptación expresa de las condiciones aplicables a la compra de alcohol. |
+| `aceptacion_condiciones_alcohol_at` | timestamptz | No | — | Fecha y hora en que se registró la aceptación de las condiciones de compra de alcohol. |
+| `version_condiciones_alcohol` | text | No | — | Versión de las condiciones de compra de alcohol aceptadas por el comprador. |
 | `acepta_comunicaciones` | boolean | Sí | false | Indica si acepta recibir comunicaciones comerciales. |
 | `moneda_preferida` | text | No | 'EUR' | Moneda preferida para mostrar precios. |
 | `pais_compra_habitual` | text | No | — | País desde el que compra habitualmente. |
@@ -713,4 +717,34 @@ Evolución mínima de INF-06 v1.0 para documentar la entidad funcional Incidenci
 
 ---
 
-*Borrador EN REVISIÓN. Parte de INF-06 v1.0 e incorpora exclusivamente la entidad Incidencia aprobada en CAP-01 y definida en INF-05 v1.2 EN REVISIÓN. Requiere validación técnica antes de aprobación.*
+## 17. SOLICITUD_RECUPERACION_PASSWORD
+
+**Objetivo.** Conservar de forma segura y trazable las solicitudes de recuperación de acceso de las cuentas de usuario.
+
+**Relaciones principales.** N:1 con usuario.
+
+| Campo | Tipo | Obligatorio | Default | Descripción |
+|---|---|---|---|---|
+| `id` | uuid | Sí | gen_random_uuid() | Identificador único de la solicitud. |
+| `usuario_id` | uuid | Sí | — | Cuenta de usuario a la que pertenece la solicitud. |
+| `token_hash` | text | Sí | — | Huella segura y única del token; no almacena el token utilizable en claro. |
+| `estado` | estado_solicitud_recuperacion | Sí | 'pendiente' | Estado: pendiente, utilizada, expirada o cancelada. |
+| `created_at` | timestamptz | Sí | now() | Fecha y hora de creación. |
+| `expires_at` | timestamptz | Sí | — | Fecha y hora límite de validez. |
+| `used_at` | timestamptz | No | — | Fecha y hora de utilización efectiva. |
+
+**Clave primaria.** `id`
+
+**Claves foráneas.** `usuario_id` → `usuario.id`, con borrado en cascada.
+
+**Restricciones de unicidad.** `token_hash` es único.
+
+**Índices.**
+- `idx_solicitud_recuperacion_usuario_id`: (`usuario_id`)
+- `idx_solicitud_recuperacion_estado_expires`: (`estado`, `expires_at`)
+
+**Reglas de negocio asociadas.** Una cuenta puede tener múltiples solicitudes históricas; solo una solicitud pendiente, no expirada y no utilizada permite cambiar la contraseña; el token se almacena exclusivamente como hash; una solicitud utilizada, expirada o cancelada no se reutiliza.
+
+---
+
+*Borrador EN REVISIÓN. Parte de INF-06 v1.0 e incorpora exclusivamente las decisiones aprobadas para Incidencia, recuperación de contraseña y trazabilidad de mayoría de edad y condiciones de compra de alcohol. Requiere validación técnica antes de aprobación.*
