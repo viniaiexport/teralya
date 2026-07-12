@@ -1,8 +1,8 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 3.5 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 3.6 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
-## CAP — Documentación funcional (Arquitecto de Producto)
+## CAP — Documentación funcional
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias | Sustituye a |
 |---|---|---|---|---|---|---|
@@ -15,65 +15,76 @@
 | CAP-07 | Historias de Usuario | 1.1 | 🟡 EN REVISIÓN | docs/CAP/CAP-07_v1.1_Historias_de_Usuario.md | CAP-06 | v1.0 incompleta |
 | CAP-08 | Criterios de Aceptación | 1.1 | 🟡 EN REVISIÓN | docs/CAP/CAP-08_v1.1_Criterios_de_Aceptacion.md | CAP-07 v1.1 | v1.0 incompleta |
 
-## INF — Documentación técnica (Claude)
+## INF — Documentación técnica
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias | Sustituye a |
 |---|---|---|---|---|---|---|
 | INF-05 | Esquema de Base de Datos | 1.2 | 🟡 EN REVISIÓN | docs/INF/teralya_schema_v1.2_EN_REVISION.sql | CAP-01, CAP-02 | v1.1 aprobada |
 | INF-06 | Diccionario de Datos | 1.1 | 🟡 EN REVISIÓN | docs/INF/INF-06_v1.1_Diccionario_de_Datos.md | INF-05 v1.2 | v1.0 aprobada |
-| INF-07 | Arquitectura Técnica Consolidada | 1.2 | 🟡 EN REVISIÓN | docs/INF/INF-07_v1.2_Arquitectura_Tecnica_Consolidada.md | INF-01 a INF-06 v1.1 | v1.1 aprobada |
+| INF-07 | Arquitectura Técnica Consolidada | 1.3 | ✅ APROBADO POR CTO | docs/INF/INF-07_v1.3_Arquitectura_Tecnica_Consolidada.md | INF-05, INF-06, ADR-002, ADR-003, ADR-004 | v1.2 |
 | INF-08 | Especificación de APIs | 2.1 | 🟡 EN REVISIÓN | docs/INF/INF-08_v2.1_Especificacion_de_APIs.md | CAP-05, CAP-06, INF-05, INF-06 | v2.0 |
-| INF-08 (auditoría limitada) | Auditoría de Idempotencia | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
-| INF-09 | Arquitectura Frontend | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, ADR-001, ADR-002, ADR-003 | — |
+| INF-08-AUD-IDEM | Auditoría limitada de Idempotencia | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
+| INF-08-AUD-COV | Auditoría de cobertura de Pantallas y Casos de Uso | 1.0 | 🔴 BLOQUEO PARCIAL | docs/INF/INF-08_v2.1_Auditoria_Cobertura_Pantallas_v1.0.md | CAP-05, CAP-06, CAP-07, INF-08 v2.1 | — |
+| INF-09 | Arquitectura Frontend | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, INF-07 v1.3, ADR-001 a ADR-004 | — |
 
 ## DECISION_LOG
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log - Teralya | 1.1 | ✅ Oficial (incluye Decisiones 0010-0012) | docs/DECISION_LOG/Decision_Log.md | Referenciado por INF-07, ADR-001, ADR-002, ADR-003 |
+| DLOG | Decision Log — Teralya | 1.2 | ✅ OFICIAL, incluye 0010–0013 | docs/DECISION_LOG/Decision_Log.md | INF-07, INF-09, ADR-001 a ADR-004 |
 
 ### Decisiones de negocio vigentes
 
-- Comisión objetivo estándar: **10%**. Se permiten reducciones de lanzamiento y promociones puntuales aprobadas por el CEO, sin modificar el porcentaje estándar.
+- Comisión objetivo estándar: **10%**. Las reducciones temporales requieren aprobación del CEO.
 - Fecha objetivo de lanzamiento del MVP: **octubre de 2026**.
-- Fuente normativa: Decisiones 0008 y 0009 del Decision Log v1.1.
+- Fuente normativa: Decisiones 0008 y 0009.
 
 ## ADR
 
 | Código | Nombre | Estado | Ubicación | Decide |
 |---|---|---|---|---|
-| ADR-001 | Carrito de visitante | ✅ Aceptado | docs/ADR/ADR-001-Carrito-de-visitante.md | CEO (Decisión 0010) |
-| ADR-002 | Proveedor de identidad del MVP | ✅ Aceptado | docs/ADR/ADR-002-Proveedor-de-identidad.md | CEO (Decisión 0011) |
-| ADR-003 | Next.js App Router | ✅ Aceptado | docs/ADR/ADR-003-Nextjs-App-Router.md | CTO (Decisión 0012) |
+| ADR-001 | Carrito de visitante | ✅ Aceptado | docs/ADR/ADR-001-Carrito-de-visitante.md | CEO, Decisión 0010 |
+| ADR-002 | Proveedor de identidad | ✅ Aceptado | docs/ADR/ADR-002-Proveedor-de-identidad.md | CEO, Decisión 0011 |
+| ADR-003 | Next.js App Router | ✅ Aceptado | docs/ADR/ADR-003-Nextjs-App-Router.md | CTO, Decisión 0012 |
+| ADR-004 | Topología del Frontend del MVP | ✅ Aceptado | docs/ADR/ADR-004-Topologia-Frontend-MVP.md | CTO con autorización CEO, Decisión 0013 |
 
 ## LEGAL, UX
 
-Carpetas creadas y listas para recibir documentación (`docs/LEGAL/`, `docs/UX/`). Sin contenido todavía.
+Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 
 ## ARCHIVE
 
 | Documento archivado | Motivo |
 |---|---|
-| `INF-07_v1.0_OBSOLETO_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.1 (incorpora Decisión CTO de mayoría de edad e internacionalización) |
-| `docs/INF/teralya_schema_v1.1_APROBADO.sql` | INF-05 v1.1 aprobada; sustituida por v1.2 en revisión con entidad Incidencia |
-| `docs/INF/INF-06_Diccionario_de_Datos.md` | INF-06 v1.0 aprobada; sustituida por v1.1 en revisión con entidad Incidencia |
-| `docs/CAP/CAP-02-Modelo-de-Datos.pdf` | CAP-02 v1.0 incompleta; sustituida por v1.1 en revisión |
-| `docs/CAP/CAP-07-Historias-de-Usuario.md` | CAP-07 v1.0 incompleta; sustituida por v1.1 en revisión |
-| `docs/CAP/CAP-08-Criterios-de-Aceptacion.md` | CAP-08 v1.0 incompleta; sustituida por v1.1 en revisión |
-| `docs/INF/INF-07_v1.1_Arquitectura_Tecnica_Consolidada.md` | INF-07 v1.1 aprobada; sustituida por v1.2 en revisión |
-| `docs/INF/INF-08_v2.0_Especificacion_de_APIs.md` | Versión histórica aprobada; sustituida por v2.1 en revisión con protección de idempotencia |
-| `docs/INF/INF-08_Informe_de_Auditoria_Final.md` | Auditoría histórica correspondiente exclusivamente a INF-08 v2.0 |
+| `INF-07_v1.0_OBSOLETO_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.1 |
+| `docs/INF/INF-07_v1.1_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.2 |
+| `docs/INF/INF-07_v1.2_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.3; contenía topología histórica de dos frontends incompatible con ADR-004 |
+| `docs/INF/teralya_schema_v1.1_APROBADO.sql` | Sustituido por INF-05 v1.2 en revisión |
+| `docs/INF/INF-06_Diccionario_de_Datos.md` | Sustituido por INF-06 v1.1 en revisión |
+| `docs/CAP/CAP-02-Modelo-de-Datos.pdf` | Sustituido por CAP-02 v1.1 |
+| `docs/CAP/CAP-07-Historias-de-Usuario.md` | Sustituido por CAP-07 v1.1 |
+| `docs/CAP/CAP-08-Criterios-de-Aceptacion.md` | Sustituido por CAP-08 v1.1 |
+| `docs/INF/INF-08_v2.0_Especificacion_de_APIs.md` | Sustituido por INF-08 v2.1 |
+| `docs/INF/INF-08_Informe_de_Auditoria_Final.md` | Auditoría histórica de INF-08 v2.0 |
 
-## Verificación de sincronización — trabajo pendiente
+## Estado operativo y siguiente documento
 
-Documentos en reconstrucción o revisión:
+### Cerrado hoy
 
-- CAP-02 v1.1 — reconstruida y en revisión.
-- CAP-07 v1.1 — reconstruida y en revisión.
-- CAP-08 v1.1 — reconstruida y en revisión.
-- INF-05 v1.2 e INF-06 v1.1 — en revisión; incorporan Incidencia, mayoría de edad y recuperación segura de contraseña.
-- INF-07 v1.2 — en revisión y alineada con el modelo vigente de 17 tablas.
-- INF-08 v2.1 y auditoría limitada — en revisión.
-- INF-09 Arquitectura Frontend — creado, EN REVISIÓN, 25 apartados. Pendiente de aprobación del CTO.
-- INF-08 v2.1 — corrección de auditoría aplicada: API-012 pasa de "Visitante, Comprador" a "Comprador" (coherencia con ADR-001).
-- ADR-001, ADR-002 y ADR-003 — creados y aceptados. INF-09 no tiene ya ningún ADR propuesto pendiente.
+- INF-07 v1.3 aprobado y alineado con una única aplicación Next.js.
+- INF-09 v1.0 aprobado con 25 apartados.
+- ADR-004 y Decisión 0013 cierran la topología Frontend.
+- La arquitectura Frontend no tiene decisiones pendientes.
+
+### Documento actualmente en desarrollo
+
+**INF-08 v2.2 — Especificación de APIs completa**, que debe derivarse de INF-08 v2.1 y de la Auditoría de cobertura v1.0.
+
+### Bloqueos abiertos
+
+- Trece operaciones aprobadas carecen de contrato API explícito. Las pantallas afectadas no deben implementarse hasta aprobar INF-08 v2.2.
+- INF-05 v1.2, INF-06 v1.1, CAP-02 v1.1, CAP-07 v1.1 y CAP-08 v1.1 siguen EN REVISIÓN y requieren cierre independiente.
+
+### Regla de continuidad
+
+Los huecos de INF-08 no reabren INF-09. Cualquier cambio futuro de framework, App Router o topología requiere un nuevo ADR.
