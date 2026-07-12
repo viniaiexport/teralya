@@ -2,10 +2,10 @@
 -- TERALYA — Esquema de Base de Datos (INF-05)
 -- PostgreSQL · Versión 1.2 · Julio 2026 · Estado: EN REVISIÓN
 -- Autor: Claude · Basado en: Capítulo 1 - Entidades del MVP
--- Evolución v1.2: incorpora exclusivamente la entidad funcional
---   Incidencia aprobada en CAP-01, con relaciones opcionales a pedido,
---   subpedido, bodega y vino. Su historial mínimo se registra mediante
---   la tabla transversal auditoria existente.
+-- Evolución v1.2: incorpora la entidad funcional Incidencia aprobada
+--   en CAP-01; la entidad mínima solicitud_recuperacion_password; y la
+--   trazabilidad aprobada de mayoría de edad y condiciones de alcohol.
+--   El historial mínimo de Incidencia reutiliza auditoria.
 -- Decisión CTO aplicada: Usuario Base + Usuario fusionados en "usuario".
 --   Comprador = extensión 1:1. Bodega = entidad independiente, 1:N con
 --   usuario. Administrador = rol, sin tabla propia.
@@ -34,6 +34,7 @@ CREATE TYPE estado_cuenta_stripe  AS ENUM ('no_iniciada', 'pendiente', 'en_revis
 CREATE TYPE canal_notificacion    AS ENUM ('email');
 CREATE TYPE estado_notificacion   AS ENUM ('pendiente', 'enviada', 'entregada', 'fallida', 'cancelada');
 CREATE TYPE resultado_auditoria   AS ENUM ('correcto', 'error');
+CREATE TYPE estado_solicitud_recuperacion AS ENUM ('pendiente', 'utilizada', 'expirada', 'cancelada');
 
 -- ---------------------------------------------------------------------
 -- 1. BODEGA  (independiente; se crea antes de usuario por la FK 1:N)
@@ -138,8 +139,6 @@ CREATE TABLE usuario (
     -- Seguridad
     intentos_fallidos            INTEGER NOT NULL DEFAULT 0,
     cuenta_bloqueada              BOOLEAN NOT NULL DEFAULT FALSE,
-    token_recuperacion            TEXT,
-    token_recuperacion_caducidad   TIMESTAMPTZ,
     doble_factor_activo            BOOLEAN NOT NULL DEFAULT FALSE,  -- futuro
 
     created_at                    TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -151,6 +150,26 @@ CREATE TABLE usuario (
 
 CREATE INDEX idx_usuario_bodega_id ON usuario(bodega_id);
 CREATE INDEX idx_usuario_rol ON usuario(rol);
+
+-- ---------------------------------------------------------------------
+-- 2A. SOLICITUD_RECUPERACION_PASSWORD
+-- Objetivo: conservar de forma segura y trazable las solicitudes de
+--   recuperación de acceso asociadas a una cuenta de usuario.
+-- ---------------------------------------------------------------------
+CREATE TABLE solicitud_recuperacion_password (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    usuario_id  UUID NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+    token_hash  TEXT NOT NULL UNIQUE,
+    estado      estado_solicitud_recuperacion NOT NULL DEFAULT 'pendiente',
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    expires_at  TIMESTAMPTZ NOT NULL,
+    used_at     TIMESTAMPTZ
+);
+
+CREATE INDEX idx_solicitud_recuperacion_usuario_id
+    ON solicitud_recuperacion_password(usuario_id);
+CREATE INDEX idx_solicitud_recuperacion_estado_expires
+    ON solicitud_recuperacion_password(estado, expires_at);
 
 -- FKs diferidas de bodega hacia usuario (ciclo resuelto)
 ALTER TABLE bodega ADD CONSTRAINT fk_bodega_aprobada_por FOREIGN KEY (aprobada_por) REFERENCES usuario(id);
@@ -168,7 +187,12 @@ ALTER TABLE bodega ADD CONSTRAINT fk_bodega_updated_by   FOREIGN KEY (updated_by
 -- ---------------------------------------------------------------------
 CREATE TABLE comprador (
     usuario_id                UUID PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
-    fecha_nacimiento           DATE,
+    fecha_nacimiento           DATE NOT NULL,
+    declaracion_mayoria_edad    BOOLEAN NOT NULL DEFAULT FALSE,
+    declaracion_mayoria_edad_at TIMESTAMPTZ,
+    aceptacion_condiciones_alcohol    BOOLEAN NOT NULL DEFAULT FALSE,
+    aceptacion_condiciones_alcohol_at TIMESTAMPTZ,
+    version_condiciones_alcohol       TEXT,
     acepta_comunicaciones       BOOLEAN NOT NULL DEFAULT FALSE,
     moneda_preferida            TEXT DEFAULT 'EUR',
     pais_compra_habitual         TEXT,
@@ -703,7 +727,7 @@ CREATE INDEX idx_auditoria_usuario_id ON auditoria(usuario_id);
 CREATE INDEX idx_auditoria_fecha ON auditoria(fecha_hora);
 
 -- =====================================================================
--- Fin del esquema — 16 tablas. La versión 1.2 añade exclusivamente
--- Incidencia respecto de INF-05 v1.1, por decisión del CEO basada en
--- CAP-01 aprobado.
+-- Fin del esquema — 17 tablas. La versión 1.2 incorpora Incidencia,
+-- solicitud_recuperacion_password y la trazabilidad mínima aprobada
+-- para mayoría de edad y condiciones de compra de alcohol.
 -- =====================================================================
