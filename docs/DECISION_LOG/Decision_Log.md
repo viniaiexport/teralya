@@ -15,6 +15,7 @@
 | 0009 | Fecha objetivo de lanzamiento del MVP: **octubre de 2026** | Llegar al mercado antes de la campaña de Navidad de 2026, manteniendo el alcance estrictamente limitado al MVP aprobado | 12/07/2026 | Aprobada por el CEO |
 | 0010 | Carrito de visitante: temporal y local en el navegador; no se persiste en `carrito` hasta registro/login, momento en que se valida y fusiona con el carrito del comprador. Checkout siempre requiere autenticación. `carrito.comprador_id` se mantiene `NOT NULL` (sin cambio de esquema) | Resolver la contradicción entre CAP-05 (PT-COM-002 admite "Visitante") e INF-05 (`comprador_id NOT NULL`), detectada durante la creación de INF-09 | 12/07/2026 | Aprobada por el CEO (ADR-001) |
 | 0011 | Proveedor de identidad del MVP: autenticación autogestionada por el backend de Teralya (`usuario.password_hash`); no se adopta un proveedor externo gestionado en esta fase | Fijar formalmente una coherencia que ya existía de facto entre INF-05 v1.2 e INF-07 v1.2, evitando una futura migración no planificada que mueva esquema, API y frontend a la vez | 12/07/2026 | Aprobada por el CEO (ADR-002) |
+| 0012 | Frontend del MVP con **Next.js y App Router** (no Pages Router), manteniendo React + TypeScript ya aprobado en INF-07 | Cerrar la decisión técnica que INF-09 asumía como base de diseño de rutas/layouts/loading/error sin estar formalizada, evitando ambigüedad antes de implementar | 12/07/2026 | Aprobada por el CTO (ADR-003) |
 
 ---
 

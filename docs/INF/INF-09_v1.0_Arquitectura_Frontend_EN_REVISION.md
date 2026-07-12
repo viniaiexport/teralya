@@ -20,7 +20,7 @@ Definir la arquitectura técnica del Frontend del MVP de Teralya como consecuenc
 
 ## 3. Estructura completa del proyecto Next.js
 
-Aplicación Next.js única (App Router — ver ADR-003 propuesto, §"ADRs propuestos"), no tres aplicaciones separadas, para compartir componentes, cliente de API, autenticación e internacionalización entre Comprador, Bodega y Administrador, conforme a INF-07 §1 y §3 (monorepo, un único despliegue de Frontend por app).
+Aplicación Next.js única (App Router — decidido y cerrado, ver ADR-003, `docs/ADR/ADR-003-Nextjs-App-Router.md`), no tres aplicaciones separadas, para compartir componentes, cliente de API, autenticación e internacionalización entre Comprador, Bodega y Administrador, conforme a INF-07 §1 y §3 (monorepo, un único despliegue de Frontend por app).
 
 Grupos de rutas por rol, no aplicaciones independientes:
 - Grupo público (sin autenticación).
@@ -219,9 +219,7 @@ El Frontend nunca confirma un Pedido por sí mismo: la confirmación autoritativ
 
 ## ADRs propuestos
 
-Los ADR sobre carrito de visitante e identidad ya se cerraron como ADR-001 y ADR-002 (`docs/ADR/`) durante la auditoría de coherencia. Queda un único punto propuesto, sin cerrar:
-
-1. **Next.js: App Router vs. Pages Router.** Este documento asume App Router (§3) por ser el estándar actual y por su ajuste natural a layouts/loading/error por grupo de rutas (§6, §12, §13); no existe decisión previa del CTO al respecto. Se recomienda fijarlo formalmente antes de iniciar la implementación.
+Los tres ADR identificados durante la creación y auditoría de INF-09 ya se cerraron: ADR-001 (carrito de visitante), ADR-002 (proveedor de identidad) y ADR-003 (Next.js App Router) — todos en `docs/ADR/`, todos Aceptados. No queda ningún ADR propuesto sin cerrar en este documento.
 
 ---
 

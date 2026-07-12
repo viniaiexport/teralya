@@ -24,13 +24,13 @@
 | INF-07 | Arquitectura Técnica Consolidada | 1.2 | 🟡 EN REVISIÓN | docs/INF/INF-07_v1.2_Arquitectura_Tecnica_Consolidada.md | INF-01 a INF-06 v1.1 | v1.1 aprobada |
 | INF-08 | Especificación de APIs | 2.1 | 🟡 EN REVISIÓN | docs/INF/INF-08_v2.1_Especificacion_de_APIs.md | CAP-05, CAP-06, INF-05, INF-06 | v2.0 |
 | INF-08 (auditoría limitada) | Auditoría de Idempotencia | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
-| INF-09 | Arquitectura Frontend | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, ADR-001, ADR-002 | — |
+| INF-09 | Arquitectura Frontend | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, ADR-001, ADR-002, ADR-003 | — |
 
 ## DECISION_LOG
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log - Teralya | 1.1 | ✅ Oficial (incluye Decisiones 0010-0011) | docs/DECISION_LOG/Decision_Log.md | Referenciado por INF-07, ADR-001, ADR-002 |
+| DLOG | Decision Log - Teralya | 1.1 | ✅ Oficial (incluye Decisiones 0010-0012) | docs/DECISION_LOG/Decision_Log.md | Referenciado por INF-07, ADR-001, ADR-002, ADR-003 |
 
 ### Decisiones de negocio vigentes
 
@@ -44,6 +44,7 @@
 |---|---|---|---|---|
 | ADR-001 | Carrito de visitante | ✅ Aceptado | docs/ADR/ADR-001-Carrito-de-visitante.md | CEO (Decisión 0010) |
 | ADR-002 | Proveedor de identidad del MVP | ✅ Aceptado | docs/ADR/ADR-002-Proveedor-de-identidad.md | CEO (Decisión 0011) |
+| ADR-003 | Next.js App Router | ✅ Aceptado | docs/ADR/ADR-003-Nextjs-App-Router.md | CTO (Decisión 0012) |
 
 ## LEGAL, UX
 
@@ -75,4 +76,4 @@ Documentos en reconstrucción o revisión:
 - INF-08 v2.1 y auditoría limitada — en revisión.
 - INF-09 Arquitectura Frontend — creado, EN REVISIÓN, 25 apartados. Pendiente de aprobación del CTO.
 - INF-08 v2.1 — corrección de auditoría aplicada: API-012 pasa de "Visitante, Comprador" a "Comprador" (coherencia con ADR-001).
-- ADR-001 y ADR-002 — creados y aceptados, cierran las dos contradicciones/decisiones pendientes detectadas al crear INF-09.
+- ADR-001, ADR-002 y ADR-003 — creados y aceptados. INF-09 no tiene ya ningún ADR propuesto pendiente.
