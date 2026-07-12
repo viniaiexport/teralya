@@ -1,6 +1,6 @@
 # Decision Log — Teralya
 
-**Registro de decisiones del proyecto.** Cada decisión relevante queda aquí con fecha y motivo, para no perder el razonamiento ni repetir discusiones ya cerradas (Blueprint, Cap. 7).
+**Versión 1.1 · Julio 2026 · Registro oficial de decisiones del proyecto.** Cada decisión relevante queda aquí con fecha y motivo, para no perder el razonamiento ni repetir discusiones ya cerradas.
 
 | ID | Decisión | Motivo | Fecha | Estado |
 |---|---|---|---|---|
@@ -11,7 +11,15 @@
 | 0005 | `subpedido.estado` como única fuente de verdad del flujo logístico; `pedido_item.estado` reducido a `normal / cancelado / devuelto` | Resolver la Contradicción 4 (estados logísticos duplicados entre dos tablas sin fuente de verdad clara) | 09/07/2026 | Aprobada por el CTO |
 | 0006 | Verificación de mayoría de edad obligatoria en el registro de comprador: fecha de nacimiento + declaración + aceptación de condiciones de venta de alcohol, con registro para auditoría. Sin verificación documental de identidad en el MVP | Obligación legal de la venta de alcohol en la UE; equilibrio entre cumplimiento y fricción de registro en el MVP | 09/07/2026 | Aprobada por el CTO |
 | 0007 | Plataforma multilingüe desde el MVP: español, inglés, francés, alemán, italiano. Detección de idioma del navegador + selección manual + idioma guardado por usuario. Arquitectura preparada para traducción de contenidos futura, sin diseñar aún el sistema de traducción de vinos/bodegas | Teralya nace con vocación de mercado paneuropeo, no solo español | 09/07/2026 | Aprobada por el CTO |
+| 0008 | Comisión objetivo estándar de Teralya: **10%** sobre las ventas. Se permiten reducciones de lanzamiento y promociones puntuales aprobadas por el CEO, limitadas en duración y alcance; estas acciones no modifican el porcentaje estándar | Equilibrar competitividad para las bodegas, sostenibilidad económica de la plataforma y capacidad para financiar pagos, soporte, cumplimiento y crecimiento. Sustituye el objetivo preliminar del 7% | 12/07/2026 | Aprobada por el CEO |
+| 0009 | Fecha objetivo de lanzamiento del MVP: **octubre de 2026** | Llegar al mercado antes de la campaña de Navidad de 2026, manteniendo el alcance estrictamente limitado al MVP aprobado | 12/07/2026 | Aprobada por el CEO |
 
 ---
 
-*Nota de higiene documental: existe en Drive un documento anterior, "Marketplace_Europeo_Bodegas_Fundadoras_Ruta_50p_v0_2.pdf" (29/06/2026), previo al nombre Teralya, con supuestos ya superados (marca de trabajo "Vineo", comisión ~7%, lanzamiento octubre 2026, stack Next.js/Supabase/Vercel). Es un borrador anterior al Blueprint Fundacional, no una fuente activa — se recomienda archivarlo o marcarlo claramente como histórico para evitar que Codex/ChatGPT lo confundan con la especificación vigente.*
+## Nota de higiene documental
+
+El documento anterior `Marketplace_Europeo_Bodegas_Fundadoras_Ruta_50p_v0_2.pdf` (29/06/2026) es histórico y no constituye una fuente normativa. Utiliza la marca de trabajo anterior y contiene supuestos preliminares.
+
+- Su objetivo de comisión del 7% queda sustituido por la Decisión 0008: comisión estándar del 10%.
+- Su objetivo de lanzamiento en octubre de 2026 queda confirmado y formalizado por la Decisión 0009.
+- Cualquier otro supuesto del documento histórico debe contrastarse con `docs/INDEX.md` y con este Decision Log antes de utilizarse.
