@@ -123,13 +123,13 @@ Público
 email
 
 **Validaciones**
-Email obligatorio y con formato válido. El email debe estar asociado a una cuenta existente.
+Email obligatorio y con formato válido. La existencia de la cuenta no se valida como condición para responder — se comprueba internamente solo para decidir si se genera la solicitud de recuperación.
 
 **Respuesta correcta**
-200 OK. Confirmación de envío de instrucciones.
+200 OK. Respuesta genérica de confirmación de envío, idéntica exista o no una cuenta asociada a ese email.
 
 **Posibles errores**
-400 email inválido · 404 cuenta no encontrada.
+400 email con formato inválido.
 
 **Casos de uso relacionados**
 CU-003
@@ -138,7 +138,7 @@ CU-003
 PT-ACC-004
 
 **Observaciones**
-El enlace o token generado tiene validez limitada.
+Solo se genera y envía una solicitud de recuperación (`solicitud_recuperacion_password`) cuando la cuenta existe internamente; de cara al solicitante, la respuesta es siempre 200 OK genérico, para no revelar si un email está registrado (regla de recuperación segura de CAP-02). El enlace o token generado tiene validez limitada.
 
 ---
 
