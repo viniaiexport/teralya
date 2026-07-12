@@ -20,3 +20,43 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issue_number = 1;
+            const reminderMarker = '<!-- teralya-claude-watch -->';
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 }
+            );
+
+            const isCtoTask = body =>
+              body.includes('## Siguiente tarea para Claude') ||
+              body.includes('Entrega requerida a Claude');
+
+            const isClaudeDelivery = body =>
+              body.includes('Entrega Claude') ||
+              body.includes('**Entrega Claude');
+
+            let lastTaskIndex = -1;
+            let lastDeliveryIndex = -1;
+            let lastReminderIndex = -1;
+
+            comments.forEach((comment, index) => {
+              const body = comment.body || '';
+              if (isCtoTask(body)) lastTaskIndex = index;
+              if (isClaudeDelivery(body)) lastDeliveryIndex = index;
+              if (body.includes(reminderMarker)) lastReminderIndex = index;
+            });
+
+            const taskIsPending = lastTaskIndex > lastDeliveryIndex;
+            const reminderAlreadyPosted = lastReminderIndex > lastTaskIndex;
+
+            if (!taskIsPending || reminderAlreadyPosted) {
+              core.info('No new reminder is required.');
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: `${reminderMarker}\n🔔 **Tarea pendiente para Claude**\n\nExiste una instrucción posterior a la última entrega registrada. Revisa el último comentario del CTO en este issue y publica aquí el commit, los archivos modificados, las validaciones y los bloqueos.\n\nEste recordatorio se genera automáticamente y no requiere intervención del CEO.`
+            });
