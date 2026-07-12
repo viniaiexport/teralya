@@ -1,7 +1,11 @@
 -- =====================================================================
 -- TERALYA — Esquema de Base de Datos (INF-05)
--- PostgreSQL · Versión 1.1 · Julio 2026
+-- PostgreSQL · Versión 1.2 · Julio 2026 · Estado: EN REVISIÓN
 -- Autor: Claude · Basado en: Capítulo 1 - Entidades del MVP
+-- Evolución v1.2: incorpora la entidad funcional Incidencia aprobada
+--   en CAP-01; la entidad mínima solicitud_recuperacion_password; y la
+--   trazabilidad aprobada de mayoría de edad y condiciones de alcohol.
+--   El historial mínimo de Incidencia reutiliza auditoria.
 -- Decisión CTO aplicada: Usuario Base + Usuario fusionados en "usuario".
 --   Comprador = extensión 1:1. Bodega = entidad independiente, 1:N con
 --   usuario. Administrador = rol, sin tabla propia.
@@ -30,6 +34,7 @@ CREATE TYPE estado_cuenta_stripe  AS ENUM ('no_iniciada', 'pendiente', 'en_revis
 CREATE TYPE canal_notificacion    AS ENUM ('email');
 CREATE TYPE estado_notificacion   AS ENUM ('pendiente', 'enviada', 'entregada', 'fallida', 'cancelada');
 CREATE TYPE resultado_auditoria   AS ENUM ('correcto', 'error');
+CREATE TYPE estado_solicitud_recuperacion AS ENUM ('pendiente', 'utilizada', 'expirada', 'cancelada');
 
 -- ---------------------------------------------------------------------
 -- 1. BODEGA  (independiente; se crea antes de usuario por la FK 1:N)
@@ -134,8 +139,6 @@ CREATE TABLE usuario (
     -- Seguridad
     intentos_fallidos            INTEGER NOT NULL DEFAULT 0,
     cuenta_bloqueada              BOOLEAN NOT NULL DEFAULT FALSE,
-    token_recuperacion            TEXT,
-    token_recuperacion_caducidad   TIMESTAMPTZ,
     doble_factor_activo            BOOLEAN NOT NULL DEFAULT FALSE,  -- futuro
 
     created_at                    TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -147,6 +150,26 @@ CREATE TABLE usuario (
 
 CREATE INDEX idx_usuario_bodega_id ON usuario(bodega_id);
 CREATE INDEX idx_usuario_rol ON usuario(rol);
+
+-- ---------------------------------------------------------------------
+-- 2A. SOLICITUD_RECUPERACION_PASSWORD
+-- Objetivo: conservar de forma segura y trazable las solicitudes de
+--   recuperación de acceso asociadas a una cuenta de usuario.
+-- ---------------------------------------------------------------------
+CREATE TABLE solicitud_recuperacion_password (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    usuario_id  UUID NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+    token_hash  TEXT NOT NULL UNIQUE,
+    estado      estado_solicitud_recuperacion NOT NULL DEFAULT 'pendiente',
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    expires_at  TIMESTAMPTZ NOT NULL,
+    used_at     TIMESTAMPTZ
+);
+
+CREATE INDEX idx_solicitud_recuperacion_usuario_id
+    ON solicitud_recuperacion_password(usuario_id);
+CREATE INDEX idx_solicitud_recuperacion_estado_expires
+    ON solicitud_recuperacion_password(estado, expires_at);
 
 -- FKs diferidas de bodega hacia usuario (ciclo resuelto)
 ALTER TABLE bodega ADD CONSTRAINT fk_bodega_aprobada_por FOREIGN KEY (aprobada_por) REFERENCES usuario(id);
@@ -164,7 +187,12 @@ ALTER TABLE bodega ADD CONSTRAINT fk_bodega_updated_by   FOREIGN KEY (updated_by
 -- ---------------------------------------------------------------------
 CREATE TABLE comprador (
     usuario_id                UUID PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
-    fecha_nacimiento           DATE,
+    fecha_nacimiento           DATE NOT NULL,
+    declaracion_mayoria_edad    BOOLEAN NOT NULL DEFAULT FALSE,
+    declaracion_mayoria_edad_at TIMESTAMPTZ,
+    aceptacion_condiciones_alcohol    BOOLEAN NOT NULL DEFAULT FALSE,
+    aceptacion_condiciones_alcohol_at TIMESTAMPTZ,
+    version_condiciones_alcohol       TEXT,
     acepta_comunicaciones       BOOLEAN NOT NULL DEFAULT FALSE,
     moneda_preferida            TEXT DEFAULT 'EUR',
     pais_compra_habitual         TEXT,
@@ -589,7 +617,49 @@ CREATE INDEX idx_pedido_item_pedido_id ON pedido_item(pedido_id);
 CREATE INDEX idx_pedido_item_subpedido_id ON pedido_item(subpedido_id);
 
 -- ---------------------------------------------------------------------
--- 14. NOTIFICACION
+-- 14. INCIDENCIA
+-- Objetivo: registrar un problema operativo básico del MVP relacionado
+--   con un pedido, subpedido, bodega o vino, para su gestión por
+--   administración.
+-- Alcance: registro, clasificación, estado, descripción, relaciones y
+--   trazabilidad mínima. No implementa tickets, chat, CRM ni soporte
+--   avanzado.
+-- Trazabilidad: los cambios se registran en auditoria usando
+--   tipo_entidad = 'incidencia' y entidad_id = incidencia.id.
+-- ---------------------------------------------------------------------
+CREATE TABLE incidencia (
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tipo              TEXT NOT NULL,
+    estado            TEXT NOT NULL,
+    fecha             TIMESTAMPTZ NOT NULL DEFAULT now(),
+    descripcion       TEXT NOT NULL,
+
+    pedido_id         UUID REFERENCES pedido(id),
+    subpedido_id      UUID REFERENCES subpedido(id),
+    bodega_id         UUID REFERENCES bodega(id),
+    vino_id           UUID REFERENCES vino(id),
+
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT chk_incidencia_relacion
+        CHECK (
+            pedido_id IS NOT NULL OR
+            subpedido_id IS NOT NULL OR
+            bodega_id IS NOT NULL OR
+            vino_id IS NOT NULL
+        )
+);
+
+CREATE INDEX idx_incidencia_estado ON incidencia(estado);
+CREATE INDEX idx_incidencia_fecha ON incidencia(fecha);
+CREATE INDEX idx_incidencia_pedido_id ON incidencia(pedido_id) WHERE pedido_id IS NOT NULL;
+CREATE INDEX idx_incidencia_subpedido_id ON incidencia(subpedido_id) WHERE subpedido_id IS NOT NULL;
+CREATE INDEX idx_incidencia_bodega_id ON incidencia(bodega_id) WHERE bodega_id IS NOT NULL;
+CREATE INDEX idx_incidencia_vino_id ON incidencia(vino_id) WHERE vino_id IS NOT NULL;
+
+-- ---------------------------------------------------------------------
+-- 15. NOTIFICACION
 -- Objetivo: registra todas las comunicaciones automáticas enviadas a
 --   compradores, bodegas y administradores.
 -- Relaciones: N:1 con usuario · N:1 opcional con pedido · N:1 opcional
@@ -624,7 +694,7 @@ CREATE TABLE notificacion (
 CREATE INDEX idx_notificacion_usuario_id ON notificacion(usuario_id);
 
 -- ---------------------------------------------------------------------
--- 15. AUDITORIA  (polimórfica; nunca se modifica ni se elimina)
+-- 16. AUDITORIA  (polimórfica; nunca se modifica ni se elimina)
 -- Objetivo: registra todos los eventos relevantes del marketplace para
 --   garantizar trazabilidad, seguridad y soporte ante incidencias.
 -- Relaciones: polimórfica hacia cualquier entidad del sistema vía
@@ -657,6 +727,7 @@ CREATE INDEX idx_auditoria_usuario_id ON auditoria(usuario_id);
 CREATE INDEX idx_auditoria_fecha ON auditoria(fecha_hora);
 
 -- =====================================================================
--- Fin del esquema — 15 tablas (16 entidades originales - 1 por fusión
--- Usuario Base + Usuario, según decisión CTO del 03/07/2026)
+-- Fin del esquema — 17 tablas. La versión 1.2 incorpora Incidencia,
+-- solicitud_recuperacion_password y la trazabilidad mínima aprobada
+-- para mayoría de edad y condiciones de compra de alcohol.
 -- =====================================================================
