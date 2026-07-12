@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 3.3 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 3.4 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional (Arquitecto de Producto)
 
@@ -29,7 +29,13 @@
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log - Teralya | 1.0 | ✅ Oficial | docs/DECISION_LOG/Decision_Log.md | Referenciado por INF-07 |
+| DLOG | Decision Log - Teralya | 1.1 | ✅ Oficial | docs/DECISION_LOG/Decision_Log.md | Referenciado por INF-07 |
+
+### Decisiones de negocio vigentes
+
+- Comisión objetivo estándar: **10%**. Se permiten reducciones de lanzamiento y promociones puntuales aprobadas por el CEO, sin modificar el porcentaje estándar.
+- Fecha objetivo de lanzamiento del MVP: **octubre de 2026**.
+- Fuente normativa: Decisiones 0008 y 0009 del Decision Log v1.1.
 
 ## ADR, LEGAL, UX
 
@@ -59,4 +65,4 @@ Documentos en reconstrucción o revisión:
 - INF-05 v1.2 e INF-06 v1.1 — en revisión; incorporan Incidencia, mayoría de edad y recuperación segura de contraseña.
 - INF-07 v1.2 — en revisión y alineada con el modelo vigente de 17 tablas.
 - INF-08 v2.1 y auditoría limitada — en revisión.
-- INF-09 Arquitectura Frontend — no consta todavía como documento oficial; estado pendiente de verificar.
+- INF-09 Arquitectura Frontend — creación autorizada por el CEO; documento todavía inexistente y pendiente de elaboración.
