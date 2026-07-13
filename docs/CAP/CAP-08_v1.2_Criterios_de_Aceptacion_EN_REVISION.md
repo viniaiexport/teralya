@@ -14,7 +14,7 @@
 |---|---|---|---|---|
 | 1.0 | 09/07/2026 | Arquitecto de Producto Teralya | INCOMPLETA | Archivo sin desarrollo de los criterios declarados. |
 | 1.1 | 11/07/2026 | Agente de Producto Teralya | EN REVISIÓN | Reconstrucción desde CAP-07 v1.1 y fuentes funcionales vigentes. |
-| 1.2 | 13/07/2026 | CTO + Agente de Producto | EN REVISIÓN | Alineación con CAP-02 v1.2, CAP-07 v1.2, INF-08 v2.3, ADR-001 y DLOG 0010/0014–0018. |
+| 1.2 | 13/07/2026 | CTO + Agente de Producto | EN REVISIÓN | Alineación con CAP-02 v1.3, CAP-07 v1.2, INF-08 v2.3, ADR-001 y DLOG 0010/0014–0018. |
 
 ## OBJETIVO Y MÉTODO
 
@@ -357,7 +357,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 1. Los 93 criterios cubren las 32 historias aprobadas sin forzar una relación de un único criterio por historia.
 2. La reconstrucción incorpora carrito visitante local y fusión, idempotencia de checkout/Stripe, fuentes de verdad económicas y logísticas, publicación controlada, incidencias e integridad de SubPedidos.
 3. No se añaden rendimiento, diseño visual, analítica avanzada, logística avanzada, facturación avanzada ni funciones excluidas del MVP.
-4. La aprobación requiere trazabilidad coherente con CAP-02 v1.2, CAP-07 v1.2, INF-08 v2.3, ADR-001 y DLOG 0010/0014–0018.
+4. La aprobación requiere trazabilidad coherente con CAP-02 v1.3, CAP-07 v1.2, INF-08 v2.3, ADR-001 y DLOG 0010/0014–0018.
 
 ## CIERRE
 
