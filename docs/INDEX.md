@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 5.3 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 5.4 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -106,21 +106,24 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - API-001 incluye PostgreSQL, sesión opaca Redis, edad mínima configurable, versión de condiciones y pruebas de integración.
 - API-002 — `POST /auth/login` implementada e integrada en `main` mediante el commit `423c3f6`.
 - API-002 incluye acceso por rol y estado, sesión opaca, rate limit Redis, contadores de seguridad, auditoría inmutable y pruebas E2E.
+- API-003 — `POST /auth/recuperar-password` implementada e integrada en `main` mediante el commit `47697f9`.
+- API-003 incluye respuesta anti-enumeración, token de 256 bits almacenado solo como hash, rate limit, notificación SMTP, serialización transaccional por usuario y pruebas E2E concurrentes.
 - GitHub Actions valida esquema INF-05 v1.4, lint, pruebas, build, contrato OpenAPI y Redocly.
 
 ### Actualmente en desarrollo
 
-La implementación del backend está en curso. El siguiente incremento propuesto es API-003 — recuperación de contraseña, sin reabrir el contrato aprobado.
+La implementación del backend está en curso. El siguiente incremento propuesto es API-004 — restablecimiento de contraseña, sin reabrir el contrato aprobado.
 
 ### Siguiente paso propuesto
 
-Preparar e implementar API-003 como tercera rebanada vertical, reutilizando PostgreSQL, Redis y el patrón de auditoría ya integrado.
+Preparar e implementar API-004 como cuarta rebanada vertical, consumiendo de forma segura las solicitudes creadas por API-003.
 
 ### Bloqueos abiertos
 
 - No existen bloqueos funcionales ni contractuales identificados para iniciar API-003.
 - Antes de producción, Legal debe fijar los valores de `MINIMUM_PURCHASE_AGE` y `ALCOHOL_TERMS_VERSION`.
 - Antes de producción, Seguridad debe aprobar los valores de `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` y `LOGIN_RATE_LIMIT_WINDOW_SECONDS`.
+- Antes de producción, Seguridad e Infraestructura deben fijar TTL, límites, ventana, SMTP, remitente y URL pública de recuperación.
 - LEGAL y UX siguen sin contenido oficial; su planificación requiere una instrucción independiente.
 
 ### Regla de continuidad
