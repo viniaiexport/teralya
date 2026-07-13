@@ -2,8 +2,8 @@
 
 **Teralya · Versión 2.2 · Julio 2026 · EN REVISIÓN**
 
-*INF-08 v2.2: incorpora contratos explícitos para las 13 operaciones señaladas en la Auditoría de cobertura de Pantallas y CU v1.0 (huecos entre CAP-05/CAP-06/CAP-07 e INF-08 v2.1). Conserva los 29 endpoints válidos de v2.1 sin alterar su contrato; solo añade endpoints nuevos y confirma el flujo de credenciales de registro de bodega (ADR-002). No modifica INF-07, INF-09, ADR-003 ni ADR-004.*
-Especificación funcional de las APIs del MVP, derivada directamente de los Casos de Uso de CAP-06 y las Pantallas de CAP-05. Documento puramente funcional: no incluye código, no diseña la implementación, no especifica TypeScript ni SQL, no diseña autenticación JWT ni Supabase. 42 endpoints en 9 módulos — cada uno corresponde a un Caso de Uso o pantalla aprobados (CAP-05/CAP-06/CAP-07); no se ha añadido funcionalidad más allá del MVP.
+*INF-08 v2.2: conserva los 29 identificadores originales de v2.1 sin cambio (API-001 a API-029, salvo la confirmación de credenciales en API-005 por ADR-002). Añade las 13 operaciones de la Auditoría de cobertura v1.0 como API-030 a API-042. No modifica INF-07, INF-09, ADR-003 ni ADR-004.*
+Especificación funcional de las APIs del MVP, derivada directamente de los Casos de Uso de CAP-06 y las Pantallas de CAP-05. Documento puramente funcional: no incluye código, no diseña la implementación, no especifica TypeScript ni SQL, no diseña autenticación JWT ni Supabase. 42 endpoints en 9 módulos (API-001 a API-042) — cada uno corresponde a un Caso de Uso o pantalla aprobados (CAP-05/CAP-06/CAP-07); no se ha añadido funcionalidad más allá del MVP.
 
 ## Índice de módulos
 
@@ -17,7 +17,6 @@ Especificación funcional de las APIs del MVP, derivada directamente de los Caso
 
 **Código**
 API-001
-
 
 **Nombre**
 Registro de comprador
@@ -56,11 +55,12 @@ PT-ACC-001
 Registra en auditoría la aceptación y su fecha. Sin verificación documental de identidad en el MVP.
 
 ---
+
+
 ### API-002 — Iniciar sesión
 
 **Código**
 API-002
-
 
 **Nombre**
 Iniciar sesión
@@ -99,11 +99,12 @@ PT-ACC-003
 —
 
 ---
+
+
 ### API-003 — Recuperar contraseña — solicitar
 
 **Código**
 API-003
-
 
 **Nombre**
 Recuperar contraseña — solicitar
@@ -142,11 +143,12 @@ PT-ACC-004
 Solo se genera y envía una solicitud de recuperación (`solicitud_recuperacion_password`) cuando la cuenta existe internamente; de cara al solicitante, la respuesta es siempre 200 OK genérico, para no revelar si un email está registrado (regla de recuperación segura de CAP-02). El enlace o token generado tiene validez limitada.
 
 ---
+
+
 ### API-004 — Recuperar contraseña — establecer nueva
 
 **Código**
 API-004
-
 
 **Nombre**
 Recuperar contraseña — establecer nueva
@@ -186,13 +188,14 @@ PT-ACC-005
 
 ---
 
+
+
 ## Módulo: Bodegas
 
 ### API-005 — Solicitar registro como bodega
 
 **Código**
 API-005
-
 
 **Nombre**
 Solicitar registro como bodega
@@ -231,11 +234,12 @@ PT-ACC-002
 La bodega no puede operar hasta ser validada por administración. El registro crea directamente la cuenta de usuario (`usuario.password_hash`) asociada a la bodega, conforme al modelo de autenticación autogestionado de ADR-002 — no existe un segundo flujo de identidad ni credenciales separadas.
 
 ---
+
+
 ### API-006 — Completar perfil de bodega
 
 **Código**
 API-006
-
 
 **Nombre**
 Completar perfil de bodega
@@ -274,11 +278,12 @@ PT-BOD-002
 —
 
 ---
-### API-007 — Consultar ficha pública de bodega
+
+
+### API-030 — Consultar ficha pública de bodega
 
 **Código**
-API-007
-
+API-030
 
 **Nombre**
 Consultar ficha pública de bodega
@@ -318,11 +323,10 @@ Complementa la ficha de vino cuando el comprador navega desde el vino hacia la b
 
 ---
 
-### API-008 — Consultar perfil propio de bodega
+### API-031 — Consultar perfil propio de bodega
 
 **Código**
-API-008
-
+API-031
 
 **Nombre**
 Consultar perfil propio de bodega
@@ -358,18 +362,17 @@ CU-014
 PT-BOD-002
 
 **Observaciones**
-Complementa a Completar perfil de bodega, que ya existía sin lectura explícita. Brecha 2 de la Auditoría de cobertura v1.0.
+Complementa a API-006 (Completar perfil de bodega), que ya existía sin lectura explícita. Brecha 2 de la Auditoría de cobertura v1.0.
 
 ---
 
 
 ## Módulo: Vinos
 
-### API-009 — Crear vino
+### API-007 — Crear vino
 
 **Código**
-API-009
-
+API-007
 
 **Nombre**
 Crear vino
@@ -408,11 +411,12 @@ PT-BOD-004
 El vino no queda visible para compradores hasta ser publicado por administración.
 
 ---
-### API-010 — Editar vino propio
+
+
+### API-008 — Editar vino propio
 
 **Código**
-API-010
-
+API-008
 
 **Nombre**
 Editar vino propio
@@ -451,11 +455,12 @@ PT-BOD-005
 —
 
 ---
-### API-011 — Consultar catálogo de vinos / Buscar y filtrar
+
+
+### API-009 — Consultar catálogo de vinos / Buscar y filtrar
 
 **Código**
-API-011
-
+API-009
 
 **Nombre**
 Consultar catálogo de vinos / Buscar y filtrar
@@ -494,11 +499,12 @@ PT-PUB-002
 —
 
 ---
-### API-012 — Ver ficha de vino
+
+
+### API-010 — Ver ficha de vino
 
 **Código**
-API-012
-
+API-010
 
 **Nombre**
 Ver ficha de vino
@@ -537,11 +543,12 @@ PT-PUB-003
 Un vino publicado pero no disponible se muestra como no disponible y no puede añadirse al carrito.
 
 ---
-### API-013 — Listar vinos propios de bodega
+
+
+### API-032 — Listar vinos propios de bodega
 
 **Código**
-API-013
-
+API-032
 
 **Nombre**
 Listar vinos propios de bodega
@@ -577,15 +584,14 @@ CU-015 / CU-016 / CU-017
 PT-BOD-003
 
 **Observaciones**
-A diferencia del catálogo público, incluye vinos en borrador y pendientes de revisión. Brecha 3 de la Auditoría de cobertura v1.0.
+A diferencia del catálogo público (API-009), incluye vinos en borrador y pendientes de revisión. Brecha 3 de la Auditoría de cobertura v1.0.
 
 ---
 
-### API-014 — Consultar detalle de vino propio
+### API-033 — Consultar detalle de vino propio
 
 **Código**
-API-014
-
+API-033
 
 **Nombre**
 Consultar detalle de vino propio
@@ -625,11 +631,10 @@ Brecha 4 de la Auditoría de cobertura v1.0.
 
 ---
 
-### API-015 — Solicitar publicación de vino
+### API-034 — Solicitar publicación de vino
 
 **Código**
-API-015
-
+API-034
 
 **Nombre**
 Solicitar publicación de vino
@@ -665,18 +670,17 @@ CU-017
 PT-BOD-003, PT-BOD-005, PT-BOD-006, PT-ADM-004
 
 **Observaciones**
-La bodega nunca publica directamente: publicar y despublicar siguen siendo exclusivas del Administrador (CU-023/024). Brecha 5 de la Auditoría de cobertura v1.0.
+La bodega nunca publica directamente: publicar (API-025) y despublicar (API-026) siguen siendo exclusivas del Administrador (CU-023/024). Brecha 5 de la Auditoría de cobertura v1.0.
 
 ---
 
 
 ## Módulo: Carrito
 
-### API-016 — Añadir vino al carrito
+### API-011 — Añadir vino al carrito
 
 **Código**
-API-016
-
+API-011
 
 **Nombre**
 Añadir vino al carrito
@@ -715,11 +719,12 @@ PT-COM-002
 El carrito conserva la bodega asociada a cada vino.
 
 ---
-### API-017 — Gestionar carrito — consultar
+
+
+### API-012 — Gestionar carrito — consultar
 
 **Código**
-API-017
-
+API-012
 
 **Nombre**
 Gestionar carrito — consultar
@@ -758,11 +763,12 @@ PT-COM-002
 —
 
 ---
-### API-018 — Gestionar carrito — modificar cantidad
+
+
+### API-013 — Gestionar carrito — modificar cantidad
 
 **Código**
-API-018
-
+API-013
 
 **Nombre**
 Gestionar carrito — modificar cantidad
@@ -801,11 +807,12 @@ PT-COM-002
 —
 
 ---
-### API-019 — Gestionar carrito — eliminar producto
+
+
+### API-014 — Gestionar carrito — eliminar producto
 
 **Código**
-API-019
-
+API-014
 
 **Nombre**
 Gestionar carrito — eliminar producto
@@ -844,11 +851,12 @@ PT-COM-002
 —
 
 ---
-### API-020 — Gestionar carrito — vaciar
+
+
+### API-015 — Gestionar carrito — vaciar
 
 **Código**
-API-020
-
+API-015
 
 **Nombre**
 Gestionar carrito — vaciar
@@ -888,13 +896,14 @@ PT-COM-002
 
 ---
 
+
+
 ## Módulo: Checkout
 
-### API-021 — Realizar checkout
+### API-016 — Realizar checkout
 
 **Código**
-API-021
-
+API-016
 
 **Nombre**
 Realizar checkout
@@ -933,11 +942,12 @@ PT-COM-003
 No se inicia el pago si el checkout no es válido. La operación es idempotente por carrito activo mientras exista su Pedido `pendiente_pago`.
 
 ---
-### API-022 — Pagar Pedido
+
+
+### API-017 — Pagar Pedido
 
 **Código**
-API-022
-
+API-017
 
 **Nombre**
 Pagar Pedido
@@ -976,11 +986,12 @@ PT-COM-004
 El Pedido solo se confirma cuando el sistema recibe la confirmación correcta de Stripe (ver Webhook de Stripe). La operación es idempotente por `pedido_id`: mientras exista una sesión válida, devuelve la misma URL de redirección.
 
 ---
-### API-023 — Consultar confirmación de Pedido
+
+
+### API-018 — Consultar confirmación de Pedido
 
 **Código**
-API-023
-
+API-018
 
 **Nombre**
 Consultar confirmación de Pedido
@@ -1020,13 +1031,14 @@ La confirmación solo se muestra como válida tras pago aprobado por Stripe.
 
 ---
 
+
+
 ## Módulo: Pedidos
 
-### API-024 — Consultar Pedidos
+### API-019 — Consultar Pedidos
 
 **Código**
-API-024
-
+API-019
 
 **Nombre**
 Consultar Pedidos
@@ -1065,11 +1077,12 @@ PT-COM-006
 El comprador consulta el Pedido completo, no los SubPedidos como unidad funcional.
 
 ---
-### API-025 — Consultar detalle de Pedido
+
+
+### API-020 — Consultar detalle de Pedido
 
 **Código**
-API-025
-
+API-020
 
 **Nombre**
 Consultar detalle de Pedido
@@ -1109,13 +1122,14 @@ El estado mostrado es el estado global del Pedido.
 
 ---
 
+
+
 ## Módulo: SubPedidos
 
-### API-026 — Consultar SubPedidos de bodega
+### API-021 — Consultar SubPedidos de bodega
 
 **Código**
-API-026
-
+API-021
 
 **Nombre**
 Consultar SubPedidos de bodega
@@ -1154,11 +1168,12 @@ PT-BOD-007
 La bodega no accede al Pedido completo como unidad de gestión.
 
 ---
-### API-027 — Consultar detalle de SubPedido
+
+
+### API-022 — Consultar detalle de SubPedido
 
 **Código**
-API-027
-
+API-022
 
 **Nombre**
 Consultar detalle de SubPedido
@@ -1197,11 +1212,12 @@ PT-BOD-008
 —
 
 ---
-### API-028 — Cambiar estado de SubPedido
+
+
+### API-023 — Cambiar estado de SubPedido
 
 **Código**
-API-028
-
+API-023
 
 **Nombre**
 Cambiar estado de SubPedido
@@ -1241,101 +1257,14 @@ La bodega no puede modificar el Pedido completo.
 
 ---
 
+
+
 ## Módulo: Administración
 
-### API-029 — Listar bodegas pendientes de validación
+### API-024 — Validar bodega
 
 **Código**
-API-029
-
-
-**Nombre**
-Listar bodegas pendientes de validación
-
-**Objetivo**
-Permitir que el administrador consulte las solicitudes de bodega pendientes de validar.
-
-**Método HTTP**
-GET
-
-**Ruta**
-`/admin/bodegas?estado=pendiente`
-
-**Actor autorizado**
-Administrador
-
-**Parámetros de entrada**
-Filtro de estado; paginación.
-
-**Validaciones**
-Administrador autenticado.
-
-**Respuesta correcta**
-200 OK. Listado de bodegas pendientes.
-
-**Posibles errores**
-401 no autenticado · 403 sin permisos.
-
-**Casos de uso relacionados**
-CU-021
-
-**Pantallas relacionadas**
-PT-ADM-002
-
-**Observaciones**
-Precede a la validación de bodega. Brecha 6 de la Auditoría de cobertura v1.0.
-
----
-
-### API-030 — Consultar detalle administrativo de bodega
-
-**Código**
-API-030
-
-
-**Nombre**
-Consultar detalle administrativo de bodega
-
-**Objetivo**
-Permitir que el administrador revise el detalle completo de una bodega antes de validarla.
-
-**Método HTTP**
-GET
-
-**Ruta**
-`/admin/bodegas/{id}`
-
-**Actor autorizado**
-Administrador
-
-**Parámetros de entrada**
-id (en la ruta)
-
-**Validaciones**
-Administrador autenticado; la bodega debe existir.
-
-**Respuesta correcta**
-200 OK. Detalle completo de la bodega.
-
-**Posibles errores**
-401 · 403 · 404 no encontrada.
-
-**Casos de uso relacionados**
-CU-021
-
-**Pantallas relacionadas**
-PT-ADM-003
-
-**Observaciones**
-Brecha 7 de la Auditoría de cobertura v1.0.
-
----
-
-### API-031 — Validar bodega
-
-**Código**
-API-031
-
+API-024
 
 **Nombre**
 Validar bodega
@@ -1374,99 +1303,12 @@ PT-ADM-002 / PT-ADM-003
 —
 
 ---
-### API-032 — Listar vinos pendientes de revisión
+
+
+### API-025 — Publicar vino
 
 **Código**
-API-032
-
-
-**Nombre**
-Listar vinos pendientes de revisión
-
-**Objetivo**
-Permitir que el administrador consulte los vinos que las bodegas han solicitado publicar.
-
-**Método HTTP**
-GET
-
-**Ruta**
-`/admin/vinos?estado=pendiente_revision`
-
-**Actor autorizado**
-Administrador
-
-**Parámetros de entrada**
-Filtro de estado; paginación.
-
-**Validaciones**
-Administrador autenticado.
-
-**Respuesta correcta**
-200 OK. Listado de vinos pendientes de revisión.
-
-**Posibles errores**
-401 · 403.
-
-**Casos de uso relacionados**
-CU-022 / CU-023 / CU-024
-
-**Pantallas relacionadas**
-PT-ADM-004
-
-**Observaciones**
-Precede a Publicar/Despublicar vino. Brecha 8 de la Auditoría de cobertura v1.0.
-
----
-
-### API-033 — Consultar detalle administrativo de vino
-
-**Código**
-API-033
-
-
-**Nombre**
-Consultar detalle administrativo de vino
-
-**Objetivo**
-Permitir que el administrador revise el detalle completo de un vino antes de decidir su publicación.
-
-**Método HTTP**
-GET
-
-**Ruta**
-`/admin/vinos/{id}`
-
-**Actor autorizado**
-Administrador
-
-**Parámetros de entrada**
-id (en la ruta)
-
-**Validaciones**
-Administrador autenticado; el vino debe existir.
-
-**Respuesta correcta**
-200 OK. Detalle completo, incluida la bodega propietaria y su estado de validación.
-
-**Posibles errores**
-401 · 403 · 404 no encontrado.
-
-**Casos de uso relacionados**
-CU-022 / CU-023 / CU-024
-
-**Pantallas relacionadas**
-PT-ADM-005
-
-**Observaciones**
-Brecha 9 de la Auditoría de cobertura v1.0.
-
----
-
-### API-034 — Publicar vino
-
-**Código**
-API-034
-
+API-025
 
 **Nombre**
 Publicar vino
@@ -1505,11 +1347,12 @@ PT-ADM-004 / PT-ADM-005
 Solo el administrador puede publicar vinos; la bodega únicamente puede solicitarlo (CU-017).
 
 ---
-### API-035 — Despublicar vino
+
+
+### API-026 — Despublicar vino
 
 **Código**
-API-035
-
+API-026
 
 **Nombre**
 Despublicar vino
@@ -1548,11 +1391,12 @@ PT-ADM-004 / PT-ADM-005
 No elimina el histórico de Pedidos existentes.
 
 ---
-### API-036 — Consultar Pedidos como administrador
+
+
+### API-027 — Consultar Pedidos como administrador
 
 **Código**
-API-036
-
+API-027
 
 **Nombre**
 Consultar Pedidos como administrador
@@ -1591,187 +1435,12 @@ PT-ADM-006 / PT-ADM-007
 Los SubPedidos se muestran como información operativa interna, no como módulo independiente.
 
 ---
-### API-037 — Consultar detalle administrativo de Pedido
+
+
+### API-028 — Consultar dashboard administrativo
 
 **Código**
-API-037
-
-
-**Nombre**
-Consultar detalle administrativo de Pedido
-
-**Objetivo**
-Formalizar la consulta individual de un Pedido concreto por parte del administrador.
-
-**Método HTTP**
-GET
-
-**Ruta**
-`/admin/pedidos/{id}`
-
-**Actor autorizado**
-Administrador
-
-**Parámetros de entrada**
-id (en la ruta)
-
-**Validaciones**
-Administrador autenticado; el Pedido debe existir.
-
-**Respuesta correcta**
-200 OK. Detalle completo del Pedido, incluidos SubPedidos como información operativa interna.
-
-**Posibles errores**
-401 · 403 · 404 no encontrado.
-
-**Casos de uso relacionados**
-CU-025
-
-**Pantallas relacionadas**
-PT-ADM-007
-
-**Observaciones**
-El listado ya existía (Consultar Pedidos como administrador); esta es la ruta de detalle individual que faltaba formalizar. Brecha 10 de la Auditoría de cobertura v1.0.
-
----
-
-### API-038 — Listar incidencias
-
-**Código**
-API-038
-
-
-**Nombre**
-Listar incidencias
-
-**Objetivo**
-Permitir que el administrador consulte las incidencias abiertas y su estado.
-
-**Método HTTP**
-GET
-
-**Ruta**
-`/admin/incidencias`
-
-**Actor autorizado**
-Administrador
-
-**Parámetros de entrada**
-Filtro de estado; paginación.
-
-**Validaciones**
-Administrador autenticado.
-
-**Respuesta correcta**
-200 OK. Listado de incidencias.
-
-**Posibles errores**
-401 · 403.
-
-**Casos de uso relacionados**
-CU-027
-
-**Pantallas relacionadas**
-PT-ADM-008
-
-**Observaciones**
-Brecha 11 de la Auditoría de cobertura v1.0.
-
----
-
-### API-039 — Consultar detalle de incidencia
-
-**Código**
-API-039
-
-
-**Nombre**
-Consultar detalle de incidencia
-
-**Objetivo**
-Permitir que el administrador revise el detalle completo de una incidencia.
-
-**Método HTTP**
-GET
-
-**Ruta**
-`/admin/incidencias/{id}`
-
-**Actor autorizado**
-Administrador
-
-**Parámetros de entrada**
-id (en la ruta)
-
-**Validaciones**
-Administrador autenticado; la incidencia debe existir.
-
-**Respuesta correcta**
-200 OK. Detalle completo, incluido el recurso relacionado (Pedido, SubPedido, vino o bodega).
-
-**Posibles errores**
-401 · 403 · 404 no encontrada.
-
-**Casos de uso relacionados**
-CU-027
-
-**Pantallas relacionadas**
-PT-ADM-009
-
-**Observaciones**
-Brecha 12 de la Auditoría de cobertura v1.0.
-
----
-
-### API-040 — Actualizar estado de incidencia
-
-**Código**
-API-040
-
-
-**Nombre**
-Actualizar estado de incidencia
-
-**Objetivo**
-Permitir que el administrador cambie el estado de una incidencia dentro de las transiciones permitidas.
-
-**Método HTTP**
-PATCH
-
-**Ruta**
-`/admin/incidencias/{id}`
-
-**Actor autorizado**
-Administrador
-
-**Parámetros de entrada**
-estado_destino
-
-**Validaciones**
-Administrador autenticado; la incidencia debe existir; la transición debe estar permitida para el estado actual.
-
-**Respuesta correcta**
-200 OK. Incidencia actualizada; se registra el cambio para auditoría.
-
-**Posibles errores**
-401 · 403 · 404 · 409 transición no permitida.
-
-**Casos de uso relacionados**
-CU-027
-
-**Pantallas relacionadas**
-PT-ADM-008, PT-ADM-009
-
-**Observaciones**
-Todo cambio de estado de incidencia genera un registro en la tabla `auditoria` (INF-05). Brecha 13 de la Auditoría de cobertura v1.0.
-
----
-
-### API-041 — Consultar dashboard administrativo
-
-**Código**
-API-041
-
+API-028
 
 **Nombre**
 Consultar dashboard administrativo
@@ -1811,13 +1480,358 @@ El dashboard del MVP se limita a estos dos indicadores; no se añaden métricas 
 
 ---
 
-## Módulo: Sistema
 
-### API-042 — Webhook de Stripe
+### API-035 — Listar bodegas pendientes de validación
+
+**Código**
+API-035
+
+**Nombre**
+Listar bodegas pendientes de validación
+
+**Objetivo**
+Permitir que el administrador consulte las solicitudes de bodega pendientes de validar.
+
+**Método HTTP**
+GET
+
+**Ruta**
+`/admin/bodegas?estado=pendiente`
+
+**Actor autorizado**
+Administrador
+
+**Parámetros de entrada**
+Filtro de estado; paginación.
+
+**Validaciones**
+Administrador autenticado.
+
+**Respuesta correcta**
+200 OK. Listado de bodegas pendientes.
+
+**Posibles errores**
+401 no autenticado · 403 sin permisos.
+
+**Casos de uso relacionados**
+CU-021
+
+**Pantallas relacionadas**
+PT-ADM-002
+
+**Observaciones**
+Precede a la validación de bodega (API-024). Brecha 6 de la Auditoría de cobertura v1.0.
+
+---
+
+### API-036 — Consultar detalle administrativo de bodega
+
+**Código**
+API-036
+
+**Nombre**
+Consultar detalle administrativo de bodega
+
+**Objetivo**
+Permitir que el administrador revise el detalle completo de una bodega antes de validarla.
+
+**Método HTTP**
+GET
+
+**Ruta**
+`/admin/bodegas/{id}`
+
+**Actor autorizado**
+Administrador
+
+**Parámetros de entrada**
+id (en la ruta)
+
+**Validaciones**
+Administrador autenticado; la bodega debe existir.
+
+**Respuesta correcta**
+200 OK. Detalle completo de la bodega.
+
+**Posibles errores**
+401 · 403 · 404 no encontrada.
+
+**Casos de uso relacionados**
+CU-021
+
+**Pantallas relacionadas**
+PT-ADM-003
+
+**Observaciones**
+Brecha 7 de la Auditoría de cobertura v1.0.
+
+---
+
+### API-037 — Listar vinos pendientes de revisión
+
+**Código**
+API-037
+
+**Nombre**
+Listar vinos pendientes de revisión
+
+**Objetivo**
+Permitir que el administrador consulte los vinos que las bodegas han solicitado publicar.
+
+**Método HTTP**
+GET
+
+**Ruta**
+`/admin/vinos?estado=pendiente_revision`
+
+**Actor autorizado**
+Administrador
+
+**Parámetros de entrada**
+Filtro de estado; paginación.
+
+**Validaciones**
+Administrador autenticado.
+
+**Respuesta correcta**
+200 OK. Listado de vinos pendientes de revisión.
+
+**Posibles errores**
+401 · 403.
+
+**Casos de uso relacionados**
+CU-022 / CU-023 / CU-024
+
+**Pantallas relacionadas**
+PT-ADM-004
+
+**Observaciones**
+Precede a Publicar (API-025) / Despublicar (API-026) vino. Brecha 8 de la Auditoría de cobertura v1.0.
+
+---
+
+### API-038 — Consultar detalle administrativo de vino
+
+**Código**
+API-038
+
+**Nombre**
+Consultar detalle administrativo de vino
+
+**Objetivo**
+Permitir que el administrador revise el detalle completo de un vino antes de decidir su publicación.
+
+**Método HTTP**
+GET
+
+**Ruta**
+`/admin/vinos/{id}`
+
+**Actor autorizado**
+Administrador
+
+**Parámetros de entrada**
+id (en la ruta)
+
+**Validaciones**
+Administrador autenticado; el vino debe existir.
+
+**Respuesta correcta**
+200 OK. Detalle completo, incluida la bodega propietaria y su estado de validación.
+
+**Posibles errores**
+401 · 403 · 404 no encontrado.
+
+**Casos de uso relacionados**
+CU-022 / CU-023 / CU-024
+
+**Pantallas relacionadas**
+PT-ADM-005
+
+**Observaciones**
+Brecha 9 de la Auditoría de cobertura v1.0.
+
+---
+
+### API-039 — Consultar detalle administrativo de Pedido
+
+**Código**
+API-039
+
+**Nombre**
+Consultar detalle administrativo de Pedido
+
+**Objetivo**
+Formalizar la consulta individual de un Pedido concreto por parte del administrador.
+
+**Método HTTP**
+GET
+
+**Ruta**
+`/admin/pedidos/{id}`
+
+**Actor autorizado**
+Administrador
+
+**Parámetros de entrada**
+id (en la ruta)
+
+**Validaciones**
+Administrador autenticado; el Pedido debe existir.
+
+**Respuesta correcta**
+200 OK. Detalle completo del Pedido, incluidos SubPedidos como información operativa interna.
+
+**Posibles errores**
+401 · 403 · 404 no encontrado.
+
+**Casos de uso relacionados**
+CU-025
+
+**Pantallas relacionadas**
+PT-ADM-007
+
+**Observaciones**
+El listado ya existía (API-027); esta es la ruta de detalle individual que faltaba formalizar. Brecha 10 de la Auditoría de cobertura v1.0.
+
+---
+
+### API-040 — Listar incidencias
+
+**Código**
+API-040
+
+**Nombre**
+Listar incidencias
+
+**Objetivo**
+Permitir que el administrador consulte las incidencias abiertas y su estado.
+
+**Método HTTP**
+GET
+
+**Ruta**
+`/admin/incidencias`
+
+**Actor autorizado**
+Administrador
+
+**Parámetros de entrada**
+Filtro de estado; paginación.
+
+**Validaciones**
+Administrador autenticado.
+
+**Respuesta correcta**
+200 OK. Listado de incidencias.
+
+**Posibles errores**
+401 · 403.
+
+**Casos de uso relacionados**
+CU-027
+
+**Pantallas relacionadas**
+PT-ADM-008
+
+**Observaciones**
+Brecha 11 de la Auditoría de cobertura v1.0.
+
+---
+
+### API-041 — Consultar detalle de incidencia
+
+**Código**
+API-041
+
+**Nombre**
+Consultar detalle de incidencia
+
+**Objetivo**
+Permitir que el administrador revise el detalle completo de una incidencia.
+
+**Método HTTP**
+GET
+
+**Ruta**
+`/admin/incidencias/{id}`
+
+**Actor autorizado**
+Administrador
+
+**Parámetros de entrada**
+id (en la ruta)
+
+**Validaciones**
+Administrador autenticado; la incidencia debe existir.
+
+**Respuesta correcta**
+200 OK. Detalle completo, incluido el recurso relacionado (Pedido, SubPedido, vino o bodega).
+
+**Posibles errores**
+401 · 403 · 404 no encontrada.
+
+**Casos de uso relacionados**
+CU-027
+
+**Pantallas relacionadas**
+PT-ADM-009
+
+**Observaciones**
+Brecha 12 de la Auditoría de cobertura v1.0.
+
+---
+
+### API-042 — Actualizar estado de incidencia
 
 **Código**
 API-042
 
+**Nombre**
+Actualizar estado de incidencia
+
+**Objetivo**
+Permitir que el administrador cambie el estado de una incidencia dentro de las transiciones permitidas.
+
+**Método HTTP**
+PATCH
+
+**Ruta**
+`/admin/incidencias/{id}`
+
+**Actor autorizado**
+Administrador
+
+**Parámetros de entrada**
+estado_destino
+
+**Validaciones**
+Administrador autenticado; la incidencia debe existir; la transición debe estar permitida para el estado actual.
+
+**Respuesta correcta**
+200 OK. Incidencia actualizada; se registra el cambio para auditoría.
+
+**Posibles errores**
+401 · 403 · 404 · 409 transición no permitida.
+
+**Casos de uso relacionados**
+CU-027
+
+**Pantallas relacionadas**
+PT-ADM-008, PT-ADM-009
+
+**Observaciones**
+Todo cambio de estado de incidencia genera un registro en la tabla `auditoria` (INF-05). Brecha 13 de la Auditoría de cobertura v1.0.
+
+---
+
+
+## Módulo: Sistema
+
+### API-029 — Webhook de Stripe
+
+**Código**
+API-029
 
 **Nombre**
 Webhook de Stripe
@@ -1857,6 +1871,8 @@ Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido 
 
 ---
 
+
+
 ---
 
 ## Matriz de trazabilidad CU/PT → API
@@ -1869,44 +1885,43 @@ Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido 
 | API-004 | CU-003 | PT-ACC-005 |
 | API-005 | CU-012 | PT-ACC-002 |
 | API-006 | CU-014 | PT-BOD-002 |
-| API-007 | CU-006 (navegación alternativa) | PT-PUB-004 |
-| API-008 | CU-014 | PT-BOD-002 |
-| API-009 | CU-015 | PT-BOD-004 |
-| API-010 | CU-016 | PT-BOD-005 |
-| API-011 | CU-004 / CU-005 | PT-PUB-002 |
-| API-012 | CU-006 | PT-PUB-003 |
-| API-013 | CU-015 / CU-016 / CU-017 | PT-BOD-003 |
-| API-014 | CU-015 / CU-016 / CU-017 | PT-BOD-006 |
-| API-015 | CU-017 | PT-BOD-003, PT-BOD-005, PT-BOD-006, PT-ADM-004 |
-| API-016 | CU-007 | PT-COM-002 |
-| API-017 | CU-008 | PT-COM-002 |
-| API-018 | CU-008 | PT-COM-002 |
-| API-019 | CU-008 | PT-COM-002 |
-| API-020 | CU-008 | PT-COM-002 |
-| API-021 | CU-009 | PT-COM-003 |
-| API-022 | CU-010 | PT-COM-004 |
-| API-023 | CU-010 / CU-028 | PT-COM-005 |
-| API-024 | CU-011 | PT-COM-006 |
-| API-025 | CU-011 | PT-COM-007 |
-| API-026 | CU-018 | PT-BOD-007 |
-| API-027 | CU-018 | PT-BOD-008 |
-| API-028 | CU-019 | PT-BOD-008 |
-| API-029 | CU-021 | PT-ADM-002 |
-| API-030 | CU-021 | PT-ADM-003 |
-| API-031 | CU-021 | PT-ADM-002 / PT-ADM-003 |
-| API-032 | CU-022 / CU-023 / CU-024 | PT-ADM-004 |
-| API-033 | CU-022 / CU-023 / CU-024 | PT-ADM-005 |
-| API-034 | CU-023 | PT-ADM-004 / PT-ADM-005 |
-| API-035 | CU-024 | PT-ADM-004 / PT-ADM-005 |
-| API-036 | CU-025 | PT-ADM-006 / PT-ADM-007 |
-| API-037 | CU-025 | PT-ADM-007 |
-| API-038 | CU-027 | PT-ADM-008 |
-| API-039 | CU-027 | PT-ADM-009 |
-| API-040 | CU-027 | PT-ADM-008, PT-ADM-009 |
-| API-041 | CU-026 | PT-ADM-001 |
-| API-042 | CU-028 / CU-029 | — |
+| API-007 | CU-015 | PT-BOD-004 |
+| API-008 | CU-016 | PT-BOD-005 |
+| API-009 | CU-004 / CU-005 | PT-PUB-002 |
+| API-010 | CU-006 | PT-PUB-003 |
+| API-011 | CU-007 | PT-COM-002 |
+| API-012 | CU-008 | PT-COM-002 |
+| API-013 | CU-008 | PT-COM-002 |
+| API-014 | CU-008 | PT-COM-002 |
+| API-015 | CU-008 | PT-COM-002 |
+| API-016 | CU-009 | PT-COM-003 |
+| API-017 | CU-010 | PT-COM-004 |
+| API-018 | CU-010 / CU-028 | PT-COM-005 |
+| API-019 | CU-011 | PT-COM-006 |
+| API-020 | CU-011 | PT-COM-007 |
+| API-021 | CU-018 | PT-BOD-007 |
+| API-022 | CU-018 | PT-BOD-008 |
+| API-023 | CU-019 | PT-BOD-008 |
+| API-024 | CU-021 | PT-ADM-002 / PT-ADM-003 |
+| API-025 | CU-023 | PT-ADM-004 / PT-ADM-005 |
+| API-026 | CU-024 | PT-ADM-004 / PT-ADM-005 |
+| API-027 | CU-025 | PT-ADM-006 / PT-ADM-007 |
+| API-028 | CU-026 | PT-ADM-001 |
+| API-029 | CU-028 / CU-029 | — |
+| API-030 | CU-006 (navegación alternativa) | PT-PUB-004 |
+| API-031 | CU-014 | PT-BOD-002 |
+| API-032 | CU-015 / CU-016 / CU-017 | PT-BOD-003 |
+| API-033 | CU-015 / CU-016 / CU-017 | PT-BOD-006 |
+| API-034 | CU-017 | PT-BOD-003, PT-BOD-005, PT-BOD-006, PT-ADM-004 |
+| API-035 | CU-021 | PT-ADM-002 |
+| API-036 | CU-021 | PT-ADM-003 |
+| API-037 | CU-022 / CU-023 / CU-024 | PT-ADM-004 |
+| API-038 | CU-022 / CU-023 / CU-024 | PT-ADM-005 |
+| API-039 | CU-025 | PT-ADM-007 |
+| API-040 | CU-027 | PT-ADM-008 |
+| API-041 | CU-027 | PT-ADM-009 |
+| API-042 | CU-027 | PT-ADM-008, PT-ADM-009 |
 
-Matriz completa: 42 endpoints, cada uno con Caso de Uso y/o Pantalla trazados. Ninguna de las 36 pantallas de CAP-05 ni de los 32 Casos de Uso de CAP-06 queda sin al menos un endpoint que la implemente, cerrando las 13 brechas identificadas en la Auditoría de cobertura v1.0.
+Matriz completa: 42 endpoints (API-001 a API-042), cada uno con Caso de Uso y/o Pantalla trazados. Ninguna de las 36 pantallas de CAP-05 ni de los 32 Casos de Uso de CAP-06 queda sin al menos un endpoint que la implemente.
 
-
-*INF-08 v2.2 — 42 endpoints en 9 módulos. Cierra las 13 brechas de la Auditoría de cobertura v1.0. Los 29 endpoints previos se conservan sin cambio de contrato, salvo la confirmación de credenciales en el registro de bodega (Solicitar registro como bodega, ADR-002). Estado: EN REVISIÓN.*
+*INF-08 v2.2 — 42 endpoints en 9 módulos. API-001 a API-029 conservan su identificador original de v2.1. API-030 a API-042 cierran las 13 brechas de la Auditoría de cobertura v1.0. Estado: EN REVISIÓN.*
