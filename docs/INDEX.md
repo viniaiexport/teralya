@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 4.0 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 4.1 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -20,7 +20,7 @@
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias | Sustituye a |
 |---|---|---|---|---|---|---|
 | INF-05 | Esquema de Base de Datos | 1.3 | ✅ APROBADO POR CTO | docs/INF/teralya_schema_v1.3_APROBADO.sql | CAP-01, CAP-02, INF-08 v2.2, DLOG 0014–0016 | v1.2 en revisión |
-| INF-06 | Diccionario de Datos | 1.1 | 🟡 EN REVISIÓN | docs/INF/INF-06_v1.1_Diccionario_de_Datos.md | INF-05 v1.2 | v1.0 aprobada |
+| INF-06 | Diccionario de Datos | 1.2 | ✅ APROBADO POR CTO | docs/INF/INF-06_v1.2_Diccionario_de_Datos_APROBADO.md | INF-05 v1.3 | v1.1 en revisión |
 | INF-07 | Arquitectura Técnica Consolidada | 1.3 | ✅ APROBADO POR CTO | docs/INF/INF-07_v1.3_Arquitectura_Tecnica_Consolidada.md | INF-05, INF-06, ADR-002, ADR-003, ADR-004 | v1.2 |
 | INF-08 | Especificación de APIs | 2.2 | ✅ APROBADO POR CTO | docs/INF/INF-08_v2.2_Especificacion_de_APIs.md | CAP-05, CAP-06, CAP-07, INF-05, INF-06, ADR-002 | v2.1 |
 | INF-08-AUD-IDEM | Auditoría limitada de Idempotencia | 1.0 | ✅ Cerrada (incorporada en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
@@ -63,6 +63,8 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 | `docs/INF/teralya_schema_v1.2_EN_REVISION.sql` | Sustituido por INF-05 v1.3 en revisión |
 | `docs/INF/teralya_schema_v1.3_EN_REVISION.sql` | Sustituido por INF-05 v1.3 aprobada |
 | `docs/INF/INF-06_Diccionario_de_Datos.md` | Sustituido por INF-06 v1.1 en revisión |
+| `docs/INF/INF-06_v1.1_Diccionario_de_Datos.md` | Sustituido por INF-06 v1.2 aprobada |
+| `docs/INF/INF-06_v1.2_Diccionario_de_Datos_EN_REVISION.md` | Sustituido por INF-06 v1.2 aprobada |
 | `docs/CAP/CAP-02-Modelo-de-Datos.pdf` | Sustituido por CAP-02 v1.1 |
 | `docs/CAP/CAP-07-Historias-de-Usuario.md` | Sustituido por CAP-07 v1.1 |
 | `docs/CAP/CAP-08-Criterios-de-Aceptacion.md` | Sustituido por CAP-08 v1.1 |
@@ -82,15 +84,16 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - La trazabilidad de CU-001 a CU-032 y de las 36 pantallas queda documentada; CU-031 y CU-032 son reglas transversales del contrato.
 - INF-09 §19 actualizado para referenciar INF-08 v2.2 aprobada.
 - INF-05 v1.3 aprobado con decisiones 0014–0016, 18 tablas e integridad reforzada.
+- INF-06 v1.2 aprobado y alineado 1:1 con INF-05 v1.3.
 
 ### Documento actualmente en desarrollo
 
-**INF-06 v1.2 — Diccionario de Datos** — siguiente documento; debe alinearse campo por campo con INF-05 v1.3.
+**CAP-02 v1.2 — Modelo de Datos** — siguiente documento; debe alinearse con INF-05 v1.3 e INF-06 v1.2.
 
 ### Bloqueos abiertos
 
-- INF-06 v1.1 está desactualizado respecto a INF-05 v1.3 y debe reconstruirse como v1.2.
-- La persistencia y las migraciones definitivas permanecen bloqueadas hasta aprobar INF-06 v1.2.
+- CAP-02 v1.1 está desactualizado en sus referencias a INF-05 v1.2 e INF-06 v1.1 y debe reconstruirse como v1.2.
+- CAP-07 v1.1 y CAP-08 v1.1 continúan EN REVISIÓN.
 - CAP-02 v1.1 sigue EN REVISIÓN y debe cerrarse de forma coherente con INF-05 e INF-06.
 - CAP-07 v1.1 y CAP-08 v1.1 siguen EN REVISIÓN y requieren cierre funcional independiente.
 - No quedan bloqueos abiertos de cobertura en INF-08 ni de arquitectura Frontend.
