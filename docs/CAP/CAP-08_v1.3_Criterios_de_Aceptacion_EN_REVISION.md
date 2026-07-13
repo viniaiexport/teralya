@@ -14,7 +14,7 @@
 |---|---|---|---|---|
 | 1.0 | 09/07/2026 | Arquitecto de Producto Teralya | INCOMPLETA | Archivo sin desarrollo de los criterios declarados. |
 | 1.1 | 11/07/2026 | Agente de Producto Teralya | EN REVISIÓN | Reconstrucción desde CAP-07 v1.1 y fuentes funcionales vigentes. |
-| 1.2 | 13/07/2026 | CTO + Agente de Producto | APROBADO | Alineación con CAP-02 v1.3, CAP-07 v1.3, INF-08 v2.4, ADR-001 y DLOG 0010/0014–0018. |
+| 1.2 | 13/07/2026 | CTO + Agente de Producto | APROBADO | Alineación con CAP-02 v1.3, CAP-07 v1.2, INF-08 v2.3, ADR-001 y DLOG 0010/0014–0018. |
 | 1.3 | 13/07/2026 | CTO + Agente de Producto | EN REVISIÓN | Añade criterios verificables para Direcciones e Imágenes conforme a DLOG 0019 e INF-08 v2.4. |
 
 ## OBJETIVO Y MÉTODO
@@ -113,15 +113,15 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-009.3 — Idempotencia por carrito:** DADO que un carrito ya originó un Pedido `pendiente_pago`, CUANDO se reintenta el checkout con el mismo carrito, ENTONCES se devuelve el mismo Pedido y no se crea un segundo Pedido.
 
-**Trazabilidad:** CAP-07 v1.3 HU-009 · CU-009 · DLOG 0010/0016 · INF-08 v2.4 API-016.
-
-**CA-009.4 — Alta idempotente de dirección propia:** DADO un comprador autenticado y una clave de idempotencia válida, CUANDO registra una dirección de envío, facturación o ambos usos, ENTONCES el sistema deriva su propietario de la sesión, crea una sola dirección activa y devuelve el mismo resultado ante un reintento idéntico.
+**CA-009.4 — Alta idempotente de dirección propia:** DADO un comprador autenticado y un `Idempotency-Key` UUID, CUANDO registra una dirección de envío, facturación o ambos usos, ENTONCES el sistema deriva su propietario de la sesión, usa la clave como identificador de Dirección y devuelve el mismo recurso ante un reintento con payload canónico idéntico; una reutilización con payload distinto produce conflicto.
 
 **CA-009.5 — Consulta y actualización de direcciones propias:** DADO un comprador autenticado, CUANDO consulta o actualiza una dirección activa propia, ENTONCES solo accede a registros propios y no puede cambiar su identificador ni propietario.
 
-**CA-009.6 — Desactivación lógica protegida:** DADO una dirección activa propia, CUANDO el comprador solicita eliminarla, ENTONCES el sistema la desactiva sin borrar snapshots históricos; si está asociada a un Pedido `pendiente_pago`, rechaza la operación con conflicto.
+**CA-009.6 — Desactivación lógica protegida e idempotente:** DADO una dirección propia, CUANDO el comprador solicita eliminarla, ENTONCES el sistema la desactiva sin borrar snapshots históricos; si está asociada a un Pedido `pendiente_pago`, rechaza el primer intento con conflicto; si ya estaba inactiva, un reintento devuelve éxito sin efecto adicional.
 
 **CA-009.7 — Confirmación posterior:** DADO un Pedido `pendiente_pago` con snapshots de dirección ya congelados, CUANDO el webhook confirma válidamente el pago, ENTONCES conserva esos snapshots y congela las líneas y precios comerciales.
+
+**Trazabilidad:** CAP-07 v1.3 HU-009 · CU-009 · FL-COM-010 · PT-COM-003/PT-COM-004 · INF-08 v2.4 API-016/API-043–046 · DLOG 0010/0016/0019.
 
 ### HU-010 — Pago del Pedido
 
@@ -173,11 +173,11 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-014.2 — Datos inválidos:** DADO campos obligatorios incompletos o formatos inválidos, CUANDO se intenta guardar, ENTONCES el sistema no confirma la actualización e identifica los datos que deben corregirse.
 
-**Trazabilidad:** HU-014 · CU-014 · FL-BOD-004 · PT-BOD-001, PT-BOD-002 y PT-PUB-004 · Módulo 9.
-
 **CA-014.3 — Gestión de direcciones propias de bodega:** DADO un usuario asociado a una bodega validada, CUANDO crea, consulta o actualiza una dirección de su bodega, ENTONCES el propietario se deriva de la sesión y nunca puede acceder ni asignar una bodega ajena.
 
-**CA-014.4 — Desactivación lógica y dirección principal:** DADO una dirección activa de la bodega, CUANDO solicita desactivarla, ENTONCES el sistema conserva el histórico, retira su condición de principal y promueve otra dirección activa cuando corresponda.
+**CA-014.4 — Desactivación lógica y dirección principal:** DADO una dirección activa de la bodega, CUANDO solicita desactivarla, ENTONCES el sistema conserva el histórico, retira su condición de principal y puede promover otra dirección activa del mismo propietario.
+
+**Trazabilidad:** CAP-07 v1.3 HU-014 · CU-014 · FL-BOD-004 · PT-BOD-001/PT-BOD-002/PT-PUB-004 · INF-08 v2.4 API-006/API-031/API-043–046 · DLOG 0019.
 
 ### HU-015 — Creación de vino
 
@@ -193,21 +193,21 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-016.2 — Propiedad o datos inválidos:** DADO un vino ajeno o datos inválidos, CUANDO la bodega intenta guardarlos, ENTONCES el sistema deniega la operación o rechaza los cambios.
 
-**Trazabilidad:** HU-016 · CU-016 · FL-BOD-006 · PT-BOD-003, PT-BOD-005 y PT-BOD-006 · Módulo 9.
+**CA-016.3 — Solicitud de carga directa:** DADO un vino propio y una imagen con metadatos admitidos, CUANDO la bodega solicita una URL de carga, ENTONCES el sistema valida propiedad, tipo, tamaño y checksum declarados y emite una autorización temporal firmada para una clave de almacenamiento generada por el servidor.
 
-**CA-016.3 — Solicitud de carga directa:** DADO un vino propio y una imagen con metadatos admitidos, CUANDO la bodega solicita una URL de carga, ENTONCES el sistema valida propiedad, tipo, tamaño y checksum declarados y emite una autorización temporal para una clave de almacenamiento generada por el servidor.
-
-**CA-016.4 — Confirmación idempotente de imagen:** DADO un objeto cargado con una autorización vigente, CUANDO la bodega confirma la imagen, ENTONCES el sistema vuelve a validar propiedad y metadatos del objeto, registra una única Imagen activa y devuelve el mismo resultado ante un reintento idéntico.
+**CA-016.4 — Confirmación idempotente de imagen:** DADO un objeto cargado con autorización vigente y texto alternativo válido y no vacío, CUANDO la bodega confirma la imagen, ENTONCES el sistema vuelve a validar firma, propiedad y metadatos del objeto, registra una única Imagen activa y devuelve el mismo resultado ante un reintento idéntico.
 
 **CA-016.5 — Edición de metadatos y principal:** DADO una imagen confirmada, activa y perteneciente a un vino propio, CUANDO la bodega actualiza texto alternativo, orden o condición de principal, ENTONCES el cambio se aplica de forma transaccional y existe como máximo una imagen principal activa por vino.
 
-**CA-016.6 — Desactivación lógica protegida:** DADO una imagen activa de un vino propio, CUANDO la bodega solicita eliminarla, ENTONCES el sistema la desactiva y promueve otra principal cuando corresponda; si es la última imagen activa de un vino `pendiente_revision` o `publicado`, rechaza la operación con conflicto.
+**CA-016.6 — Desactivación lógica protegida e idempotente:** DADO una imagen propia, CUANDO la bodega solicita eliminarla, ENTONCES el sistema la desactiva y promueve otra principal cuando corresponda; si es la última imagen activa de un vino `pendiente_revision` o `publicado`, rechaza el primer intento con conflicto; si ya estaba inactiva, un reintento devuelve éxito sin efecto adicional.
+
+**Trazabilidad:** CAP-07 v1.3 HU-016 · CU-016 · FL-BOD-006 · PT-BOD-003/PT-BOD-005/PT-BOD-006 · INF-08 v2.4 API-008/API-033/API-047–050 · DLOG 0019.
 
 ### HU-017 — Solicitud de publicación
 
-**CA-017.1 — Envío a revisión:** DADO un vino propio no publicado, completo, con precio y disponibilidad válidos, de una bodega validada, CUANDO la bodega solicita publicación, ENTONCES cambia exactamente a `pendiente_revision` y no queda publicado.
+**CA-017.1 — Envío a revisión:** DADO un vino propio no publicado, completo, con precio y disponibilidad válidos, al menos una imagen confirmada y activa y una bodega validada, CUANDO la bodega solicita publicación, ENTONCES cambia exactamente a `pendiente_revision` y no queda publicado.
 
-**CA-017.2 — Solicitud bloqueada:** DADO un vino incompleto, ajeno, con precio/disponibilidad inválidos, ya publicado o ya en `pendiente_revision`, CUANDO se solicita publicación, ENTONCES el estado no cambia y se devuelve el impedimento aplicable.
+**CA-017.2 — Solicitud bloqueada:** DADO un vino incompleto, ajeno, sin imagen confirmada y activa, con precio/disponibilidad inválidos, ya publicado o ya en `pendiente_revision`, CUANDO se solicita publicación, ENTONCES el estado no cambia y se devuelve el impedimento aplicable.
 
 **Trazabilidad:** CAP-07 v1.3 HU-017 · CU-017 · API-034 · INF-08 v2.4.
 
@@ -251,17 +251,17 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 ### HU-022 — Revisión de vino
 
-**CA-022.1 — Revisión disponible:** DADO un vino exactamente en `pendiente_revision` de una bodega validada, CUANDO el administrador abre su detalle, ENTONCES puede comprobar integridad, precio, disponibilidad e imágenes antes de decidir.
+**CA-022.1 — Revisión disponible:** DADO un vino exactamente en `pendiente_revision` de una bodega validada, CUANDO el administrador abre su detalle, ENTONCES puede comprobar integridad, precio, disponibilidad e imágenes confirmadas y activas antes de decidir.
 
-**CA-022.2 — Vino no apto:** DADO un vino fuera de `pendiente_revision`, incompleto, con precio/disponibilidad inválidos, sin imagen o cuya bodega no está validada, CUANDO se revisa, ENTONCES no puede considerarse apto para publicación.
+**CA-022.2 — Vino no apto:** DADO un vino fuera de `pendiente_revision`, incompleto, con precio/disponibilidad inválidos, sin imagen confirmada y activa o cuya bodega no está validada, CUANDO se revisa, ENTONCES no puede considerarse apto para publicación.
 
 **Trazabilidad:** CAP-07 v1.3 HU-022 · CU-022 · API-037/API-038 · INF-08 v2.4.
 
 ### HU-023 — Publicación de vino
 
-**CA-023.1 — Publicación válida:** DADO un vino exactamente en `pendiente_revision`, completo, con precio y disponibilidad válidos, al menos una imagen y bodega propietaria validada, CUANDO el administrador confirma, ENTONCES cambia a publicado y aparece como comprable en catálogo, búsqueda y ficha mientras conserve disponibilidad.
+**CA-023.1 — Publicación válida:** DADO un vino exactamente en `pendiente_revision`, completo, con precio y disponibilidad válidos, al menos una imagen confirmada y activa y bodega propietaria validada, CUANDO el administrador confirma, ENTONCES cambia a publicado y aparece como comprable en catálogo, búsqueda y ficha mientras conserve disponibilidad.
 
-**CA-023.2 — Publicación bloqueada:** DADO un vino en cualquier otro estado, incompleto, sin imagen, con precio/disponibilidad inválidos o de bodega no validada, CUANDO se intenta publicar, ENTONCES el estado no cambia y el vino no aparece como comprable.
+**CA-023.2 — Publicación bloqueada:** DADO un vino en cualquier otro estado, incompleto, sin imagen confirmada y activa, con precio/disponibilidad inválidos o de bodega no validada, CUANDO se intenta publicar, ENTONCES el estado no cambia y el vino no aparece como comprable.
 
 **Trazabilidad:** CAP-07 v1.3 HU-023 · CU-023 · API-025 · INF-08 v2.4.
 
@@ -305,13 +305,13 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 ### HU-028 — Confirmación de Pedido tras el pago
 
-**CA-028.1 — Confirmación válida:** DADO un Pedido `pendiente_pago` y un evento Stripe firmado, único, aprobado y con importe/moneda coincidentes, CUANDO API-029 lo procesa, ENTONCES actualiza `pago.estado` como única fuente económica, congela snapshots y genera atómicamente los SubPedidos.
+**CA-028.1 — Confirmación válida:** DADO un Pedido `pendiente_pago` y un evento Stripe firmado, único, aprobado y con importe/moneda coincidentes, CUANDO API-029 lo procesa, ENTONCES actualiza `pago.estado` como única fuente económica, conserva los snapshots de envío y facturación congelados al crear el Pedido, congela líneas y precios y genera atómicamente los SubPedidos.
 
 **CA-028.2 — Confirmación inválida:** DADO firma inválida, pago no aprobado, importe/moneda discrepante o Pedido/Pago inexistente, CUANDO se procesa, ENTONCES no se confirma económicamente ni se generan SubPedidos.
 
 **CA-028.3 — Idempotencia del evento:** DADO un `stripe_event_id` ya procesado con éxito, CUANDO se reenvía, ENTONCES devuelve el resultado registrado sin segundo efecto; si el procesamiento anterior falló transitoriamente antes de producir efecto, puede reintentarse hasta un único éxito.
 
-**CA-028.4 — Datos congelados:** DADO la primera confirmación válida, CUANDO finaliza, ENTONCES líneas, precios y direcciones quedan congelados e inmutables frente a cambios posteriores del catálogo o perfil.
+**CA-028.4 — Datos congelados:** DADO la primera confirmación válida, CUANDO finaliza, ENTONCES los snapshots de dirección ya congelados se conservan y las líneas y precios quedan congelados, todos inmutables frente a cambios posteriores.
 
 **Trazabilidad:** CAP-07 v1.3 HU-028 · CU-028 · DLOG 0014/0016 · INF-08 v2.4 API-029/API-018.
 
