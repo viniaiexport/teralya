@@ -7,6 +7,8 @@ const environmentSchema = z.object({
   REDIS_URL: z.string().min(1),
   PUBLIC_BASE_URL: z.url(),
   STRIPE_WEBHOOK_SECRET: z.string().min(16),
+  MINIMUM_PURCHASE_AGE: z.coerce.number().int().min(1).max(120),
+  ALCOHOL_TERMS_VERSION: z.string().trim().min(1).max(100),
 });
 
 export type Environment = z.infer<typeof environmentSchema>;
