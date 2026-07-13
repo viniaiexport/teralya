@@ -5,6 +5,9 @@ export interface UsuarioSesion {
   rol: 'comprador' | 'bodega' | 'administrador';
   idioma: string;
   estado: string;
+  nombre?: string;
+  apellidos?: string;
+  bodega_id?: string;
 }
 
 export interface AuthSession {
