@@ -651,13 +651,13 @@ Bodega
 id (en la ruta)
 
 **Validaciones**
-Bodega autenticada, validada y asociada al usuario. El vino pertenece a esa bodega, tiene información mínima completa, precio y disponibilidad válidos, y está en su estado inicial no publicado; no está publicado ni en `pendiente_revision`.
+Bodega autenticada, validada y asociada al usuario. El vino pertenece a esa bodega, tiene información mínima completa, precio y disponibilidad válidos, al menos una imagen confirmada y activa, y está en su estado inicial no publicado; no está publicado ni en `pendiente_revision`.
 
 **Respuesta correcta**
 200 OK. El vino cambia exactamente a `pendiente_revision` y continúa sin estar publicado.
 
 **Posibles errores**
-400 información/precio/disponibilidad inválidos · 403 bodega no validada, asociación inválida o vino ajeno · 404 vino inexistente · 409 ya publicado o ya en `pendiente_revision`.
+400 información/precio/disponibilidad inválidos o ausencia de imagen confirmada y activa · 403 bodega no validada o asociación inválida · 404 vino inexistente o ajeno · 409 ya publicado o ya en `pendiente_revision`.
 
 **Casos de uso relacionados**
 CU-017
@@ -669,6 +669,8 @@ PT-BOD-003, PT-BOD-005, PT-BOD-006, PT-ADM-004
 La bodega nunca publica directamente; API-025 y API-026 son exclusivas de Administración.
 
 ---
+
+## Módulo: Carrito
 
 ### API-011 — Añadir vino o fusionar carrito local
 
@@ -1026,6 +1028,8 @@ El retorno del navegador y esta consulta no confirman pagos; solo presentan el r
 
 ---
 
+## Módulo: Pedidos
+
 ### API-019 — Consultar Pedidos
 
 **Código**
@@ -1253,6 +1257,8 @@ PT-BOD-008, PT-COM-007, PT-ADM-007
 La bodega no modifica directamente `pedido.estado`. `pendiente_pago` se mantiene antes del pago y `devuelto` pertenece al flujo de devolución, no a esta matriz logística. DLOG 0005 y 0018.
 
 ---
+
+## Módulo: Administración
 
 ### API-024 — Validar bodega
 
@@ -1817,6 +1823,8 @@ Una incidencia cerrada es terminal en el MVP. DLOG 0015.
 
 ---
 
+## Módulo: Sistema
+
 ### API-029 — Webhook de Stripe
 
 **Código**
@@ -1883,10 +1891,10 @@ POST
 Comprador / Bodega validada
 
 **Parámetros de entrada**
-Idempotency-Key UUID; uso; nombre_destinatario; campos postales obligatorios; teléfono opcional; es_principal opcional. El propietario no forma parte del request.
+Idempotency-Key UUID; uso; nombre_destinatario; campos postales obligatorios; teléfono opcional; es_principal opcional. El propietario no forma parte del request. La clave UUID se usa como `direccion.id`.
 
 **Validaciones**
-Sesión válida. El propietario y su tipo se derivan de la sesión. Uso admitido. Campos postales completos. La misma clave con el mismo payload devuelve el mismo recurso; una reutilización incompatible devuelve conflicto.
+Sesión válida. El propietario y su tipo se derivan de la sesión. Uso admitido. Campos postales completos. La misma clave y el mismo payload canónico devuelven el recurso con `direccion.id` igual a la clave; la misma clave con payload distinto devuelve conflicto. Existe como máximo una Dirección principal activa por propietario.
 
 **Respuesta correcta**
 201 Created en la primera creación; 200 OK en reintento idempotente. Dirección propia activa.
@@ -1975,7 +1983,7 @@ id en ruta; campos postales, uso, teléfono o es_principal que se deseen modific
 La Dirección existe, está activa y pertenece al actor autenticado. id, propietario y estado activo son inmutables por esta operación. La actualización de principal es transaccional.
 
 **Respuesta correcta**
-200 OK. Dirección actualizada; como máximo una Dirección principal activa por propietario y uso.
+200 OK. Dirección actualizada; como máximo una Dirección principal activa por propietario.
 
 **Posibles errores**
 400 datos inválidos · 401 sesión ausente · 403 actor no autorizado · 404 Dirección inexistente, ajena o inactiva · 409 conflicto de principal.
@@ -2015,13 +2023,13 @@ Comprador / Bodega validada
 id en ruta.
 
 **Validaciones**
-La Dirección existe, está activa y pertenece al actor autenticado. No puede desactivarse si la usa un Pedido `pendiente_pago`.
+La Dirección pertenece al actor autenticado. Si está activa, no puede desactivarse cuando la usa un Pedido `pendiente_pago`; si ya está inactiva, el reintento finaliza sin efecto adicional.
 
 **Respuesta correcta**
-204 No Content. Desactivación lógica; se retira es_principal y, cuando corresponda, se promueve transaccionalmente otra Dirección activa compatible.
+204 No Content tanto en la primera desactivación como en un reintento sobre la misma Dirección propia ya inactiva. Se retira es_principal y, cuando corresponda, se promueve transaccionalmente otra Dirección activa del mismo propietario.
 
 **Posibles errores**
-401 sesión ausente · 403 actor no autorizado · 404 Dirección inexistente, ajena o inactiva · 409 Dirección vinculada a Pedido `pendiente_pago`.
+401 sesión ausente · 403 actor no autorizado · 404 Dirección inexistente o ajena · 409 Dirección activa vinculada a Pedido `pendiente_pago`.
 
 **Casos de uso relacionados**
 CU-009 / CU-014
@@ -2057,16 +2065,16 @@ POST
 Bodega validada
 
 **Parámetros de entrada**
-id del vino en ruta; upload_id UUID; nombre de archivo; content_type; tamaño; checksum.
+id del vino en ruta; upload_id UUID —reutilizado como `imagen.id` al confirmar—; nombre de archivo; content_type; tamaño; checksum SHA-256 en base64.
 
 **Validaciones**
-El vino existe y pertenece a la bodega derivada de la sesión. Tipo, tamaño y checksum cumplen los límites técnicos aprobados. La clave de almacenamiento la genera el servidor.
+El vino existe y pertenece a la bodega derivada de la sesión. Tipo, tamaño y checksum cumplen la tabla normativa TAPI-07 de INF-10. La clave de almacenamiento es determinista para bodega, vino y upload_id y la genera el servidor. Si `imagen.id = upload_id` ya fue confirmada, devuelve conflicto; mientras no exista Imagen confirmada, un reintento puede reemitir una autorización para la misma clave.
 
 **Respuesta correcta**
-200 OK. URL prefirmada temporal, método PUT, cabeceras requeridas, clave opaca y token de confirmación asociado al upload_id.
+200 OK. URL prefirmada temporal, método PUT, cabeceras firmadas requeridas, clave opaca y token firmado de confirmación que contiene actor/bodega, vino_id, upload_id, clave, MIME, bytes, checksum y expiración.
 
 **Posibles errores**
-400 metadatos inválidos · 401 sesión ausente · 403 bodega no validada o vino ajeno · 404 vino inexistente · 409 upload_id incompatible.
+400 metadatos inválidos · 401 sesión ausente · 403 rol, asociación o bodega no validada · 404 vino inexistente o ajeno · 409 upload_id ya confirmado.
 
 **Casos de uso relacionados**
 CU-016
@@ -2075,7 +2083,7 @@ CU-016
 PT-BOD-005
 
 **Observaciones**
-No crea todavía el registro Imagen. Almacenamiento de objetos compatible con S3 y entrega posterior mediante CDN. DLOG 0019.
+No crea todavía el registro Imagen. Almacenamiento de objetos compatible con S3 y entrega posterior mediante CDN. Los límites, TTL y cabeceras firmadas se fijan normativamente en INF-10 TAPI-07. DLOG 0019.
 
 ---
 
@@ -2100,16 +2108,16 @@ POST
 Bodega validada
 
 **Parámetros de entrada**
-id del vino en ruta; upload_id; token de confirmación; texto_alternativo opcional; orden opcional; es_principal opcional.
+id del vino en ruta; upload_id; token de confirmación; texto_alternativo obligatorio, no vacío tras trim; orden opcional; es_principal opcional.
 
 **Validaciones**
-Se revalida la propiedad del vino. El objeto existe en la clave autorizada y coincide con tipo, tamaño y checksum declarados. upload_id y token pertenecen a la misma autorización. La confirmación se ejecuta una sola vez.
+Se validan firma y expiración del token, actor/bodega y propiedad actual del vino. Mediante HEAD del almacenamiento, el objeto existe en la clave autorizada y coincide exactamente con MIME, bytes y checksum firmados. El texto alternativo es obligatorio y no vacío tras trim. `imagen.id` usa upload_id. La primera confirmación crea el registro; un replay idéntico devuelve el mismo recurso y el mismo upload_id con datos incompatibles devuelve conflicto.
 
 **Respuesta correcta**
 201 Created en la primera confirmación; 200 OK en reintento idéntico. Imagen confirmada, activa y servida por URL CDN estable.
 
 **Posibles errores**
-400 objeto o metadatos inválidos · 401 sesión ausente · 403 vino ajeno/autorización ajena · 404 vino, autorización u objeto inexistentes · 409 confirmación incompatible o expirada.
+400 token inválido, texto alternativo ausente/vacío u objeto incompatible · 401 sesión ausente · 403 rol, asociación o bodega no validada · 404 vino inexistente/ajeno u objeto inexistente · 409 upload_id ya confirmado con datos incompatibles · 410 token expirado.
 
 **Casos de uso relacionados**
 CU-016
@@ -2152,7 +2160,7 @@ Vino e Imagen existen, pertenecen a la Bodega autenticada, están relacionados y
 200 OK. Metadatos actualizados; la condición de principal queda consistente transaccionalmente.
 
 **Posibles errores**
-400 datos inválidos · 401 sesión ausente · 403 recurso ajeno · 404 vino o Imagen inexistentes/inactivos · 409 conflicto de principal.
+400 datos inválidos · 401 sesión ausente · 403 rol, asociación o bodega no validada · 404 vino o Imagen inexistentes, ajenos, no relacionados o inactivos · 409 conflicto de principal.
 
 **Casos de uso relacionados**
 CU-016
@@ -2189,13 +2197,13 @@ Bodega validada
 id e imagen_id en ruta.
 
 **Validaciones**
-Vino e Imagen existen, están relacionados, pertenecen a la Bodega autenticada y la Imagen está activa. Si el vino está `pendiente_revision` o `publicado`, debe permanecer al menos una Imagen confirmada y activa.
+Vino e Imagen existen, están relacionados y pertenecen a la Bodega autenticada. Si la Imagen está activa y el vino está `pendiente_revision` o `publicado`, debe permanecer al menos una Imagen confirmada y activa. Si la Imagen propia ya está inactiva, el reintento finaliza sin efecto adicional.
 
 **Respuesta correcta**
-204 No Content. Desactivación lógica; se retira es_principal y, cuando corresponda, se promueve transaccionalmente otra Imagen activa. La limpieza física del objeto puede ser asíncrona.
+204 No Content tanto en la primera desactivación como en un reintento sobre la misma Imagen propia ya inactiva. Se retira es_principal y, cuando corresponda, se promueve transaccionalmente otra Imagen activa. La limpieza física del objeto puede ser asíncrona.
 
 **Posibles errores**
-401 sesión ausente · 403 recurso ajeno · 404 vino o Imagen inexistentes/inactivos · 409 es la última Imagen activa exigida por el estado del vino.
+401 sesión ausente · 403 rol, asociación o bodega no validada · 404 vino o Imagen inexistentes, ajenos o no relacionados · 409 en el primer intento si es la última Imagen activa exigida por el estado del vino.
 
 **Casos de uso relacionados**
 CU-016 / CU-017 / CU-022 / CU-023
