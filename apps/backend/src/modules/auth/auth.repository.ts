@@ -20,6 +20,7 @@ export interface RegistrarCompradorInput {
   fechaNacimiento: string;
   declaracionMayoriaEdad: true;
   aceptacionCondicionesAlcohol: true;
+  versionCondicionesAlcohol: string;
 }
 
 const UNIQUE_VIOLATION = '23505';
@@ -54,9 +55,16 @@ export class AuthRepository {
           `INSERT INTO comprador (
              usuario_id, fecha_nacimiento,
              declaracion_mayoria_edad, declaracion_mayoria_edad_at,
-             aceptacion_condiciones_alcohol, aceptacion_condiciones_alcohol_at
-           ) VALUES ($1, $2, $3, now(), $4, now())`,
-          [usuario.id, input.fechaNacimiento, input.declaracionMayoriaEdad, input.aceptacionCondicionesAlcohol],
+             aceptacion_condiciones_alcohol, aceptacion_condiciones_alcohol_at,
+             version_condiciones_alcohol
+           ) VALUES ($1, $2, $3, now(), $4, now(), $5)`,
+          [
+            usuario.id,
+            input.fechaNacimiento,
+            input.declaracionMayoriaEdad,
+            input.aceptacionCondicionesAlcohol,
+            input.versionCondicionesAlcohol,
+          ],
         );
 
         return usuario;
