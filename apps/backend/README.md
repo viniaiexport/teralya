@@ -14,6 +14,9 @@ Monolito modular Node.js/TypeScript desarrollado contract-first. El contrato nor
 npm ci
 docker compose up -d postgres redis
 cp apps/backend/.env.example apps/backend/.env
+set -a
+. apps/backend/.env
+set +a
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f docs/INF/teralya_schema_v1.4_APROBADO.sql
 npm run start:dev --workspace @teralya/backend
 ```
