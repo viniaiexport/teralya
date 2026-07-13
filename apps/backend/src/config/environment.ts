@@ -9,6 +9,8 @@ const environmentSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().min(16),
   MINIMUM_PURCHASE_AGE: z.coerce.number().int().min(1).max(120),
   ALCOHOL_TERMS_VERSION: z.string().trim().min(1).max(100),
+  LOGIN_RATE_LIMIT_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(1_000),
+  LOGIN_RATE_LIMIT_WINDOW_SECONDS: z.coerce.number().int().min(1).max(86_400),
 });
 
 export type Environment = z.infer<typeof environmentSchema>;
