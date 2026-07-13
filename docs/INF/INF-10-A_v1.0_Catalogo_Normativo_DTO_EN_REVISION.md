@@ -13,7 +13,9 @@
 
 ## Regla de lectura
 
-Este catálogo cierra TAPI-09. Cada schema es un objeto JSON con `additionalProperties:false`. Un campo no listado está prohibido. Los campos opcionales se omiten cuando no existen; **ningún campo admite `null`**. `RO` significa solo respuesta y `WO` solo request. Todos los strings se recortan salvo Password/Token. No se admite HTML.
+Este catálogo cierra TAPI-09. Cada schema es un objeto JSON con `additionalProperties:false`. Un campo no listado está prohibido. Los campos opcionales se omiten cuando no existen; **ningún campo admite `null`**. `RO` significa solo respuesta y `WO` solo request. Todos los strings se recortan salvo Password/RecoveryToken/ConfirmationToken. No se admite HTML.
+
+**Regla normativa de composición:** la expresión `campos de X` significa la unión plana y literal de las propiedades requeridas y opcionales ya enumeradas en X, conservando tipos, límites y flags; las propiedades añadidas se suman y una repetida debe ser idéntica. `campos PageMeta` significa insertar literalmente `page`, `page_size`, `total_items` y `total_pages`. El YAML no usará `allOf` para estas composiciones: materializará el conjunto plano resultante con una única lista `required`. Ningún generador puede reinterpretar, omitir o añadir propiedades.
 
 ## Tipos escalares normativos
 
@@ -86,7 +88,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | BodegaProfilePatch | al menos uno de los campos opcionales | `nombre_comercial:Text160`, `historia:Text5000`, `filosofia:Text5000`, `region:Text160`, `pais:Text100`, `denominacion_origen:Text160`, `anio_fundacion:Year`, `web:URI`, `video_url:URI`, `email_principal:Email`, `telefono:Text32`, `persona_contacto:Text100`, `logo_url:URI`, `imagen_principal_url:URI` | WO |
 | BodegaSummary | `id:UUID`, `nombre_comercial:Text160` | `slug:Text160`, `logo_url:URI`, `region:Text160`, `pais:Text100`, `denominacion_origen:Text160` | RO |
 | BodegaPublic | `id:UUID`, `nombre_comercial:Text160`, `vinos:WineSummary[]` | `slug:Text160`, `logo_url:URI`, `imagen_principal_url:URI`, `historia:Text5000`, `filosofia:Text5000`, `region:Text160`, `pais:Text100`, `denominacion_origen:Text160`, `anio_fundacion:Year`, `web:URI`, `video_url:URI` | RO; solo vinos publicados/disponibles |
-| BodegaSelf | `id:UUID`, `nombre_comercial:Text160`, `estado:WineryState`, `created_at:DateTime`, `updated_at:DateTime` | todos los campos públicos salvo vinos; `razon_social:Text200`, `cif_vat:Text32`, `email_principal:Email`, `telefono:Text32`, `persona_contacto:Text100`, `direccion_fisica:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `provincia:Text100`, `pais_contacto:Text100` | RO |
+| BodegaSelf | `id:UUID`, `nombre_comercial:Text160`, `estado:WineryState`, `created_at:DateTime`, `updated_at:DateTime` | `slug:Text160`, `logo_url:URI`, `imagen_principal_url:URI`, `historia:Text5000`, `filosofia:Text5000`, `region:Text160`, `pais:Text100`, `denominacion_origen:Text160`, `anio_fundacion:Year`, `web:URI`, `video_url:URI`, `razon_social:Text200`, `cif_vat:Text32`, `email_principal:Email`, `telefono:Text32`, `persona_contacto:Text100`, `direccion_fisica:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `provincia:Text100`, `pais_contacto:Text100` | RO |
 | BodegaAdminSummary | `id:UUID`, `nombre_comercial:Text160`, `estado:WineryState`, `created_at:DateTime` | `razon_social:Text200`, `cif_vat:Text32`, `pais_contacto:Text100` | RO |
 | BodegaAdmin | campos de BodegaSelf | `fecha_alta:DateTime`, `fecha_aprobacion:DateTime` | RO; nunca comisión, documentación/verificación interna, credenciales, IDs de aprobador ni auditoría |
 | PageBodegaAdminSummary | `items:BodegaAdminSummary[]` y campos PageMeta | — | RO |
@@ -209,12 +211,12 @@ Todos los errores usan Problem. La columna errores enumera los status permitidos
 | 017 | CheckoutSessionRequest | 200 CheckoutSession | 400,401,404,409,502,503 |
 | 018 | pedido_id path | 200 OrderConfirmation | 401,404,409,500 |
 | 019 | PageQuery | 200 PageOrderSummary | 400,401,500 |
-| 020 | ResourceIdPath | 200 OrderBuyerDetail | 401,404,500 |
+| 020 | ResourceIdPath | 200 OrderBuyerDetail | 401,403,404,500 |
 | 021 | PageQuery | 200 PageSubOrderSummary | 400,401,403,500 |
 | 022 | ResourceIdPath | 200 SubOrderDetail | 401,403,404,500 |
 | 023 | ResourceIdPath + SubOrderStatePatch | 200 SubOrderDetail | 400,401,403,404,409,500 |
-| 024 | ResourceIdPath | 200 BodegaAdmin | 401,403,404,409,500 |
-| 025 | ResourceIdPath | 200 WineAdminDetail | 401,403,404,409,500 |
+| 024 | ResourceIdPath | 200 BodegaAdmin | 400,401,403,404,409,500 |
+| 025 | ResourceIdPath | 200 WineAdminDetail | 400,401,403,404,409,500 |
 | 026 | ResourceIdPath | 200 WineAdminDetail | 401,403,404,409,500 |
 | 027 | PageQuery | 200 PageOrderSummary | 400,401,403,500 |
 | 028 | — | 200 Dashboard | 401,403,500 |
