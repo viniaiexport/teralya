@@ -120,7 +120,7 @@ Identificar, autenticar y controlar el acceso de compradores, personal de bodega
 
 - Una Cuenta de usuario puede tener cero o un perfil Comprador.
 - Una Bodega puede tener cero o muchas Cuentas de usuario.
-- Una Cuenta de usuario de bodega pertenece como máximo a una Bodega.
+- Una Cuenta de usuario con rol bodega pertenece exactamente a una Bodega.
 - Un Administrador es una Cuenta de usuario con rol administrador.
 - Una Cuenta de usuario puede originar muchas Notificaciones y muchos eventos de Auditoría.
 
@@ -313,7 +313,7 @@ Checkout no conserva identidad persistente propia. Utiliza y valida:
 - Comprador autenticado.
 - Carrito activo y sus líneas.
 - Disponibilidad, cantidades y precios vigentes.
-- Dirección de envío y, cuando corresponda, facturación.
+- Dirección activa de envío y Dirección activa de facturación, ambas pertenecientes al Comprador; pueden ser la misma si admite ambos usos.
 - Mayoría de edad y aceptaciones aplicables.
 - Gastos de envío, impuestos y total definitivo.
 - Bodegas implicadas y capacidad de cobro mediante Stripe Connect.
@@ -565,7 +565,7 @@ Adaptar la experiencia inicial del comprador mediante una preferencia lingüíst
 
 ## Cuenta Stripe Connect
 
-Vincula una Bodega con su cuenta de Stripe para recibir la porción que le corresponde. La relación es 1:1; la bodega no puede vender sin una cuenta operativa conforme a las validaciones aprobadas. Teralya no almacena datos bancarios sensibles.
+Vincula una Bodega con su cuenta de Stripe para recibir la porción que le corresponde. La relación es 1:0..1; la bodega no puede vender sin una cuenta operativa conforme a las validaciones aprobadas. Teralya no almacena datos bancarios sensibles.
 
 ## Imagen
 
@@ -695,7 +695,7 @@ El sistema agrupa las líneas por Bodega y genera un SubPedido interno por cada 
 
 ## 7. Incidencias y cierre
 
-Administración puede registrar Incidencias mínimas relacionadas con Pedido, SubPedido, Bodega o Vino. Sus cambios quedan auditados. El Pedido se cierra cuando su situación económica y logística alcanza un estado final permitido.
+Administración puede registrar Incidencias mínimas relacionadas con Pedido, SubPedido, Bodega o Vino. Los cambios de estado quedan auditados automáticamente; las demás actuaciones relevantes deben generar Auditoría. El Pedido se cierra cuando su situación económica y logística alcanza un estado final permitido.
 
 ---
 
