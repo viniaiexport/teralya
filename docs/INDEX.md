@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 5.0 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 5.1 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -26,14 +26,14 @@
 | INF-08-AUD-IDEM | Auditoría limitada de Idempotencia | 1.0 | ✅ Cerrada (incorporada en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
 | INF-08-AUD-COV | Auditoría de cobertura de Pantallas y Casos de Uso | 1.0 | ✅ Cerrada (13 brechas resueltas en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Cobertura_Pantallas_v1.0.md | CAP-05, CAP-06, CAP-07, INF-08 v2.1 | — |
 | INF-09 | Arquitectura Frontend | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, INF-07 v1.3, ADR-001 a ADR-004 | — |
-| INF-10 | Contrato Técnico de APIs | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-10_v1.0_Contrato_Tecnico_APIs_EN_REVISION.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, CAP-08 v1.4, ADR-001/002, DLOG 0014–0020 | — |
+| INF-10 | Contrato Técnico de APIs | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-10_v1.0_Contrato_Tecnico_APIs_APROBADO.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, CAP-08 v1.4, INF-10-A v1.0, ADR-001/002, DLOG 0014–0021 | — |
 | INF-10-A | Catálogo Normativo de DTO | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-10-A_v1.0_Catalogo_Normativo_DTO_APROBADO.md | INF-10 v1.0, INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, DLOG 0020 | — |
 
 ## DECISION_LOG
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log — Teralya | 1.6 | ✅ OFICIAL, incluye 0001–0020 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-004 |
+| DLOG | Decision Log — Teralya | 1.7 | ✅ OFICIAL, incluye 0001–0021 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-004 |
 
 ### Decisiones de negocio vigentes
 
@@ -92,7 +92,7 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 | `docs/INF/INF-08_v2.4_Especificacion_de_APIs_EN_REVISION.md` | Sustituido por INF-08 v2.4 aprobada |
 | `docs/CAP/CAP-08_v1.4_Criterios_de_Aceptacion_EN_REVISION.md` | Sustituido por CAP-08 v1.4 aprobada |
 | `docs/INF/INF-08_v2.5_Especificacion_de_APIs_EN_REVISION.md` | Sustituido por INF-08 v2.5 aprobada |
-| `docs/INF/INF-10-A_v1.0_Catalogo_Normativo_DTO_EN_REVISION.md` | Sustituido por INF-10-A v1.0 aprobada |
+| `docs/INF/INF-10-A_v1.0_Catalogo_Normativo_DTO_EN_REVISION.md` | Sustituido por INF-10-A v1.0 aprobada |\n| `docs/INF/INF-10_v1.0_Contrato_Tecnico_APIs_EN_REVISION.md` | Sustituido por INF-10 v1.0 aprobada junto con OpenAPI 3.1 |
 
 ## Estado operativo y siguiente documento
 
@@ -104,28 +104,12 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - INF-08 v2.5 aprobado con 50 rutas/11 módulos y precisiones de API-017/023/029; ningún código, método o ruta cambió.
 - CAP-07 v1.3 y CAP-08 v1.4 aprobados con 32 historias y 103 criterios.
 - INF-10-A v1.0 aprobado con schemas cerrados y mapeo API-001→050.
-- DLOG v1.6 oficial con Decisiones 0001–0020; TAPI-01→09 quedan cerradas y aprobadas.
+- DLOG v1.7 oficial con Decisiones 0001–0021; TAPI-01→09 e INF-10 quedan cerrados y aprobados.\n- INF-10 v1.0 y `docs/INF/openapi/teralya-openapi-v1.0.yaml` aprobados: 50 operaciones, 41 paths, 11 módulos y 74 schemas; validación contractual, Redocly, Spectral y doble dictamen superados.
 - La fusión del carrito suma cantidades hasta stock, usa `fusion_id`, SHA-256 canónico, FK Comprador–Carrito y bloqueo transaccional.
 - La matriz logística de DLOG 0018 deriva `pedido.estado` desde `subpedido.estado`.
 - Las 13 brechas históricas de cobertura de INF-08 permanecen cerradas.
 - INF-07, INF-09 y ADR-001 a ADR-004 no se reabren.
 
-### Documento actualmente en desarrollo
-
-**INF-10 v1.0** — matriz 50/50 y TAPI-01→09 cerradas; INF-10-A aprobado. Único artefacto pendiente: generar y validar OpenAPI 3.1.
-
-### Siguiente paso propuesto
-
-Generar `docs/INF/openapi/teralya-openapi-v1.0_EN_REVISION.yaml`, validar sintaxis, `$ref`, cobertura 50/50, ejemplos y seguridad, y someter INF-10 + YAML a aprobación final.
-
-### Bloqueos abiertos
-
-- TAPI-01→09 están resueltas por DLOG 0019/0020.
-- No quedan bloqueos TAPI ni funcionales en CAP-08 v1.4, INF-08 v2.5 o INF-10-A v1.0.
-- INF-10 no puede aprobarse hasta generar y validar el OpenAPI 3.1.
-- Los documentos previamente aprobados CAP-02, CAP-07 v1.2, CAP-08 v1.2, INF-05, INF-06, INF-08 v2.3 y la arquitectura Frontend no se reabren.
-- LEGAL y UX siguen sin contenido oficial; su planificación requiere una instrucción independiente.
-
-### Regla de continuidad
+### Documento actualmente en desarrollo\n\nNo queda ningún documento técnico de API en revisión. INF-10 v1.0 y su OpenAPI 3.1 están aprobados.\n\n### Siguiente paso propuesto\n\nIniciar la planificación de implementación del backend a partir del contrato OpenAPI aprobado. Esta acción requiere una instrucción independiente y no reabre la documentación cerrada.\n\n### Bloqueos abiertos\n\n- No quedan bloqueos TAPI, funcionales ni contractuales en CAP-08 v1.4, INF-08 v2.5, INF-10-A v1.0 o INF-10 v1.0.\n- LEGAL y UX siguen sin contenido oficial; su planificación requiere una instrucción independiente.\n\n### Regla de continuidad
 
 La revisión de INF-08 v2.4 no reabre INF-09. Cualquier cambio futuro de framework, App Router o topología requiere un nuevo ADR. Cualquier cambio de fórmula de fusión o matriz logística requiere una nueva decisión registrada.
