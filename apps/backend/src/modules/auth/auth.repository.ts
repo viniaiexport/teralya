@@ -118,22 +118,34 @@ export class AuthRepository {
     return result.rows[0] ?? null;
   }
 
-  async registrarIntentoFallido(usuarioId: string): Promise<void> {
-    await this.databaseService.pool.query(
-      'UPDATE usuario SET intentos_fallidos = intentos_fallidos + 1 WHERE id = $1',
-      [usuarioId],
-    );
+  async registrarRechazoAutenticacion(usuarioId: string | null, incrementarIntentos: boolean): Promise<void> {
+    await this.databaseService.withTransaction(async (client: PoolClient) => {
+      if (usuarioId !== null && incrementarIntentos) {
+        await client.query(
+          'UPDATE usuario SET intentos_fallidos = intentos_fallidos + 1 WHERE id = $1',
+          [usuarioId],
+        );
+      }
+      await this.insertarAuditoria(client, usuarioId, 'error');
+    });
   }
 
   async registrarAccesoCorrecto(usuarioId: string): Promise<void> {
-    await this.databaseService.pool.query(
-      'UPDATE usuario SET fecha_ultimo_acceso = now(), intentos_fallidos = 0 WHERE id = $1',
-      [usuarioId],
-    );
+    await this.databaseService.withTransaction(async (client: PoolClient) => {
+      await client.query(
+        'UPDATE usuario SET fecha_ultimo_acceso = now(), intentos_fallidos = 0 WHERE id = $1',
+        [usuarioId],
+      );
+      await this.insertarAuditoria(client, usuarioId, 'correcto');
+    });
   }
 
-  async registrarAuditoriaAutenticacion(usuarioId: string | null, resultado: 'correcto' | 'error'): Promise<void> {
-    await this.databaseService.pool.query(
+  private async insertarAuditoria(
+    client: PoolClient,
+    usuarioId: string | null,
+    resultado: 'correcto' | 'error',
+  ): Promise<void> {
+    await client.query(
       `INSERT INTO auditoria (
          usuario_id, tipo_entidad, entidad_id, accion, descripcion, sistema, resultado
        ) VALUES ($1, 'usuario', $1, 'inicio_sesion', $2, 'backend', $3)`,
