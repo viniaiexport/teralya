@@ -125,7 +125,7 @@ describe('API-001 — POST /auth/registro/comprador', () => {
     expect(compradorRows.rows[0]).toMatchObject({
       declaracion_mayoria_edad: true,
       aceptacion_condiciones_alcohol: true,
-      version_condiciones_alcohol: 'test-v1',
+      version_condiciones_alcohol: process.env.ALCOHOL_TERMS_VERSION,
     });
     expect(compradorRows.rows[0]?.declaracion_mayoria_edad_at).toBeInstanceOf(Date);
     expect(compradorRows.rows[0]?.aceptacion_condiciones_alcohol_at).toBeInstanceOf(Date);
