@@ -15,7 +15,7 @@
 
 Este catálogo cierra TAPI-09. Cada schema es un objeto JSON con `additionalProperties:false`. Un campo no listado está prohibido. Los campos opcionales se omiten cuando no existen; **ningún campo admite `null`**. `RO` significa solo respuesta y `WO` solo request. Todos los strings se recortan salvo Password/RecoveryToken/ConfirmationToken. No se admite HTML.
 
-**Regla normativa de composición:** la expresión `campos de X` significa la unión plana y literal de las propiedades requeridas y opcionales ya enumeradas en X, conservando tipos, límites y flags; las propiedades añadidas se suman y una repetida debe ser idéntica. `campos PageMeta` significa insertar literalmente `page`, `page_size`, `total_items` y `total_pages`. El YAML no usará `allOf` para estas composiciones: materializará el conjunto plano resultante con una única lista `required`. Ningún generador puede reinterpretar, omitir o añadir propiedades.
+**Regla normativa de composición:** la expresión `campos de X` significa la unión plana y literal de las propiedades requeridas y opcionales ya enumeradas en X, conservando tipos, límites y flags; las propiedades añadidas se suman y una repetida debe ser idéntica. `campos de X excepto p` elimina explícitamente `p` —tanto de properties como de required— antes de añadir la propiedad sustituta declarada; no es un override implícito. `campos PageMeta` significa insertar literalmente `page`, `page_size`, `total_items` y `total_pages`. El YAML no usará `allOf`: materializará el conjunto plano resultante con una única lista `required`. Ningún generador puede reinterpretar, omitir o añadir propiedades.
 
 ## Tipos escalares normativos
 
@@ -105,7 +105,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | WineOwnSummary | `id:UUID`, `nombre_comercial:Text160`, `estado:WineState`, `stock_disponible:Stock`, `disponible_venta:boolean`, `updated_at:DateTime` | `sku:Text100`, `precio:Money`, `moneda:Currency`, `imagen_principal:ImageSummary` | RO |
 | WineOwnDetail | campos de WinePublicDetail, `estado:WineState`, `stock_disponible:Stock`, `stock_reservado:Stock`, `stock_minimo:Stock`, `created_at:DateTime`, `updated_at:DateTime` | `sku:Text100`, `peso_gramos:integer`, `plazo_preparacion_dias:integer`, `botellas_por_caja:integer` | RO |
 | WineAdminSummary | `id:UUID`, `nombre_comercial:Text160`, `estado:WineState`, `bodega:BodegaAdminSummary`, `updated_at:DateTime` | `precio:Money`, `moneda:Currency`, `imagen_principal:ImageSummary` | RO |
-| WineAdminDetail | campos de WineOwnDetail, `bodega:BodegaAdminSummary` | — | RO |
+| WineAdminDetail | campos de WineOwnDetail excepto `bodega`, más una única propiedad requerida `bodega:BodegaAdminSummary` | — | RO; sustitución explícita, sin colisión con BodegaSummary |
 | PageWineSummary | `items:WineSummary[]` y campos PageMeta | — | RO |
 | PageWineOwnSummary | `items:WineOwnSummary[]` y campos PageMeta | — | RO |
 | PageWineAdminSummary | `items:WineAdminSummary[]` y campos PageMeta | — | RO |
