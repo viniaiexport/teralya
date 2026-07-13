@@ -691,16 +691,20 @@ POST
 Comprador
 
 **Parámetros de entrada**
-Modo ordinario: vino_id, cantidad. Modo fusión: fusion_id único e items locales [{vino_id, cantidad_local}].
+Modo ordinario: vino_id, cantidad. Modo fusión: `fusion_id` único e items locales [{vino_id, cantidad_local}].
 
 **Validaciones**
-Comprador autenticado y único carrito persistente activo. Cada vino debe estar publicado, disponible y pertenecer a bodega validada. Cantidades positivas y no superiores al stock tras la combinación. `fusion_id` obligatorio y único para cada instantánea local fusionada.
+Comunes: Comprador autenticado y único carrito persistente activo.
+Modo ordinario: el vino está publicado, disponible y pertenece a bodega validada; cantidad positiva y no superior al stock.
+Modo fusión: estructura y `fusion_id` válidos. Cada línea se evalúa individualmente; vino inexistente, despublicado, no disponible, bodega no validada o cantidad no positiva se descarta con motivo. Si la suma supera stock, se limita al stock y se informa, sin rechazar toda la fusión.
 
 **Respuesta correcta**
-200 OK. En modo ordinario crea o actualiza una única línea por vino. En modo fusión, para cada vino coincidente establece `min(stock_disponible, cantidad_persistente + cantidad_local)`; conserva las líneas válidas, informa por línea las descartadas o limitadas y devuelve el carrito completo recalculado.
+200 OK. Modo ordinario: crea o actualiza una única línea por vino y devuelve el carrito recalculado. Modo fusión: procesa transaccionalmente el conjunto, establece por coincidencia `min(stock_disponible, cantidad_persistente + cantidad_local)`, conserva las líneas válidas y devuelve el carrito completo más un resultado por línea: fusionada, limitada o descartada.
 
 **Posibles errores**
-400 cantidad o estructura inválida · 401 sesión ausente · 404 vino no encontrado/despublicado/no disponible · 409 stock insuficiente en modo ordinario · 409 `fusion_id` reutilizado con contenido distinto.
+Comunes: 401 sesión ausente.
+Modo ordinario: 400 cantidad inválida · 404 vino inexistente/despublicado/no disponible · 409 stock insuficiente.
+Modo fusión: 400 envoltorio o `fusion_id` inválido · 409 `fusion_id` ya registrado con contenido diferente. Las incidencias de líneas se devuelven dentro del 200 parcial y no como error global.
 
 **Casos de uso relacionados**
 CU-002 / CU-007 / CU-008
@@ -709,7 +713,7 @@ CU-002 / CU-007 / CU-008
 PT-ACC-001, PT-ACC-003, PT-COM-002
 
 **Observaciones**
-La fusión se ejecuta transaccionalmente sobre el conjunto de líneas válidas. Repetir el mismo `fusion_id` con el mismo contenido devuelve exactamente el resultado registrado y no vuelve a sumar cantidades. El carrito visitante nunca se persiste antes de autenticar. DLOG 0010, 0016 y 0017.
+Repetir el mismo `fusion_id` con el mismo contenido devuelve exactamente el resultado registrado y no vuelve a sumar cantidades. El carrito visitante nunca se persiste antes de autenticar. DLOG 0010, 0016 y 0017.
 
 ---
 
@@ -1828,7 +1832,7 @@ Procesar la autoridad económica de Stripe de forma firmada, idempotente y atóm
 POST
 
 **Ruta**
-`/webhooks/stripe`
+`/sistema/webhooks/stripe`
 
 **Actor autorizado**
 Stripe mediante firma verificada
