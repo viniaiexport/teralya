@@ -33,11 +33,17 @@ export class SessionService {
   async issue(subject: SessionSubject): Promise<IssuedSession> {
     const token = base64UrlNoPadding(randomBytes(SESSION_TOKEN_BYTES));
     const tokenHash = hashToken(token);
-    const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000);
+    const issuedAt = new Date();
+    const expiresAt = new Date(issuedAt.getTime() + SESSION_TTL_SECONDS * 1000);
 
     await this.redisService.client.set(
       `${SESSION_KEY_PREFIX}${tokenHash}`,
-      JSON.stringify({ usuario_id: subject.usuarioId, rol: subject.rol, expires_at: expiresAt.toISOString() }),
+      JSON.stringify({
+        usuario_id: subject.usuarioId,
+        rol: subject.rol,
+        issued_at: issuedAt.toISOString(),
+        expires_at: expiresAt.toISOString(),
+      }),
       'EX',
       SESSION_TTL_SECONDS,
     );
