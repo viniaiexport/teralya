@@ -2,7 +2,7 @@
 
 **Teralya · Versión 1.0 · Julio 2026 · Estado: APROBADO POR EL CTO · Preparado por Claude y revisado por el CTO**
 
-Documento de arquitectura del Frontend del MVP. Basado en CAP-01, CAP-03, CAP-04, CAP-05 y CAP-06 aprobados; CAP-02 v1.1, CAP-07 v1.1 y CAP-08 v1.1; INF-05 v1.2, INF-06 v1.1, INF-07 v1.3 e INF-08 v2.1; Decision Log 0010 a 0013; ADR-001, ADR-002, ADR-003 y ADR-004. Conserva exactamente 25 apartados. No añade funcionalidad ni amplía el alcance del MVP.
+Documento de arquitectura del Frontend del MVP. Basado en CAP-01, CAP-03, CAP-04, CAP-05 y CAP-06 aprobados; CAP-02 v1.1, CAP-07 v1.1 y CAP-08 v1.1; INF-05 v1.2, INF-06 v1.1, INF-07 v1.3 e INF-08 v2.2; Decision Log 0010 a 0013; ADR-001, ADR-002, ADR-003 y ADR-004. Conserva exactamente 25 apartados. No añade funcionalidad ni amplía el alcance del MVP.
 
 ---
 
@@ -143,17 +143,18 @@ Se mantiene el vocabulario oficial del dominio: Pedido, SubPedido, Bodega, Vino,
 
 Las pantallas solo consumen endpoints documentados en INF-08. La arquitectura queda aprobada independientemente de la versión concreta del contrato, pero **no se implementará una pantalla cuya operación no disponga todavía de endpoint aprobado**.
 
-Cobertura actual confirmada en INF-08 v2.1:
-- Catálogo y ficha de vino: API-009 y API-010.
+Cobertura confirmada en INF-08 v2.2 aprobada:
+- Autenticación y acceso por rol: API-001 a API-004.
+- Bodegas y perfil público/propio: API-005, API-006, API-030 y API-031.
+- Vinos públicos y propios: API-007 a API-010 y API-032 a API-034.
 - Carrito autenticado: API-011 a API-015.
 - Checkout, pago y confirmación: API-016 a API-018.
 - Pedidos del comprador: API-019 y API-020.
-- Crear y editar vino: API-007 y API-008.
 - SubPedidos de bodega: API-021 a API-023.
-- Validación, publicación, despublicación, pedidos y dashboard administrativo: API-024 a API-028.
+- Administración: API-024 a API-028 y API-035 a API-042.
 - Webhook de Stripe: API-029.
 
-La auditoría de cobertura de INF-08 identifica operaciones aprobadas que deben incorporarse a INF-08 v2.2 antes de implementar sus pantallas. Este pendiente pertenece al contrato API, no reabre la arquitectura Frontend.
+Las 13 brechas identificadas por la auditoría de cobertura quedaron incorporadas en INF-08 v2.2. El contrato API ya no mantiene un bloqueo de cobertura para las 36 pantallas del MVP.
 
 ## 20. Integración con base de datos y sesión
 
