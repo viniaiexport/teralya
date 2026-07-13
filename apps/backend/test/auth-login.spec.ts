@@ -18,6 +18,16 @@ process.env.MINIMUM_PURCHASE_AGE ??= '18';
 process.env.ALCOHOL_TERMS_VERSION ??= 'test-v1';
 process.env.LOGIN_RATE_LIMIT_MAX_ATTEMPTS ??= '5';
 process.env.LOGIN_RATE_LIMIT_WINDOW_SECONDS ??= '60';
+process.env.PASSWORD_RECOVERY_TOKEN_TTL_SECONDS ??= '3600';
+process.env.PASSWORD_RECOVERY_RATE_LIMIT_MAX_ATTEMPTS ??= '3';
+process.env.PASSWORD_RECOVERY_RATE_LIMIT_WINDOW_SECONDS ??= '900';
+process.env.PASSWORD_RECOVERY_URL ??= 'http://localhost:3000/restablecer-password';
+process.env.PASSWORD_RECOVERY_FROM_EMAIL ??= 'no-reply@teralya.test';
+process.env.SMTP_HOST ??= 'localhost';
+process.env.SMTP_PORT ??= '1025';
+process.env.SMTP_SECURE ??= 'false';
+process.env.SMTP_USER ??= 'test';
+process.env.SMTP_PASSWORD ??= 'test';
 
 type Rol = 'comprador' | 'bodega' | 'administrador';
 type EstadoUsuario = 'pendiente_verificacion' | 'activo' | 'suspendido' | 'bloqueado' | 'eliminado';

@@ -39,6 +39,16 @@ jobs:
       ALCOHOL_TERMS_VERSION: ci-test-v1
       LOGIN_RATE_LIMIT_MAX_ATTEMPTS: 5
       LOGIN_RATE_LIMIT_WINDOW_SECONDS: 60
+      PASSWORD_RECOVERY_TOKEN_TTL_SECONDS: 3600
+      PASSWORD_RECOVERY_RATE_LIMIT_MAX_ATTEMPTS: 3
+      PASSWORD_RECOVERY_RATE_LIMIT_WINDOW_SECONDS: 900
+      PASSWORD_RECOVERY_URL: http://localhost:3000/restablecer-password
+      PASSWORD_RECOVERY_FROM_EMAIL: no-reply@teralya.test
+      SMTP_HOST: localhost
+      SMTP_PORT: 1025
+      SMTP_SECURE: false
+      SMTP_USER: ci
+      SMTP_PASSWORD: ci
     services:
       postgres:
         image: postgres:16-alpine
