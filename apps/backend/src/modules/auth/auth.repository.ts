@@ -95,7 +95,7 @@ export class AuthRepository {
   }
 
   async buscarUsuarioPorEmail(email: string): Promise<UsuarioAutenticacion | null> {
-    const result = await this.databaseService.pool.query<UsuarioAutenticacion>(
+    const rows = await this.databaseService.query<UsuarioAutenticacion>(
       `SELECT u.id,
               u.email,
               u.password_hash AS "passwordHash",
@@ -115,7 +115,7 @@ export class AuthRepository {
       [email],
     );
 
-    return result.rows[0] ?? null;
+    return rows[0] ?? null;
   }
 
   async registrarRechazoAutenticacion(usuarioId: string | null, incrementarIntentos: boolean): Promise<void> {
