@@ -20,14 +20,14 @@
 
 Convertir INF-08 v2.4 en un contrato técnico implementable de requests, responses, errores y enumeraciones sin modificar las funcionalidades del MVP ni la arquitectura. API-001 a API-042 conservan códigos, métodos y rutas; API-043 a API-050 formalizan Direcciones e Imágenes conforme a DLOG 0019.
 
-INF-08 v2.4 permanece EN REVISIÓN hasta el dictamen técnico final. INF-10 definirá el contrato wire. El futuro YAML OpenAPI será la fuente normativa de schemas y no se duplicarán sus definiciones completas en este Markdown.
+INF-08 v2.4 está APROBADO POR EL CTO tras doble dictamen técnico APROBABLE. INF-10 definirá el contrato wire. El futuro YAML OpenAPI será la fuente normativa de schemas y no se duplicarán sus definiciones completas en este Markdown.
 
 ## Fuentes normativas
 
 - INF-05 v1.4 — esquema aprobado.
 - INF-06 v1.3 — diccionario aprobado.
-- INF-08 v2.4 — 50 contratos funcionales EN REVISIÓN.
-- CAP-02 v1.3 y CAP-08 v1.3 EN REVISIÓN.
+- INF-08 v2.4 — 50 contratos funcionales aprobados.
+- CAP-02 v1.3 y CAP-08 v1.3 aprobados.
 - ADR-001 y ADR-002.
 - DLOG 0014 a 0019.
 - INF-07 v1.3 e INF-09 v1.0 únicamente para coherencia; no se reabren.
@@ -180,7 +180,7 @@ La solución no añade una capacidad de negocio nueva: hace implementables requi
 INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
 1. TAPI-01 a TAPI-09 estén cerradas.
-2. INF-08 v2.4, CAP-07 v1.3 y CAP-08 v1.3 estén aprobados tras revisión binaria.
+2. INF-08 v2.4, CAP-07 v1.3 y CAP-08 v1.3 estén aprobados tras revisión binaria. **CUMPLIDO**.
 3. El YAML sea válido y todos los `$ref` se resuelvan.
 4. Existan exactamente las operaciones autorizadas, sin duplicados.
 5. Cada operación tenga seguridad, parámetros, request, éxito, errores, ejemplos y trazabilidad.
@@ -190,4 +190,4 @@ INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
 ## Estado
 
-INF-10 v1.0 queda **EN REVISIÓN**. La matriz de 50 operaciones está fijada y TAPI-07 queda resuelta por DLOG 0019. La generación del OpenAPI continúa bloqueada únicamente por la aprobación de las fuentes revisadas y las restantes decisiones TAPI pendientes.
+INF-10 v1.0 queda **EN REVISIÓN**. La matriz de 50 operaciones está fijada y TAPI-07 queda resuelta por DLOG 0019. La generación del OpenAPI continúa bloqueada únicamente por las restantes decisiones TAPI pendientes.
