@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 4.8 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 4.9 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -27,6 +27,7 @@
 | INF-08-AUD-COV | Auditoría de cobertura de Pantallas y Casos de Uso | 1.0 | ✅ Cerrada (13 brechas resueltas en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Cobertura_Pantallas_v1.0.md | CAP-05, CAP-06, CAP-07, INF-08 v2.1 | — |
 | INF-09 | Arquitectura Frontend | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, INF-07 v1.3, ADR-001 a ADR-004 | — |
 | INF-10 | Contrato Técnico de APIs | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-10_v1.0_Contrato_Tecnico_APIs_EN_REVISION.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, CAP-08 v1.4, ADR-001/002, DLOG 0014–0020 | — |
+| INF-10-A | Catálogo Normativo de DTO | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-10-A_v1.0_Catalogo_Normativo_DTO_EN_REVISION.md | INF-10 v1.0, INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, DLOG 0020 | — |
 
 ## DECISION_LOG
 
@@ -107,16 +108,16 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 
 ### Documento actualmente en desarrollo
 
-**INF-10 v1.0 — Contrato Técnico de APIs** — matriz 50/50 y TAPI-01→09 cerradas; pendiente revisión binaria de CAP-08 v1.4/INF-08 v2.5 y posterior generación del OpenAPI.
+**INF-10 v1.0 + INF-10-A v1.0** — matriz 50/50, TAPI-01→09 cerradas y catálogo DTO exhaustivo; pendiente revisión binaria coordinada y posterior generación del OpenAPI.
 
 ### Siguiente paso propuesto
 
-Obtener dictamen binario y aprobar CAP-08 v1.4 e INF-08 v2.5; después generar y validar el OpenAPI 3.1.
+Obtener dictamen binario y aprobar CAP-08 v1.4, INF-08 v2.5 e INF-10-A v1.0; después generar y validar el OpenAPI 3.1.
 
 ### Bloqueos abiertos
 
 - TAPI-01→09 están resueltas por DLOG 0019/0020.
-- CAP-08 v1.4 e INF-08 v2.5 esperan dictamen binario; el OpenAPI aún no se ha generado.
+- CAP-08 v1.4, INF-08 v2.5 e INF-10-A v1.0 esperan dictamen binario; el OpenAPI aún no se ha generado.
 - Los documentos previamente aprobados CAP-02, CAP-07 v1.2, CAP-08 v1.2, INF-05, INF-06, INF-08 v2.3 y la arquitectura Frontend no se reabren.
 - LEGAL y UX siguen sin contenido oficial; su planificación requiere una instrucción independiente.
 
