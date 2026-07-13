@@ -156,6 +156,23 @@ La brecha queda resuelta funcionalmente mediante DLOG 0019 e INF-08 v2.4:
 - La propiedad siempre se deriva de la sesión. API-001 a API-042 no cambian de código, método ni ruta.
 - Los snapshots de dirección se congelan al crear el Pedido `pendiente_pago`; API-029 los conserva y congela líneas y precios al confirmar el pago.
 
+### Parámetros normativos de carga TAPI-07
+
+| Parámetro | Valor |
+|---|---|
+| MIME admitidos | `image/jpeg`, `image/png`, `image/webp` |
+| Tamaño máximo | 10 MiB (10 × 1024 × 1024 bytes) |
+| Checksum | SHA-256 en base64; firmado como `x-amz-checksum-sha256` |
+| TTL de URL prefirmada | 10 minutos |
+| TTL del token de confirmación | 30 minutos |
+| Cabeceras firmadas del PUT | `Content-Type`, `x-amz-checksum-sha256`, `If-None-Match: *` |
+| Verificación al confirmar | HEAD: clave, Content-Type, Content-Length y checksum deben coincidir exactamente con el token firmado |
+| URL persistida | URL CDN estable; nunca la URL prefirmada |
+
+El token de confirmación firmado contiene actor/bodega, `vino_id`, `upload_id`, clave, MIME, bytes, checksum y expiración. `upload_id` se reutiliza como `imagen.id`; la clave de objeto se deriva determinísticamente de bodega, vino y upload_id. Antes de confirmar no se requiere ledger: API-047 puede reemitir para la misma clave; API-048 materializa la unicidad mediante la PK existente y compara el payload canónico para replay o conflicto.
+
+Las promociones de Dirección o Imagen principal se ejecutan en transacción con bloqueo de las filas activas del propietario o vino. La Dirección principal es única por propietario, no por uso. La Imagen principal es única por vino. Las desactivaciones repetidas de recursos propios ya inactivos devuelven 204 sin nuevo efecto.
+
 La solución no añade una capacidad de negocio nueva: hace implementables requisitos de Dirección e Imagen ya presentes en INF-05/INF-06, API-016 y API-025. La generación del OpenAPI sigue condicionada al cierre de TAPI-01 a TAPI-06 y TAPI-08 a TAPI-09 y a la aprobación de INF-08 v2.4.
 
 ## Gate de aprobación
