@@ -835,12 +835,12 @@ CREATE INDEX idx_vino_bodega_estado ON vino(bodega_id, estado);
 CREATE INDEX idx_incidencia_estado_fecha ON incidencia(estado, fecha DESC);
 
 CREATE OR REPLACE FUNCTION fn_actualizar_updated_at()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     NEW.updated_at := now();
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_bodega_updated_at BEFORE UPDATE ON bodega
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_updated_at();
@@ -874,7 +874,7 @@ CREATE TRIGGER trg_notificacion_updated_at BEFORE UPDATE ON notificacion
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_updated_at();
 
 CREATE OR REPLACE FUNCTION fn_proteger_coherencia_rol_usuario()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF OLD.rol = 'comprador' AND NEW.rol <> 'comprador'
        AND EXISTS (SELECT 1 FROM comprador WHERE usuario_id = OLD.id) THEN
@@ -887,14 +887,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_proteger_coherencia_rol_usuario
 BEFORE UPDATE OF rol, estado ON usuario
 FOR EACH ROW EXECUTE FUNCTION fn_proteger_coherencia_rol_usuario();
 
 CREATE OR REPLACE FUNCTION fn_validar_rol_comprador()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM usuario
@@ -904,14 +904,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_validar_rol_comprador
 BEFORE INSERT OR UPDATE OF usuario_id ON comprador
 FOR EACH ROW EXECUTE FUNCTION fn_validar_rol_comprador();
 
 CREATE OR REPLACE FUNCTION fn_validar_aprobador_bodega()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF NEW.aprobada_por IS NOT NULL AND NOT EXISTS (
         SELECT 1 FROM usuario
@@ -921,14 +921,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_validar_aprobador_bodega
 BEFORE INSERT OR UPDATE OF aprobada_por ON bodega
 FOR EACH ROW EXECUTE FUNCTION fn_validar_aprobador_bodega();
 
 CREATE OR REPLACE FUNCTION fn_validar_imagen_entidad()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF NEW.tipo_entidad = 'vino' AND NOT EXISTS (SELECT 1 FROM vino WHERE id = NEW.entidad_id) THEN
         RAISE EXCEPTION 'La imagen referencia un vino inexistente';
@@ -937,14 +937,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_validar_imagen_entidad
 BEFORE INSERT OR UPDATE OF tipo_entidad, entidad_id ON imagen
 FOR EACH ROW EXECUTE FUNCTION fn_validar_imagen_entidad();
 
 CREATE OR REPLACE FUNCTION fn_validar_direccion_propietario()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF NEW.propietario_tipo = 'comprador'
        AND NOT EXISTS (SELECT 1 FROM comprador WHERE usuario_id = NEW.propietario_id) THEN
@@ -955,14 +955,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_validar_direccion_propietario
 BEFORE INSERT OR UPDATE OF propietario_tipo, propietario_id ON direccion
 FOR EACH ROW EXECUTE FUNCTION fn_validar_direccion_propietario();
 
 CREATE OR REPLACE FUNCTION fn_proteger_referencias_polimorficas()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF TG_TABLE_NAME = 'bodega' THEN
         IF EXISTS (SELECT 1 FROM imagen WHERE tipo_entidad = 'bodega' AND entidad_id = OLD.id)
@@ -980,7 +980,7 @@ BEGIN
     END IF;
     RETURN OLD;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_proteger_refs_bodega BEFORE DELETE ON bodega
 FOR EACH ROW EXECUTE FUNCTION fn_proteger_referencias_polimorficas();
@@ -990,7 +990,7 @@ CREATE TRIGGER trg_proteger_refs_comprador BEFORE DELETE ON comprador
 FOR EACH ROW EXECUTE FUNCTION fn_proteger_referencias_polimorficas();
 
 CREATE OR REPLACE FUNCTION fn_validar_direcciones_pedido()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM direccion
@@ -1012,14 +1012,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_validar_direcciones_pedido
 BEFORE INSERT OR UPDATE OF comprador_id, direccion_envio_id, direccion_facturacion_id ON pedido
 FOR EACH ROW EXECUTE FUNCTION fn_validar_direcciones_pedido();
 
 CREATE OR REPLACE FUNCTION fn_validar_importe_pago_pedido()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE
     total_pedido NUMERIC(10,2);
 BEGIN
@@ -1032,14 +1032,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_validar_importe_pago_pedido
 BEFORE INSERT OR UPDATE OF pedido_id, total_cobrado ON pago
 FOR EACH ROW EXECUTE FUNCTION fn_validar_importe_pago_pedido();
 
 CREATE OR REPLACE FUNCTION fn_validar_transicion_incidencia()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF NEW.estado = OLD.estado THEN
         RETURN NEW;
@@ -1053,14 +1053,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_validar_transicion_incidencia
 BEFORE UPDATE OF estado ON incidencia
 FOR EACH ROW EXECUTE FUNCTION fn_validar_transicion_incidencia();
 
 CREATE OR REPLACE FUNCTION fn_auditar_estado_incidencia()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF NEW.estado IS DISTINCT FROM OLD.estado THEN
         INSERT INTO auditoria (
@@ -1076,18 +1076,18 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_auditar_estado_incidencia
 AFTER UPDATE OF estado ON incidencia
 FOR EACH ROW EXECUTE FUNCTION fn_auditar_estado_incidencia();
 
 CREATE OR REPLACE FUNCTION fn_proteger_auditoria()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     RAISE EXCEPTION 'Los registros de auditoría son inmutables';
 END;
-$fn$;
+$$;
 
 CREATE TRIGGER trg_proteger_auditoria
 BEFORE UPDATE OR DELETE ON auditoria
