@@ -18,18 +18,18 @@
 
 ## Objetivo
 
-Convertir INF-08 v2.4 en un contrato técnico implementable de requests, responses, errores y enumeraciones sin modificar las funcionalidades del MVP ni la arquitectura. API-001 a API-042 conservan códigos, métodos y rutas; API-043 a API-050 formalizan Direcciones e Imágenes conforme a DLOG 0019.
+Convertir INF-08 v2.5 en un contrato técnico implementable de requests, responses, errores y enumeraciones sin modificar las funcionalidades del MVP ni la arquitectura. API-001 a API-042 conservan códigos, métodos y rutas; API-043 a API-050 formalizan Direcciones e Imágenes conforme a DLOG 0019.
 
-INF-08 v2.4 está APROBADO POR EL CTO tras doble dictamen técnico APROBABLE. INF-10 definirá el contrato wire. El futuro YAML OpenAPI será la fuente normativa de schemas y no se duplicarán sus definiciones completas en este Markdown.
+INF-08 v2.5 y CAP-08 v1.4 están EN REVISIÓN como correcciones coordinadas autorizadas por DLOG 0020. INF-10 definirá el contrato wire. El futuro YAML OpenAPI será la fuente normativa de schemas y no se duplicarán sus definiciones completas en este Markdown.
 
 ## Fuentes normativas
 
 - INF-05 v1.4 — esquema aprobado.
 - INF-06 v1.3 — diccionario aprobado.
-- INF-08 v2.4 — 50 contratos funcionales aprobados.
-- CAP-02 v1.3 y CAP-08 v1.3 aprobados.
+- INF-08 v2.5 — 50 contratos funcionales EN REVISIÓN.
+- CAP-02 v1.3 aprobado y CAP-08 v1.4 EN REVISIÓN.
 - ADR-001 y ADR-002.
-- DLOG 0014 a 0019.
+- DLOG 0014 a 0020.
 - INF-07 v1.3 e INF-09 v1.0 únicamente para coherencia; no se reabren.
 
 ## Artefactos coordinados
@@ -132,23 +132,23 @@ Estas convenciones pueden incorporarse al YAML después de su aprobación técni
 | API-043 | `Idempotency-Key` UUID identifica la Dirección; mismo payload devuelve el mismo resultado y payload distinto produce 409. |
 | API-047/048 | `upload_id` UUID vincula presignado y confirmación; el objeto se verifica y solo puede registrarse una Imagen activa por confirmación. |
 
-## Decisiones necesarias antes de generar OpenAPI
+## Decisiones técnicas cerradas antes de generar OpenAPI
 
-| ID | Tema | Propuesta CTO | Estado |
+| ID | Tema | Decisión | Estado |
 |---|---|---|---|
-| TAPI-01 | Transporte de sesión | HTTP Bearer con token opaco; no afirmar JWT. Expiración/renovación quedan internas hasta decisión posterior. | PROPUESTA |
-| TAPI-02 | Formato monetario | String decimal `^[0-9]+\.[0-9]{2}$`, moneda ISO 4217 separada. | PROPUESTA |
-| TAPI-03 | Error común | `code`, `message`, `field_errors?`, `request_id`. | PROPUESTA |
-| TAPI-04 | Paginación | `page` y `page_size`; fijar límite por defecto y máximo. | PROPUESTA |
-| TAPI-05 | Eventos Stripe | Definir allowlist mínima de eventos aceptados por API-029. | PENDIENTE |
-| TAPI-06 | Transiciones de SubPedido | Definir matriz exacta entre `pendiente`, `aceptado`, `en_preparacion`, `enviado`, `entregado`, `cancelado` e `incidencia`. | PENDIENTE |
-| TAPI-07 | Direcciones e imágenes | Alternativa A autorizada: API-043 a API-050; ownership por sesión, carga prefirmada, confirmación verificada y desactivación lógica. | RESUELTA — DLOG 0019 |
-| TAPI-08 | Error 402 de API-017 | Aclarar si pertenece a creación de sesión o a un resultado previo del pago. | PENDIENTE |
-| TAPI-09 | Proyecciones DTO | Cerrar campos obligatorios y límites de bodega, vino, catálogo y respuestas de detalle sin exponer columnas internas. | PENDIENTE |
+| TAPI-01 | Transporte de sesión | HTTP Bearer opaco de 256 bits, TTL absoluto 8 h, hash SHA-256 en Redis, sin JWT, refresh ni sliding expiration. | RESUELTA — DLOG 0020 |
+| TAPI-02 | Dinero | Importes como string decimal compatible con numeric(10,2); EUR única moneda del MVP. | RESUELTA — DLOG 0020 |
+| TAPI-03 | Error común | `application/problem+json`, schema Problem cerrado y X-Request-Id en toda respuesta. | RESUELTA — DLOG 0020 |
+| TAPI-04 | Paginación | `page=1`, `page_size=20`, máximo 100 y orden estable por recurso. | RESUELTA — DLOG 0020 |
+| TAPI-05 | Eventos Stripe | Allowlist de cuatro eventos Checkout Session y efectos exactos por evento. | RESUELTA — DLOG 0020 |
+| TAPI-06 | Transiciones de SubPedido | Matriz cerrada, mismo estado idempotente y entregado/cancelado terminales. | RESUELTA — DLOG 0020 |
+| TAPI-07 | Direcciones e imágenes | API-043 a API-050; ownership por sesión, carga prefirmada, confirmación verificada y desactivación lógica. | RESUELTA — DLOG 0019 |
+| TAPI-08 | Error 402 de API-017 | Se retira 402; API-017 solo crea/reutiliza sesión y usa 409/502/503 según el fallo. | RESUELTA — DLOG 0020 |
+| TAPI-09 | Proyecciones DTO | Schemas cerrados, límites comunes, proyecciones públicas/propias/admin y mapeo 50/50. | RESUELTA — DLOG 0020 |
 
 ## Resolución de TAPI-07
 
-La brecha queda resuelta funcionalmente mediante DLOG 0019 e INF-08 v2.4:
+La brecha queda resuelta funcionalmente mediante DLOG 0019 e INF-08 v2.5:
 
 - API-043 a API-046 crean, consultan, actualizan y desactivan lógicamente Direcciones propias de Comprador o Bodega.
 - API-047 y API-048 implementan carga directa prefirmada y confirmación verificada de Imágenes sin transferir binarios por el backend.
@@ -173,14 +173,125 @@ El token de confirmación firmado contiene actor/bodega, `vino_id`, `upload_id`,
 
 Las promociones de Dirección o Imagen principal se ejecutan en transacción con bloqueo de las filas activas del propietario o vino. La Dirección principal es única por propietario, no por uso. La Imagen principal es única por vino. Las desactivaciones repetidas de recursos propios ya inactivos devuelven 204 sin nuevo efecto.
 
-La solución no añade una capacidad de negocio nueva: hace implementables requisitos de Dirección e Imagen ya presentes en INF-05/INF-06, API-016 y API-025. La generación del OpenAPI sigue condicionada al cierre de TAPI-01 a TAPI-06 y TAPI-08 a TAPI-09 y a la aprobación de INF-08 v2.4.
+La solución no añade una capacidad de negocio nueva: hace implementables requisitos de Dirección e Imagen ya presentes en INF-05/INF-06, API-016 y API-025. La generación del OpenAPI sigue condicionada al cierre de TAPI-01 a TAPI-06 y TAPI-08 a TAPI-09 y a la aprobación de INF-08 v2.5.
+
+## Cierre técnico TAPI-01 a TAPI-06 y TAPI-08 a TAPI-09
+
+### TAPI-01 — Sesión opaca
+
+- OpenAPI: `type: http`, `scheme: bearer`; se omite `bearerFormat`.
+- Token de 256 bits aleatorios, base64url sin padding, 43 caracteres. Nunca contiene claims ni se persiste en claro.
+- TTL absoluto 28.800 segundos; sin refresh ni expiración deslizante. Tras expirar se usa API-002.
+- Redis conserva SHA-256 del token, `usuario_id`, `issued_at` y `expires_at` con el mismo TTL.
+- API-001/API-002 devuelven `AuthSession {access_token, token_type:"Bearer", expires_in:28800, expires_at, usuario}`.
+- Password reset, suspensión/bloqueo/eliminación o pérdida de asociación de bodega revocan sesiones.
+- 401 para token ausente, inválido, revocado o expirado con `WWW-Authenticate: Bearer`; 403 para sesión válida sin autorización.
+- `Authorization` nunca se registra ni se devuelve fuera de API-001/API-002.
+
+### TAPI-02 — Dinero
+
+- `MoneyAmount`: string `^(0|[1-9][0-9]{0,7})\.[0-9]{2}$`, de 0.00 a 99999999.99.
+- `PositiveMoneyAmount`: mismo formato y distinto de 0.00.
+- `CurrencyCode`: enum `EUR`; Stripe usa `eur` y el backend normaliza.
+- Importes nunca usan JSON number. Porcentajes usan string decimal 0.00–100.00 y no son Money.
+- El servidor calcula totales en Decimal o unidades menores enteras; el cliente no envía totales autoritativos.
+
+### TAPI-03 — Error común
+
+Errores con media type `application/problem+json` y schema cerrado:
+
+`Problem {type,title,status,detail,instance?,code,request_id,field_errors?,retryable}`.
+
+- Requeridos: `type`, `title`, `status`, `detail`, `code`, `request_id`, `retryable`.
+- `field_errors` contiene como máximo 50 objetos cerrados `{field,code,message}`.
+- Toda respuesta incluye `X-Request-Id` UUID; se conserva el del request si es UUID válido.
+- Códigos base: `VALIDATION_ERROR` 400; `AUTHENTICATION_REQUIRED`/`INVALID_CREDENTIALS` 401; `FORBIDDEN` 403; `RESOURCE_NOT_FOUND` 404; `CONFLICT`/`IDEMPOTENCY_KEY_REUSED`/`INVALID_STATE_TRANSITION`/`PAYMENT_NOT_READY` 409; `UNSUPPORTED_STRIPE_EVENT` 422; `UPSTREAM_ERROR` 502; `SERVICE_UNAVAILABLE` 503; `INTERNAL_ERROR` 500.
+- Nunca se exponen SQL, stack, credenciales, tokens, claves S3, hashes ni payload Stripe íntegro.
+
+### TAPI-04 — Paginación
+
+- Query: `page` integer mínimo 1, default 1; `page_size` integer 1–100, default 20.
+- `Page<T> {items,page,page_size,total_items,total_pages}`; página posterior a la última devuelve 200 e items vacío.
+- Orden por defecto `created_at DESC,id DESC`; incidencias `fecha DESC,id DESC`; catálogo `fecha_publicacion DESC,id DESC`.
+- Aplica a API-009, API-019, API-021, API-027, API-032, API-035, API-037 y API-040. API-044 y API-028 no son paginadas.
+- `q` tras trim admite 1–120 caracteres; no hay sort arbitrario ni cursor en el MVP.
+
+### TAPI-05 — Stripe
+
+Allowlist de API-029:
+
+| Evento | Condición | Efecto |
+|---|---|---|
+| `checkout.session.completed` | `payment_status=paid` | Confirma y ejecuta efecto comercial atómico. |
+| `checkout.session.completed` | no pagado | Registra el evento, mantiene Pago pendiente y espera resultado asíncrono. |
+| `checkout.session.async_payment_succeeded` | válida | Confirma y ejecuta efecto comercial atómico. |
+| `checkout.session.async_payment_failed` | válida | `pago.estado=fallido`; sin stock ni SubPedidos. |
+| `checkout.session.expired` | válida | `pago.estado=cancelado`; invalida sesión; sin stock ni SubPedidos. |
+
+- Cualquier otro tipo devuelve 422 sin mutación comercial.
+- Se verifica `Stripe-Signature` sobre body crudo con tolerancia máxima 300 s.
+- Deben coincidir `event.id`, livemode/entorno, Session ID, metadata `pedido_id`/`pago_id`, `currency=eur` y `amount_total` en céntimos.
+- Solo los dos casos de éxito congelan líneas/precios, aplican stock y crean SubPedidos.
+- El ledger por `stripe_event_id` hace idempotente el replay; no se admite `payment_intent.payment_failed`.
+
+### TAPI-06 — Matriz de SubPedido
+
+| Origen | Destinos permitidos |
+|---|---|
+| `pendiente` | `aceptado`, `cancelado`, `incidencia` |
+| `aceptado` | `en_preparacion`, `cancelado`, `incidencia` |
+| `en_preparacion` | `enviado`, `cancelado`, `incidencia` |
+| `incidencia` | `en_preparacion`, `cancelado` |
+| `enviado` | `entregado` |
+| `entregado` | ninguno; terminal |
+| `cancelado` | ninguno; terminal |
+
+Mismo estado devuelve 200 sin nueva mutación. Otro salto devuelve 409. API-023 bloquea Pedido y todos sus SubPedidos; cambio y recálculo DLOG 0018 son atómicos. Las incidencias posteriores al envío viven en la entidad Incidencia y no retroceden logística.
+
+### TAPI-08 — API-017
+
+- Request `{pedido_id:uuid}`.
+- 200 `CheckoutSession {pedido_id,checkout_url,session_expires_at,reused}`.
+- Reutiliza la sesión activa; si expiró, crea bajo bloqueo como máximo una sustituta.
+- Errores: 400 request; 401 sesión; 404 Pedido inexistente/ajeno; 409 Pedido no pendiente, total/moneda o relación incoherentes; 502 respuesta inválida de Stripe; 503 timeout/indisponibilidad.
+- No existe 402. El retorno del navegador no confirma y los resultados económicos entran por API-029.
+
+### TAPI-09 — DTO y límites
+
+Límites comunes: email 3–254; password input 12–128; nombre/apellidos 1–100; teléfono 1–32; URL máximo 2048; etiqueta 1–160; texto corto máximo 500; texto largo máximo 5000; arrays máximo 20 e ítem máximo 100; cantidad 1–999; stock 0–999999; año 1800–2100; idiomas `es|en|fr|de|it`. Strings se recortan salvo password; no se admite HTML.
+
+Todos los schemas usan `additionalProperties:false`. Se excluyen hashes, intentos, comisión interna, secretos/IDs Stripe privados, auditoría, documentación/verificación interna y owner IDs derivados.
+
+| Grupo API | DTO de éxito |
+|---|---|
+| 001–002 | `AuthSession`; usuario de sesión sin secretos |
+| 003–004 | `GenericRecoveryAck` / `GenericAck` |
+| 005–006, 031 | `BodegaSelf` |
+| 024, 035–036 | `BodegaAdmin` / `Page<BodegaAdminSummary>` |
+| 030 | `BodegaPublic` |
+| 007–008, 033–034 | `WineOwnDetail` |
+| 009–010 | `Page<WineSummary>` / `WinePublicDetail` |
+| 025–026, 032, 037–038 | proyección own/admin correspondiente |
+| 011–015 | `Cart` y resultado de fusión por línea cuando aplica |
+| 016–018 | `OrderPrepared`, `CheckoutSession`, `OrderConfirmation` |
+| 019–020, 027, 039 | `Page<OrderSummary>` / `OrderDetail` proyectado por rol |
+| 021–023 | `Page<SubOrderSummary>` / `SubOrderDetail` |
+| 028 | `Dashboard {ventas_dia,pedidos_pendientes}` |
+| 029 | `WebhookAck {event_id,status,pedido_id?,pago_estado?,pedido_estado?}` |
+| 040–042 | `Page<IncidentSummary>` / `IncidentDetail` |
+| 043–046 | `Address`, lista o 204; sin propietario IDs |
+| 047–050 | `UploadAuthorization`, `Image` o 204 |
+
+Requests mínimos: registro comprador conserva fecha de nacimiento y dos aceptaciones; registro bodega exige nombre comercial, razón social, CIF/VAT, email, password, persona de contacto, teléfono y aceptación; `WineWrite` exige nombre, precio positivo, EUR, stock y disponibilidad; publicación exige además stock positivo y una imagen confirmada/activa con alt. El catálogo admite `q,tipo_vino,region,denominacion_origen,precio_min,precio_max,page,page_size`.
+
+Proyecciones públicas nunca muestran stock exacto, comisiones, verificación, credenciales, Stripe, auditoría ni direcciones privadas. Proyecciones propias/admin solo añaden campos necesarios por operación. Los campos completos de cada schema se materializarán una sola vez en el YAML y este Markdown conservará la matriz normativa.
 
 ## Gate de aprobación
 
 INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
-1. TAPI-01 a TAPI-09 estén cerradas.
-2. INF-08 v2.4, CAP-07 v1.3 y CAP-08 v1.3 estén aprobados tras revisión binaria. **CUMPLIDO**.
+1. TAPI-01 a TAPI-09 estén cerradas. **CUMPLIDO EN BORRADOR; pendiente aprobación coordinada de DLOG 0020.**
+2. INF-08 v2.5 y CAP-08 v1.4 estén aprobados tras revisión binaria; CAP-07 v1.3 permanece vigente. **PENDIENTE.**
 3. El YAML sea válido y todos los `$ref` se resuelvan.
 4. Existan exactamente las operaciones autorizadas, sin duplicados.
 5. Cada operación tenga seguridad, parámetros, request, éxito, errores, ejemplos y trazabilidad.
@@ -190,4 +301,4 @@ INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
 ## Estado
 
-INF-10 v1.0 queda **EN REVISIÓN**. La matriz de 50 operaciones está fijada y TAPI-07 queda resuelta por DLOG 0019. La generación del OpenAPI continúa bloqueada únicamente por las restantes decisiones TAPI pendientes.
+INF-10 v1.0 queda **EN REVISIÓN** con TAPI-01 a TAPI-09 cerradas documentalmente y 50 operaciones fijadas. Antes de generar el OpenAPI deben aprobarse CAP-08 v1.4 e INF-08 v2.5 mediante dictamen binario; después se generará y validará el YAML contra este contrato.
