@@ -13,7 +13,7 @@
 | Versión | Fecha | Autor | Estado | Descripción |
 |---|---|---|---|---|
 | 1.0 | 09/07/2026 | Arquitecto de Producto Teralya | INCOMPLETA | Archivo sin desarrollo de los criterios declarados. |
-| 1.1 | 11/07/2026 | Agente de Producto Teralya | EN REVISIÓN | Reconstrucción desde CAP-07 v1.2 y fuentes funcionales vigentes. |
+| 1.1 | 11/07/2026 | Agente de Producto Teralya | EN REVISIÓN | Reconstrucción desde CAP-07 v1.1 y fuentes funcionales vigentes. |
 | 1.2 | 13/07/2026 | CTO + Agente de Producto | EN REVISIÓN | Alineación con CAP-02 v1.2, CAP-07 v1.2, INF-08 v2.3, ADR-001 y DLOG 0010/0014–0016. |
 
 ## OBJETIVO Y MÉTODO
@@ -24,7 +24,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 ### HU-001 — Registro de comprador
 
-**CA-001.1 — Registro válido:** DADO un visitante sin cuenta con el mismo email, mayor de la edad mínima y con todos los datos y aceptaciones obligatorias, CUANDO envía el registro, ENTONCES el sistema crea su cuenta de comprador, inicia una sesión válida y permite continuar hacia Mi Cuenta o checkout.
+**CA-001.1 — Registro válido:** DADO un visitante con email no registrado, mayor de la edad mínima y con todos los datos y aceptaciones obligatorias, CUANDO envía el registro, ENTONCES el sistema crea su cuenta de comprador, inicia una sesión válida y permite continuar hacia Mi Cuenta o checkout.
 
 **CA-001.2 — Edad o aceptación inválida:** DADO un visitante que no cumple la edad mínima o no acepta expresamente la declaración de mayoría de edad o las condiciones de compra de alcohol, CUANDO intenta registrarse, ENTONCES el sistema no crea la cuenta ni persiste datos de carrito.
 
@@ -32,9 +32,9 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-001.4 — Acreditaciones:** DADO un registro completado correctamente, CUANDO se crea la cuenta, ENTONCES quedan asociados fecha de nacimiento, confirmación de mayoría de edad, aceptación, fecha/hora y versión de las condiciones de alcohol aceptadas.
 
-**CA-001.5 — Fusión tras registro:** DADO un carrito local con líneas válidas e inválidas, CUANDO finaliza el registro, ENTONCES el sistema fusiona de forma idempotente las líneas válidas con el único carrito persistente activo, conserva una línea por vino, revalida precio/publicación/disponibilidad/cantidad, informa las descartadas y no crea carrito persistente anónimo.
+**CA-001.5 — Fusión tras registro:** DADO un carrito local identificado por `fusion_id`, CUANDO finaliza el registro, ENTONCES API-011 combina por vino `min(stock, cantidad_persistente + cantidad_local)`, conserva una sola línea, informa líneas descartadas/limitadas y el reintento con el mismo contenido devuelve el mismo resultado sin volver a sumar.
 
-**Trazabilidad:** CAP-07 v1.2 HU-001 · CU-001 · ADR-001 · DLOG 0010 · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-001 · CU-001 · ADR-001 · DLOG 0010/0017 · INF-08 v2.3 API-001/API-011.
 
 ### HU-002 — Inicio de sesión de comprador
 
@@ -42,11 +42,11 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-002.2 — Acceso inválido:** DADO credenciales incorrectas o una cuenta inactiva, CUANDO se intenta iniciar sesión, ENTONCES el sistema deniega el acceso, no muestra recursos privados y no modifica carritos.
 
-**CA-002.3 — Fusión local:** DADO un comprador que inicia sesión con carrito local, CUANDO la autenticación concluye, ENTONCES las líneas válidas se fusionan de forma idempotente con su único carrito persistente activo, sin duplicar vinos; las inválidas se descartan e informan tras revalidar precio, publicación, disponibilidad y cantidad.
+**CA-002.3 — Fusión local:** DADO un comprador que inicia sesión con carrito local identificado por `fusion_id`, CUANDO la autenticación concluye, ENTONCES API-011 combina cada coincidencia como `min(stock, cantidad_persistente + cantidad_local)`, conserva una línea por vino e informa descartes/límites.
 
-**CA-002.4 — Sin carrito local:** DADO un comprador que inicia sesión sin carrito local, CUANDO la autenticación concluye, ENTONCES conserva sin cambios su carrito persistente existente.
+**CA-002.4 — Idempotencia o ausencia:** DADO el mismo `fusion_id` y contenido ya procesados, CUANDO se reintenta, ENTONCES devuelve el resultado registrado sin sumar otra vez; si no existe carrito local, el acceso no altera el persistente.
 
-**Trazabilidad:** CAP-07 v1.2 HU-002 · CU-002 · ADR-001 · DLOG 0010 · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-002 · CU-002 · ADR-001 · DLOG 0010/0017 · INF-08 v2.3 API-002/API-011.
 
 ### HU-003 — Recuperación de contraseña
 
@@ -100,33 +100,35 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-008.3 — Cambio de validez:** DADO una línea cuyo vino deja de cumplir publicación, disponibilidad, bodega validada o cantidad suficiente, CUANDO se revisa el carrito o se intenta avanzar, ENTONCES se identifica la línea inválida y se bloquea el checkout hasta eliminarla o corregirla.
 
-**CA-008.4 — Resultado de fusión:** DADO una fusión tras registro o inicio de sesión, CUANDO finaliza, ENTONCES existe como máximo una línea por vino en el único carrito persistente activo y el carrito local procesado no produce duplicados en reintentos.
+**CA-008.4 — Resultado de fusión:** DADO una fusión identificada, CUANDO se procesa, ENTONCES existe una línea por vino con cantidad `min(stock, persistente + local)`; el mismo `fusion_id` y contenido no producen un segundo incremento.
 
-**Trazabilidad:** CAP-07 v1.2 HU-008 · CU-008 · ADR-001 · API-012 a API-015 · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-008 · CU-008 · ADR-001 · DLOG 0010/0017 · INF-08 v2.3 API-011 a API-015.
 
 ### HU-009 — Checkout
 
-**CA-009.1 — Preparación válida:** DADO un comprador autenticado, carrito activo no vacío con líneas válidas y direcciones propias, activas y válidas habilitadas para envío y facturación —que pueden ser la misma si admite ambos usos—, CUANDO confirma datos y resumen, ENTONCES el sistema congela líneas/precios/direcciones, calcula el total y crea un Pedido en `pendiente_pago`.
+**CA-009.1 — Preparación válida:** DADO un comprador autenticado, carrito activo no vacío con líneas válidas y direcciones propias, activas y habilitadas para envío y facturación —que pueden coincidir si admiten ambos usos—, CUANDO confirma datos y resumen, ENTONCES el sistema calcula el total y crea un único Pedido `pendiente_pago` referenciando ambas direcciones, sin congelar aún los snapshots definitivos.
 
-**CA-009.2 — Checkout inválido:** DADO sesión ausente, carrito vacío o inactivo, línea inválida o dirección de envío/facturación inexistente, ajena, inactiva o no habilitada para su uso, CUANDO intenta preparar el pago, ENTONCES no crea Pedido ni sesión Stripe y devuelve el impedimento verificable.
+**CA-009.2 — Checkout inválido:** DADO sesión ausente, carrito vacío/inactivo, línea inválida o dirección de envío/facturación inexistente, ajena, inactiva o no habilitada para su uso, CUANDO intenta preparar el pago, ENTONCES no crea Pedido ni sesión Stripe y devuelve el impedimento verificable.
 
 **CA-009.3 — Idempotencia por carrito:** DADO que un carrito ya originó un Pedido `pendiente_pago`, CUANDO se reintenta el checkout con el mismo carrito, ENTONCES se devuelve el mismo Pedido y no se crea un segundo Pedido.
 
-**Trazabilidad:** CAP-07 v1.2 HU-009 · CU-009 · DLOG 0015/0016 · API-016 · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-009 · CU-009 · DLOG 0010/0016 · INF-08 v2.3 API-016.
 
 ### HU-010 — Pago del Pedido
 
-**CA-010.1 — Sesión única reutilizable:** DADO un Pedido `pendiente_pago` sin sesión Stripe activa, CUANDO se inicia el pago, ENTONCES se crea una sola sesión activa asociada; si ya existe una sesión activa, el reintento devuelve la misma URL sin crear otra sesión.
+**CA-010.1 — Sesión única activa:** DADO un Pedido `pendiente_pago` sin sesión Stripe activa, CUANDO se inicia el pago, ENTONCES se crea una sola sesión activa; si existe una activa, el reintento devuelve la misma URL.
 
-**CA-010.2 — Retorno no confirmatorio:** DADO cualquier retorno del navegador desde Stripe, CUANDO el comprador vuelve a Teralya, ENTONCES el retorno por sí solo no confirma el pago ni el Pedido.
+**CA-010.2 — Sustitución de sesión expirada:** DADO una sesión Stripe expirada o inválida, CUANDO se reintenta el pago, ENTONCES puede sustituirse, manteniendo como máximo una sesión activa por Pedido.
 
-**CA-010.3 — Confirmación autorizada:** DADO un webhook firmado, único, con pago aprobado e importe coincidente, CUANDO el sistema lo procesa, ENTONCES confirma económicamente mediante `pago.estado` y muestra la confirmación del Pedido.
+**CA-010.3 — Retorno no confirmatorio:** DADO cualquier retorno del navegador desde Stripe, CUANDO el comprador vuelve a Teralya, ENTONCES el retorno no confirma Pago ni Pedido.
 
-**CA-010.4 — Pago no aprobado:** DADO pago rechazado, cancelado, interrumpido, importe discrepante o confirmación no firmada, CUANDO se procesa el resultado, ENTONCES el Pedido no queda confirmado.
+**CA-010.4 — Confirmación autorizada:** DADO un webhook firmado, único, aprobado y con importe/moneda coincidentes, CUANDO API-029 lo procesa, ENTONCES actualiza `pago.estado` y deja la confirmación disponible para API-018.
 
-**CA-010.5 — Reintento sin duplicados:** DADO una solicitud o evento ya procesado, CUANDO se reenvía, ENTONCES devuelve el resultado existente y no duplica pago, confirmación, Pedido ni SubPedidos.
+**CA-010.5 — Pago no aprobado:** DADO pago rechazado/cancelado, firma inválida o importe discrepante, CUANDO se procesa, ENTONCES no se confirma ni se generan SubPedidos.
 
-**Trazabilidad:** CAP-07 v1.2 HU-010 · CU-010 · DLOG 0014/0016 · API-017/API-018 · INF-08 v2.3.
+**CA-010.6 — Reenvío exitoso:** DADO un `stripe_event_id` ya procesado con éxito, CUANDO se reenvía, ENTONCES devuelve el resultado registrado sin repetir efectos; un fallo transitorio anterior al éxito puede reintentarse.
+
+**Trazabilidad:** CAP-07 v1.2 HU-010 · CU-010 · DLOG 0014/0016 · INF-08 v2.3 API-017/API-018/API-029.
 
 ### HU-011 — Consulta de Pedidos
 
@@ -204,7 +206,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-019.3 — Sin edición global directa:** DADO una bodega autenticada, CUANDO intenta modificar directamente el estado global del Pedido, ENTONCES el sistema deniega la operación.
 
-**Trazabilidad:** CAP-07 v1.2 HU-019 · CU-019 · DLOG 0014 · API-023 · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-019 · CU-019 · DLOG 0005 · API-023 · INF-08 v2.3.
 
 ## ADMINISTRADOR
 
@@ -232,7 +234,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-022.2 — Vino no apto:** DADO un vino fuera de `pendiente_revision`, incompleto, con precio/disponibilidad inválidos, sin imagen o cuya bodega no está validada, CUANDO se revisa, ENTONCES no puede considerarse apto para publicación.
 
-**Trazabilidad:** CAP-07 v1.2 HU-022 · CU-022 · API-037 · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-022 · CU-022 · API-037/API-038 · INF-08 v2.3.
 
 ### HU-023 — Publicación de vino
 
@@ -274,43 +276,51 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-027.3 — Salto o reapertura:** DADO una transición que salta estados, retrocede o reabre una incidencia cerrada, CUANDO se intenta guardar, ENTONCES se rechaza sin mutación ni evento de cambio exitoso.
 
-**CA-027.4 — Asociación obligatoria:** DADO una incidencia sin asociación a Pedido, SubPedido, Bodega o Vino, CUANDO se intenta crear o consolidar, ENTONCES se rechaza por integridad.
+**CA-027.4 — Invariante de asociación:** DADO una incidencia existente, CUANDO se consulta o intenta actualizar, ENTONCES debe conservar al menos una asociación válida a Pedido, SubPedido, Bodega o Vino; si la relación está corrupta, la actualización se rechaza sin introducir una operación de creación.
 
-**Trazabilidad:** CAP-07 v1.2 HU-027 · CU-027 · DLOG 0015 · API-040/API-041/API-042 · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-027 · CU-027 · DLOG 0015 · INF-08 v2.3 API-040/API-041/API-042.
 
 ## SISTEMA
 
 ### HU-028 — Confirmación de Pedido tras el pago
 
-**CA-028.1 — Confirmación válida:** DADO un Pedido `pendiente_pago` y un evento Stripe firmado, único, aprobado y con importe coincidente, CUANDO se procesa, ENTONCES se actualiza `pago.estado` como única fuente económica, se confirma el flujo del Pedido y se habilita la generación atómica de SubPedidos.
+**CA-028.1 — Confirmación válida:** DADO un Pedido `pendiente_pago` y un evento Stripe firmado, único, aprobado y con importe/moneda coincidentes, CUANDO API-029 lo procesa, ENTONCES actualiza `pago.estado` como única fuente económica, congela snapshots y genera atómicamente los SubPedidos.
 
-**CA-028.2 — Confirmación inválida:** DADO firma inválida, evento repetido no previamente exitoso, pago no aprobado, importe discrepante o Pedido inexistente, CUANDO se procesa, ENTONCES no se confirma económicamente ni se generan SubPedidos.
+**CA-028.2 — Confirmación inválida:** DADO firma inválida, pago no aprobado, importe/moneda discrepante o Pedido/Pago inexistente, CUANDO se procesa, ENTONCES no se confirma económicamente ni se generan SubPedidos.
 
-**CA-028.3 — Idempotencia del evento:** DADO un identificador de evento Stripe ya procesado con éxito, CUANDO se reenvía, ENTONCES se devuelve el resultado existente sin segundo efecto sobre Pago, Pedido, stock o SubPedidos.
+**CA-028.3 — Idempotencia del evento:** DADO un `stripe_event_id` ya procesado con éxito, CUANDO se reenvía, ENTONCES devuelve el resultado registrado sin segundo efecto; si el procesamiento anterior falló transitoriamente antes de producir efecto, puede reintentarse hasta un único éxito.
 
-**CA-028.4 — Datos congelados:** DADO la primera confirmación válida, CUANDO finaliza, ENTONCES líneas, precios y direcciones congelados del Pedido permanecen inmutables frente a cambios posteriores del catálogo o perfil.
+**CA-028.4 — Datos congelados:** DADO la primera confirmación válida, CUANDO finaliza, ENTONCES líneas, precios y direcciones quedan congelados e inmutables frente a cambios posteriores del catálogo o perfil.
 
-**Trazabilidad:** CAP-07 v1.2 HU-028 · CU-028 · DLOG 0014/0016 · API-018 · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-028 · CU-028 · DLOG 0014/0016 · INF-08 v2.3 API-029/API-018.
 
 ### HU-029 — Generación de SubPedidos
 
-**CA-029.1 — División exacta:** DADO un Pedido confirmado con líneas de una o varias bodegas válidas, CUANDO se generan SubPedidos, ENTONCES existe exactamente un SubPedido por combinación Pedido–Bodega, cada uno contiene solo líneas de esa bodega y todos conservan el mismo Pedido/Pago origen.
+**CA-029.1 — División exacta:** DADO un Pedido confirmado con líneas de una o varias bodegas válidas, CUANDO API-029 genera SubPedidos, ENTONCES existe exactamente uno por Pedido–Bodega, contiene solo líneas de esa bodega y conserva el mismo Pedido/Pago origen.
 
-**CA-029.2 — Atomicidad:** DADO una línea sin vino/bodega válida o cualquier fallo durante la división, CUANDO se ejecuta, ENTONCES no queda una creación parcial de SubPedidos.
+**CA-029.2 — Atomicidad:** DADO una línea sin vino/bodega válida o cualquier fallo durante la división, CUANDO se ejecuta API-029, ENTONCES se revierte la transacción completa y no queda creación parcial.
 
-**CA-029.3 — Reintento:** DADO que los SubPedidos ya fueron generados, CUANDO se reintenta la operación o se reenvía el webhook, ENTONCES no se crea ningún duplicado y se devuelve el resultado existente.
+**CA-029.3 — Reintento:** DADO que los SubPedidos ya fueron generados por un evento exitoso, CUANDO se reenvía el mismo `stripe_event_id`, ENTONCES no se crea duplicado y se devuelve el resultado registrado.
 
-**Trazabilidad:** CAP-07 v1.2 HU-029 · CU-029 · DLOG 0016 · integridad única Pedido–Bodega · INF-08 v2.3.
+**Trazabilidad:** CAP-07 v1.2 HU-029 · CU-029 · DLOG 0016 · INF-08 v2.3 API-029.
 
 ### HU-030 — Recálculo del estado global
 
-**CA-030.1 — Fuente logística:** DADO una actualización válida de un SubPedido, CUANDO queda guardada, ENTONCES el sistema evalúa el conjunto completo de `subpedido.estado` y deriva el estado global del Pedido conforme a la regla de agregación vigente.
+**CA-030.1 — Pagado:** DADO que todos los SubPedidos están `pendiente`, CUANDO se recalcula, ENTONCES el Pedido queda `pagado`.
 
-**CA-030.2 — Sin escritura logística duplicada:** DADO una bodega o petición que intenta escribir directamente el estado global del Pedido, CUANDO se procesa, ENTONCES se rechaza y el valor global solo puede cambiar por recálculo derivado.
+**CA-030.2 — En preparación:** DADO que ninguno está enviado/entregado y al menos uno está `aceptado`, `en_preparacion` o `incidencia`, CUANDO se recalcula, ENTONCES queda `en_preparacion`.
 
-**CA-030.3 — Inconsistencia:** DADO transición inválida, SubPedido/Pedido inexistente o relación inconsistente, CUANDO se solicita actualizar, ENTONCES no se modifica `subpedido.estado` ni el estado global.
+**CA-030.3 — Parcialmente enviado:** DADO al menos un SubPedido `enviado` o `entregado` y otro `pendiente`, `aceptado`, `en_preparacion` o `incidencia`, CUANDO se recalcula, ENTONCES queda `parcialmente_enviado`.
 
-**Trazabilidad:** CAP-07 v1.2 HU-030 · CU-030 · DLOG 0014 · API-023 · INF-08 v2.3.
+**CA-030.4 — Enviado:** DADO que todos los no cancelados están `enviado` o `entregado` y al menos uno sigue `enviado`, CUANDO se recalcula, ENTONCES queda `enviado`.
+
+**CA-030.5 — Entregado:** DADO que todos los no cancelados están `entregado` y existe al menos uno no cancelado, CUANDO se recalcula, ENTONCES queda `entregado`.
+
+**CA-030.6 — Cancelado:** DADO que todos los SubPedidos están `cancelado`, CUANDO se recalcula, ENTONCES queda `cancelado`.
+
+**CA-030.7 — Protección:** DADO transición inválida, relación inconsistente o intento de escritura global directa por bodega, CUANDO se procesa, ENTONCES no cambia `subpedido.estado` ni `pedido.estado`. `pendiente_pago` y `devuelto` quedan fuera de esta matriz logística.
+
+**Trazabilidad:** CAP-07 v1.2 HU-030 · CU-030 · DLOG 0005/0018 · INF-08 v2.3 API-023.
 
 ### HU-031 — Control de acceso por rol
 
@@ -339,16 +349,16 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 | HU-001 a HU-011 | Comprador | 11 | 36 | CU-001 a CU-011 |
 | HU-012 a HU-019 | Bodega | 8 | 17 | CU-012 a CU-019 |
 | HU-020 a HU-027 | Administrador | 8 | 19 | CU-020 a CU-027 |
-| HU-028 a HU-032 | Sistema | 5 | 16 | CU-028 a CU-032 |
-| **Total** |  | **32** | **88** | **CU-001 a CU-032** |
+| HU-028 a HU-032 | Sistema | 5 | 20 | CU-028 a CU-032 |
+| **Total** |  | **32** | **93** | **CU-001 a CU-032** |
 
 ## OBSERVACIONES DE REVISIÓN
 
-1. Los 88 criterios cubren las 32 historias aprobadas sin forzar una relación de un único criterio por historia.
+1. Los 93 criterios cubren las 32 historias aprobadas sin forzar una relación de un único criterio por historia.
 2. La reconstrucción incorpora carrito visitante local y fusión, idempotencia de checkout/Stripe, fuentes de verdad económicas y logísticas, publicación controlada, incidencias e integridad de SubPedidos.
 3. No se añaden rendimiento, diseño visual, analítica avanzada, logística avanzada, facturación avanzada ni funciones excluidas del MVP.
 4. La aprobación requiere trazabilidad coherente con CAP-02 v1.2, CAP-07 v1.2, INF-08 v2.3, ADR-001 y DLOG 0010/0014–0016.
 
 ## CIERRE
 
-CAP-08 v1.2 queda completo en estado **EN REVISIÓN**, con 88 criterios verificables para HU-001 a HU-032 y trazabilidad hacia las fuentes oficiales vigentes.
+CAP-08 v1.2 queda completo en estado **EN REVISIÓN**, con 93 criterios verificables para HU-001 a HU-032 y trazabilidad hacia las fuentes oficiales vigentes.
