@@ -290,7 +290,7 @@ Proyecciones públicas nunca muestran stock exacto, comisiones, verificación, c
 
 INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
-1. TAPI-01 a TAPI-09 estén cerradas. **CUMPLIDO EN BORRADOR; pendiente aprobación coordinada de DLOG 0020.**
+1. TAPI-01 a TAPI-09 estén cerradas. **CUMPLIDO por DLOG 0019/0020.**
 2. INF-08 v2.5 y CAP-08 v1.4 estén aprobados tras revisión binaria; CAP-07 v1.3 permanece vigente. **PENDIENTE.**
 3. El YAML sea válido y todos los `$ref` se resuelvan.
 4. Existan exactamente las operaciones autorizadas, sin duplicados.
