@@ -14,7 +14,7 @@
 
 | Versión | Fecha | Autor | Estado | Descripción |
 |---|---|---|---|---|
-| 1.0 | 13/07/2026 | CTO + preparación técnica | EN REVISIÓN | Define gobernanza, invariantes, decisiones pendientes y matriz exacta para generar el contrato OpenAPI implementable. |
+| 1.0 | 13/07/2026 | CTO + preparación técnica | EN REVISIÓN | Define gobernanza, invariantes, cierre TAPI-01→09 y matriz exacta; YAML OpenAPI todavía pendiente de generación y validación. |
 
 ## Objetivo
 
