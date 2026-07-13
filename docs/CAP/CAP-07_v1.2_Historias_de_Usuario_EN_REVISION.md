@@ -6,7 +6,7 @@
 - **Versión:** 1.2
 - **Estado:** EN REVISIÓN
 - **Fecha:** 13/07/2026
-- **Autor:** Agente de Producto Teralya
+- **Autor:** CTO Teralya
 
 ## CONTROL DE VERSIONES
 
@@ -72,15 +72,15 @@ Todas las historias tienen prioridad **MVP — Obligatoria**, porque derivan de 
 
 ### HU-007 — Añadir vino al carrito
 
-- **Actor:** Comprador
-- **Historia:** Como comprador, quiero añadir al carrito una cantidad válida de un vino publicado y disponible, para incorporarlo a mi compra.
+- **Actor:** Visitante / Comprador
+- **Historia:** Como visitante o comprador, quiero añadir una cantidad válida de un vino publicado y disponible al carrito local o persistente que corresponda, para incorporarlo a mi futura compra.
 - **Prioridad:** MVP — Obligatoria
 - **Trazabilidad:** CAP-03 Módulo 11 · CAP-04 FL-COM-008 · CAP-05 PT-PUB-002, PT-PUB-003, PT-PUB-004 y PT-COM-002 · CAP-06 CU-007.
 
 ### HU-008 — Gestión del carrito
 
-- **Actor:** Comprador
-- **Historia:** Como comprador, quiero revisar, modificar cantidades o eliminar vinos del carrito, para preparar correctamente la compra antes del checkout.
+- **Actor:** Visitante / Comprador
+- **Historia:** Como visitante o comprador, quiero revisar, modificar cantidades o eliminar vinos del carrito local o persistente, para preparar correctamente la compra antes de autenticarme y completar el checkout.
 - **Prioridad:** MVP — Obligatoria
 - **Trazabilidad:** CAP-03 Módulo 11 · CAP-04 FL-COM-009 · CAP-05 PT-COM-002 y PT-COM-003 · CAP-06 CU-008.
 
@@ -267,6 +267,12 @@ Todas las historias tienen prioridad **MVP — Obligatoria**, porque derivan de 
 | HU-020 a HU-027 | Administrador | CU-020 a CU-027 | 8 |
 | HU-028 a HU-032 | Sistema | CU-028 a CU-032 | 5 |
 | **Total** |  | **CU-001 a CU-032** | **32** |
+
+## REGLAS TRANSVERSALES
+
+- Conforme a ADR-001 y Decisión 0010, el visitante gestiona un carrito local; al registrarse o iniciar sesión se fusiona con el carrito persistente del Comprador. Checkout siempre exige autenticación.
+- `pago.estado` es la única fuente económica persistente y `subpedido.estado` la fuente logística.
+- Estas reglas actualizan las historias relacionadas sin crear nuevos CU ni nuevas HU.
 
 ## OBSERVACIONES DE REVISIÓN
 
