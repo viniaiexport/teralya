@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 3.9 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 4.0 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -19,7 +19,7 @@
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias | Sustituye a |
 |---|---|---|---|---|---|---|
-| INF-05 | Esquema de Base de Datos | 1.3 | 🟡 EN REVISIÓN | docs/INF/teralya_schema_v1.3_EN_REVISION.sql | CAP-01, CAP-02, INF-08 v2.2, DLOG 0014–0016 | v1.2 en revisión |
+| INF-05 | Esquema de Base de Datos | 1.3 | ✅ APROBADO POR CTO | docs/INF/teralya_schema_v1.3_APROBADO.sql | CAP-01, CAP-02, INF-08 v2.2, DLOG 0014–0016 | v1.2 en revisión |
 | INF-06 | Diccionario de Datos | 1.1 | 🟡 EN REVISIÓN | docs/INF/INF-06_v1.1_Diccionario_de_Datos.md | INF-05 v1.2 | v1.0 aprobada |
 | INF-07 | Arquitectura Técnica Consolidada | 1.3 | ✅ APROBADO POR CTO | docs/INF/INF-07_v1.3_Arquitectura_Tecnica_Consolidada.md | INF-05, INF-06, ADR-002, ADR-003, ADR-004 | v1.2 |
 | INF-08 | Especificación de APIs | 2.2 | ✅ APROBADO POR CTO | docs/INF/INF-08_v2.2_Especificacion_de_APIs.md | CAP-05, CAP-06, CAP-07, INF-05, INF-06, ADR-002 | v2.1 |
@@ -61,6 +61,7 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 | `docs/INF/INF-07_v1.2_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.3; contenía topología histórica de dos frontends incompatible con ADR-004 |
 | `docs/INF/teralya_schema_v1.1_APROBADO.sql` | Sustituido por INF-05 v1.2 en revisión |
 | `docs/INF/teralya_schema_v1.2_EN_REVISION.sql` | Sustituido por INF-05 v1.3 en revisión |
+| `docs/INF/teralya_schema_v1.3_EN_REVISION.sql` | Sustituido por INF-05 v1.3 aprobada |
 | `docs/INF/INF-06_Diccionario_de_Datos.md` | Sustituido por INF-06 v1.1 en revisión |
 | `docs/CAP/CAP-02-Modelo-de-Datos.pdf` | Sustituido por CAP-02 v1.1 |
 | `docs/CAP/CAP-07-Historias-de-Usuario.md` | Sustituido por CAP-07 v1.1 |
@@ -80,16 +81,16 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - Las 13 brechas de cobertura de INF-08 v2.1 quedan cerradas.
 - La trazabilidad de CU-001 a CU-032 y de las 36 pantallas queda documentada; CU-031 y CU-032 son reglas transversales del contrato.
 - INF-09 §19 actualizado para referenciar INF-08 v2.2 aprobada.
-- INF-05 v1.3 creado con decisiones 0014–0016, 18 tablas e integridad reforzada.
+- INF-05 v1.3 aprobado con decisiones 0014–0016, 18 tablas e integridad reforzada.
 
 ### Documento actualmente en desarrollo
 
-**INF-05 v1.3 — Esquema de Base de Datos** — creado y pendiente de auditoría final del CTO.
+**INF-06 v1.2 — Diccionario de Datos** — siguiente documento; debe alinearse campo por campo con INF-05 v1.3.
 
 ### Bloqueos abiertos
 
-- INF-05 v1.3 sigue EN REVISIÓN hasta superar auditoría final; INF-06 v1.1 debe actualizarse después a la nueva estructura.
-- No debe iniciarse persistencia ni migraciones definitivas hasta aprobar INF-05 v1.3.
+- INF-06 v1.1 está desactualizado respecto a INF-05 v1.3 y debe reconstruirse como v1.2.
+- La persistencia y las migraciones definitivas permanecen bloqueadas hasta aprobar INF-06 v1.2.
 - CAP-02 v1.1 sigue EN REVISIÓN y debe cerrarse de forma coherente con INF-05 e INF-06.
 - CAP-07 v1.1 y CAP-08 v1.1 siguen EN REVISIÓN y requieren cierre funcional independiente.
 - No quedan bloqueos abiertos de cobertura en INF-08 ni de arquitectura Frontend.
