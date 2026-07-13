@@ -306,7 +306,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 ### HU-030 — Recálculo del estado global
 
-**CA-030.1 — Pagado:** DADO que todos los SubPedidos están `pendiente`, CUANDO se recalcula, ENTONCES el Pedido queda `pagado`.
+**CA-030.1 — Pagado:** DADO que todos los SubPedidos no cancelados están `pendiente` y existe al menos uno no cancelado, CUANDO se recalcula, ENTONCES el Pedido queda `pagado`.
 
 **CA-030.2 — En preparación:** DADO que ninguno está enviado/entregado y al menos uno está `aceptado`, `en_preparacion` o `incidencia`, CUANDO se recalcula, ENTONCES queda `en_preparacion`.
 
