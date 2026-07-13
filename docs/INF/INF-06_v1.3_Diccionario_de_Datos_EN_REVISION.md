@@ -448,19 +448,19 @@ Actualización 1:1 sobre INF-05 v1.4 en revisión. Documenta 19 tablas, tipos ex
 
 **Claves foráneas.**
 - `comprador_id` → `comprador.usuario_id`
-- `carrito_id` → `carrito.id`
+- (`carrito_id`, `comprador_id`) → `carrito.(id, comprador_id)` mediante `fk_carrito_fusion_carrito_comprador`; garantiza que el carrito pertenece al mismo comprador.
 
 **Restricciones de unicidad.**
 - `uq_carrito_fusion_comprador`: (`comprador_id`, `fusion_id`) única.
 
 **Restricciones (CHECK).**
-- `chk_carrito_fusion_payload_hash`: la huella no puede estar vacía.
-- `chk_carrito_fusion_resultado_objeto`: `resultado` debe ser un objeto JSON.
+- `chk_carrito_fusion_payload_hash`: SHA-256 hexadecimal en minúsculas, exactamente 64 caracteres.
+- `chk_carrito_fusion_resultado_objeto`: objeto JSON versionado (`version = 1`) con objeto `carrito` y array `lineas`.
 
 **Índices.**
 - `idx_carrito_fusion_carrito_id`: (`carrito_id`).
 
-**Reglas de negocio asociadas.** La fusión y el alta del ledger se confirman en la misma transacción. Repetir comprador, `fusion_id` y hash devuelve `resultado` sin volver a sumar; un hash distinto con la misma clave se rechaza. El registro no admite UPDATE ni DELETE.
+**Reglas de negocio asociadas.** El servidor calcula `payload_hash` como SHA-256 hexadecimal sobre JSON canónico: líneas ordenadas por `vino_id`, una entrada por vino y cantidades enteras normalizadas. La transacción bloquea la fila del carrito y sus líneas afectadas antes de leer, calcular, escribir y registrar el ledger, evitando pérdida de actualización entre `fusion_id` distintos. Repetir comprador, `fusion_id` y hash devuelve `resultado` sin volver a sumar; un hash distinto con la misma clave se rechaza. El registro no admite UPDATE ni DELETE.
 
 ---
 
@@ -981,12 +981,84 @@ Total normativo: **14 funciones y 30 triggers**.
 | `carrito` | `chk_carrito_contadores` | `CONSTRAINT chk_carrito_contadores CHECK (num_productos >= 0 AND num_botellas >= 0)` |
 | `carrito` | `chk_carrito_importes` | `CONSTRAINT chk_carrito_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND descuentos >= 0 AND total >= 0 )` |
 | `carrito` | `chk_carrito_total` | `CONSTRAINT chk_carrito_total CHECK (total = subtotal + gastos_envio - descuentos)` |
+| `carrito` | `uq_carrito_id_comprador` | `CONSTRAINT uq_carrito_id_comprador UNIQUE (id, comprador_id)` |
 | `carrito_item` | `chk_cantidad_minima` | `CONSTRAINT chk_cantidad_minima CHECK (cantidad >= 1)` |
 | `carrito_item` | `chk_carrito_item_importes` | `CONSTRAINT chk_carrito_item_importes CHECK ( precio_unitario >= 0 AND importe_total >= 0 AND importe_total = precio_unitario * cantidad )` |
 | `carrito_item` | `uq_carrito_vino` | `CONSTRAINT uq_carrito_vino UNIQUE (carrito_id, vino_id)` |
+| `carrito_fusion` | `fk_carrito_fusion_carrito_comprador` | `CONSTRAINT fk_carrito_fusion_carrito_comprador FOREIGN KEY (carrito_id, comprador_id) REFERENCES carrito(id, comprador_id)` |
 | `carrito_fusion` | `uq_carrito_fusion_comprador` | `CONSTRAINT uq_carrito_fusion_comprador UNIQUE (comprador_id, fusion_id)` |
-| `carrito_fusion` | `chk_carrito_fusion_payload_hash` | `CONSTRAINT chk_carrito_fusion_payload_hash CHECK (btrim(payload_hash) <> '')` |
-| `carrito_fusion` | `chk_carrito_fusion_resultado_objeto` | `CONSTRAINT chk_carrito_fusion_resultado_objeto CHECK (jsonb_typeof(resultado) = 'object')` |
+| `carrito_fusion` | `chk_carrito_fusion_payload_hash` | `CONSTRAINT chk_carrito_fusion_payload_hash CHECK (payload_hash ~ '^[0-9a-f]{64}
+| `pedido` | `chk_pedido_importes` | `CONSTRAINT chk_pedido_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND descuentos >= 0 AND total >= 0 )` |
+| `pedido` | `chk_pedido_total` | `CONSTRAINT chk_pedido_total CHECK (total = subtotal + gastos_envio + impuestos - descuentos)` |
+| `pago` | `uq_pago_id_pedido` | `CONSTRAINT uq_pago_id_pedido UNIQUE (id, pedido_id)` |
+| `pago` | `chk_pago_importes` | `CONSTRAINT chk_pago_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND comision_marketplace >= 0 AND total_cobrado >= 0 AND total_repartido >= 0 AND total_reembolsado >= 0 )` |
+| `pago` | `chk_reparto_no_supera_cobrado` | `CONSTRAINT chk_reparto_no_supera_cobrado CHECK (total_repartido <= total_cobrado)` |
+| `pago` | `chk_reembolso_no_supera_cobrado` | `CONSTRAINT chk_reembolso_no_supera_cobrado CHECK (total_reembolsado <= total_cobrado)` |
+| `pago` | `chk_checkout_session_coherente` | `CONSTRAINT chk_checkout_session_coherente CHECK ( stripe_checkout_session_id IS NULL OR stripe_checkout_expires_at IS NOT NULL )` |
+| `evento_webhook_stripe` | `chk_webhook_tipo_no_vacio` | `CONSTRAINT chk_webhook_tipo_no_vacio CHECK (btrim(tipo_evento) <> '')` |
+| `evento_webhook_stripe` | `chk_webhook_procesado` | `CONSTRAINT chk_webhook_procesado CHECK (procesado_at IS NULL OR procesado_at >= recibido_at)` |
+| `subpedido` | `fk_subpedido_pago_pedido` | `CONSTRAINT fk_subpedido_pago_pedido FOREIGN KEY (pago_id, pedido_id) REFERENCES pago(id, pedido_id)` |
+| `subpedido` | `uq_subpedido_pedido_bodega` | `CONSTRAINT uq_subpedido_pedido_bodega UNIQUE (pedido_id, bodega_id)` |
+| `subpedido` | `uq_subpedido_id_pedido_bodega` | `CONSTRAINT uq_subpedido_id_pedido_bodega UNIQUE (id, pedido_id, bodega_id)` |
+| `subpedido` | `chk_subpedido_importes` | `CONSTRAINT chk_subpedido_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND comision_marketplace >= 0 AND total >= 0 )` |
+| `pedido_item` | `fk_item_subpedido_pedido_bodega` | `CONSTRAINT fk_item_subpedido_pedido_bodega FOREIGN KEY (subpedido_id, pedido_id, bodega_id) REFERENCES subpedido(id, pedido_id, bodega_id)` |
+| `pedido_item` | `fk_item_vino_bodega` | `CONSTRAINT fk_item_vino_bodega FOREIGN KEY (vino_id, bodega_id) REFERENCES vino(id, bodega_id)` |
+| `pedido_item` | `chk_cantidad_positiva` | `CONSTRAINT chk_cantidad_positiva CHECK (cantidad > 0)` |
+| `pedido_item` | `chk_pedido_item_importes` | `CONSTRAINT chk_pedido_item_importes CHECK ( precio_unitario >= 0 AND importe_total >= 0 AND importe_total = precio_unitario * cantidad )` |
+| `incidencia` | `chk_incidencia_tipo_no_vacio` | `CONSTRAINT chk_incidencia_tipo_no_vacio CHECK (btrim(tipo) <> '')` |
+| `incidencia` | `chk_incidencia_descripcion_no_vacia` | `CONSTRAINT chk_incidencia_descripcion_no_vacia CHECK (btrim(descripcion) <> '')` |
+| `incidencia` | `chk_incidencia_relacion` | `CONSTRAINT chk_incidencia_relacion CHECK ( pedido_id IS NOT NULL OR subpedido_id IS NOT NULL OR bodega_id IS NOT NULL OR vino_id IS NOT NULL )` |
+
+## Catálogo literal de índices
+
+| Índice | Tabla | Definición normativa |
+|---|---|---|
+| `idx_usuario_bodega_id` | `usuario` | `CREATE INDEX idx_usuario_bodega_id ON usuario(bodega_id);` |
+| `idx_usuario_rol` | `usuario` | `CREATE INDEX idx_usuario_rol ON usuario(rol);` |
+| `idx_solicitud_recuperacion_usuario_id` | `solicitud_recuperacion_password` | `CREATE INDEX idx_solicitud_recuperacion_usuario_id ON solicitud_recuperacion_password(usuario_id);` |
+| `idx_solicitud_recuperacion_estado_expires` | `solicitud_recuperacion_password` | `CREATE INDEX idx_solicitud_recuperacion_estado_expires ON solicitud_recuperacion_password(estado, expires_at);` |
+| `idx_vino_bodega_id` | `vino` | `CREATE INDEX idx_vino_bodega_id ON vino(bodega_id);` |
+| `idx_vino_estado` | `vino` | `CREATE INDEX idx_vino_estado ON vino(estado);` |
+| `idx_imagen_entidad` | `imagen` | `CREATE INDEX idx_imagen_entidad ON imagen(tipo_entidad, entidad_id);` |
+| `uq_imagen_principal` | `imagen` | `CREATE UNIQUE INDEX uq_imagen_principal ON imagen(tipo_entidad, entidad_id) WHERE es_principal;` |
+| `idx_direccion_propietario` | `direccion` | `CREATE INDEX idx_direccion_propietario ON direccion(propietario_tipo, propietario_id);` |
+| `uq_direccion_principal` | `direccion` | `CREATE UNIQUE INDEX uq_direccion_principal ON direccion(propietario_tipo, propietario_id) WHERE es_principal;` |
+| `uq_carrito_activo_por_comprador` | `carrito` | `CREATE UNIQUE INDEX uq_carrito_activo_por_comprador ON carrito(comprador_id) WHERE estado = 'activo';` |
+| `idx_carrito_fusion_carrito_id` | `carrito_fusion` | `CREATE INDEX idx_carrito_fusion_carrito_id ON carrito_fusion(carrito_id);` |
+| `idx_pedido_comprador_id` | `pedido` | `CREATE INDEX idx_pedido_comprador_id ON pedido(comprador_id);` |
+| `idx_pedido_estado` | `pedido` | `CREATE INDEX idx_pedido_estado ON pedido(estado);` |
+| `idx_webhook_stripe_pago_id` | `evento_webhook_stripe` | `CREATE INDEX idx_webhook_stripe_pago_id ON evento_webhook_stripe(pago_id);` |
+| `idx_subpedido_pedido_id` | `subpedido` | `CREATE INDEX idx_subpedido_pedido_id ON subpedido(pedido_id);` |
+| `idx_subpedido_bodega_id` | `subpedido` | `CREATE INDEX idx_subpedido_bodega_id ON subpedido(bodega_id);` |
+| `idx_subpedido_pago_id` | `subpedido` | `CREATE INDEX idx_subpedido_pago_id ON subpedido(pago_id);` |
+| `idx_pedido_item_pedido_id` | `pedido_item` | `CREATE INDEX idx_pedido_item_pedido_id ON pedido_item(pedido_id);` |
+| `idx_pedido_item_subpedido_id` | `pedido_item` | `CREATE INDEX idx_pedido_item_subpedido_id ON pedido_item(subpedido_id);` |
+| `idx_incidencia_estado` | `incidencia` | `CREATE INDEX idx_incidencia_estado ON incidencia(estado);` |
+| `idx_incidencia_fecha` | `incidencia` | `CREATE INDEX idx_incidencia_fecha ON incidencia(fecha);` |
+| `idx_incidencia_pedido_id` | `incidencia` | `CREATE INDEX idx_incidencia_pedido_id ON incidencia(pedido_id) WHERE pedido_id IS NOT NULL;` |
+| `idx_incidencia_subpedido_id` | `incidencia` | `CREATE INDEX idx_incidencia_subpedido_id ON incidencia(subpedido_id) WHERE subpedido_id IS NOT NULL;` |
+| `idx_incidencia_bodega_id` | `incidencia` | `CREATE INDEX idx_incidencia_bodega_id ON incidencia(bodega_id) WHERE bodega_id IS NOT NULL;` |
+| `idx_incidencia_vino_id` | `incidencia` | `CREATE INDEX idx_incidencia_vino_id ON incidencia(vino_id) WHERE vino_id IS NOT NULL;` |
+| `idx_notificacion_usuario_id` | `notificacion` | `CREATE INDEX idx_notificacion_usuario_id ON notificacion(usuario_id);` |
+| `idx_auditoria_entidad` | `auditoria` | `CREATE INDEX idx_auditoria_entidad ON auditoria(tipo_entidad, entidad_id);` |
+| `idx_auditoria_usuario_id` | `auditoria` | `CREATE INDEX idx_auditoria_usuario_id ON auditoria(usuario_id);` |
+| `idx_auditoria_fecha` | `auditoria` | `CREATE INDEX idx_auditoria_fecha ON auditoria(fecha_hora);` |
+| `uq_usuario_email_normalizado` | `usuario` | `CREATE UNIQUE INDEX uq_usuario_email_normalizado ON usuario(lower(email));` |
+| `idx_carrito_comprador_id` | `carrito` | `CREATE INDEX idx_carrito_comprador_id ON carrito(comprador_id);` |
+| `idx_carrito_item_carrito_id` | `carrito_item` | `CREATE INDEX idx_carrito_item_carrito_id ON carrito_item(carrito_id);` |
+| `idx_carrito_item_vino_id` | `carrito_item` | `CREATE INDEX idx_carrito_item_vino_id ON carrito_item(vino_id);` |
+| `idx_pedido_item_vino_id` | `pedido_item` | `CREATE INDEX idx_pedido_item_vino_id ON pedido_item(vino_id);` |
+| `idx_pedido_item_bodega_id` | `pedido_item` | `CREATE INDEX idx_pedido_item_bodega_id ON pedido_item(bodega_id);` |
+| `idx_notificacion_pedido_id` | `notificacion` | `CREATE INDEX idx_notificacion_pedido_id ON notificacion(pedido_id) WHERE pedido_id IS NOT NULL;` |
+| `idx_notificacion_subpedido_id` | `notificacion` | `CREATE INDEX idx_notificacion_subpedido_id ON notificacion(subpedido_id) WHERE subpedido_id IS NOT NULL;` |
+| `idx_bodega_aprobada_por` | `bodega` | `CREATE INDEX idx_bodega_aprobada_por ON bodega(aprobada_por) WHERE aprobada_por IS NOT NULL;` |
+| `idx_bodega_updated_by` | `bodega` | `CREATE INDEX idx_bodega_updated_by ON bodega(updated_by) WHERE updated_by IS NOT NULL;` |
+| `idx_pedido_estado_created` | `pedido` | `CREATE INDEX idx_pedido_estado_created ON pedido(estado, created_at);` |
+| `idx_subpedido_bodega_estado` | `subpedido` | `CREATE INDEX idx_subpedido_bodega_estado ON subpedido(bodega_id, estado);` |
+| `idx_vino_bodega_estado` | `vino` | `CREATE INDEX idx_vino_bodega_estado ON vino(bodega_id, estado);` |
+| `idx_incidencia_estado_fecha` | `incidencia` | `CREATE INDEX idx_incidencia_estado_fecha ON incidencia(estado, fecha DESC);` |
+)` |
+| `carrito_fusion` | `chk_carrito_fusion_resultado_objeto` | `CONSTRAINT chk_carrito_fusion_resultado_objeto CHECK (jsonb_typeof(resultado) = 'object' AND resultado ->> 'version' = '1' AND jsonb_typeof(resultado -> 'carrito') = 'object' AND jsonb_typeof(resultado -> 'lineas') = 'array')` |
 | `pedido` | `chk_pedido_importes` | `CONSTRAINT chk_pedido_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND descuentos >= 0 AND total >= 0 )` |
 | `pedido` | `chk_pedido_total` | `CONSTRAINT chk_pedido_total CHECK (total = subtotal + gastos_envio + impuestos - descuentos)` |
 | `pago` | `uq_pago_id_pedido` | `CONSTRAINT uq_pago_id_pedido UNIQUE (id, pedido_id)` |
