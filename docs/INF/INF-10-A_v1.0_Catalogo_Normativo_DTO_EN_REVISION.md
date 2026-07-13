@@ -24,7 +24,7 @@ Este catálogo cierra TAPI-09. Cada schema es un objeto JSON con `additionalProp
 | DateTime | string, format date-time UTC |
 | Email | string, format email, 3..254, comparación case-insensitive |
 | Password | string WO, 12..128, no trim |
-| Token | string WO, 32..512 |
+| ConfirmationToken | string sensible, 32..4096; RO en UploadAuthorization y WO en ImageConfirmRequest |
 | Lang | enum es, en, fr, de, it |
 | URI | string, format uri, 1..2048 |
 | Text32 | string, 1..32 |
@@ -87,7 +87,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | BodegaPublic | `id:UUID`, `nombre_comercial:Text160`, `vinos:WineSummary[]` | `slug:Text160`, `logo_url:URI`, `imagen_principal_url:URI`, `historia:Text5000`, `filosofia:Text5000`, `region:Text160`, `pais:Text100`, `denominacion_origen:Text160`, `anio_fundacion:Year`, `web:URI`, `video_url:URI` | RO; solo vinos publicados/disponibles |
 | BodegaSelf | `id:UUID`, `nombre_comercial:Text160`, `estado:WineryState`, `created_at:DateTime`, `updated_at:DateTime` | todos los campos públicos salvo vinos; `razon_social:Text200`, `cif_vat:Text32`, `email_principal:Email`, `telefono:Text32`, `persona_contacto:Text100`, `direccion_fisica:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `provincia:Text100`, `pais_contacto:Text100` | RO |
 | BodegaAdminSummary | `id:UUID`, `nombre_comercial:Text160`, `estado:WineryState`, `created_at:DateTime` | `razon_social:Text200`, `cif_vat:Text32`, `pais_contacto:Text100` | RO |
-| BodegaAdmin | campos de BodegaSelf | `verificacion_estado:Text100`, `documentacion_recibida:Text5000`, `documentacion_pendiente:Text5000`, `fecha_aprobacion:DateTime`, `fecha_verificacion:DateTime` | RO; nunca comisión, credenciales ni auditoría |
+| BodegaAdmin | campos de BodegaSelf | `fecha_alta:DateTime`, `fecha_aprobacion:DateTime` | RO; nunca comisión, documentación/verificación interna, credenciales, IDs de aprobador ni auditoría |
 | PageBodegaAdminSummary | `items:BodegaAdminSummary[]` y campos PageMeta | — | RO |
 
 ## Vinos e imágenes
@@ -95,7 +95,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | Schema | Campos requeridos | Campos opcionales | Flags y reglas |
 |---|---|---|---|
 | WineCreateRequest | `nombre_comercial:Text160`, `precio:PositiveMoney`, `moneda:Currency`, `stock_disponible:Stock`, `disponible_venta:boolean` | `sku:Text100`, `tipo_vino:Text80`, `anada:Year`, `pais:Text100`, `region:Text160`, `denominacion_origen:Text160`, `variedades_uva:Text100[]`, `crianza:Text100`, `meses_crianza:integer(0..120)`, `graduacion_alcoholica:Percent`, `volumen_ml:integer(1..10000)`, `descripcion_corta:Text500`, `descripcion_completa:Text5000`, `nota_cata:Text5000`, `maridaje:Text5000`, `temperatura_servicio:Text100`, `certificaciones:Text100[]`, `premios:Text100[]`, `produccion_limitada:boolean`, `peso_gramos:integer(1..100000)`, `plazo_preparacion_dias:integer(0..365)`, `botellas_por_caja:integer(1..100)` | WO |
-| WinePatchRequest | al menos un campo | los mismos campos de WineCreateRequest | WO; no id, bodega_id, estado ni timestamps |
+| WineUpdateRequest | `nombre_comercial:Text160`, `precio:PositiveMoney`, `moneda:Currency`, `stock_disponible:Stock`, `disponible_venta:boolean` | los mismos opcionales de WineCreateRequest | WO; reemplazo PUT, sin id, bodega_id, estado ni timestamps |
 | WineSummary | `id:UUID`, `nombre_comercial:Text160`, `precio:Money`, `moneda:Currency`, `disponible_venta:boolean`, `bodega:BodegaSummary` | `slug:Text160`, `tipo_vino:Text80`, `anada:Year`, `region:Text160`, `denominacion_origen:Text160`, `imagen_principal:ImageSummary` | RO; sin stock exacto |
 | WinePublicDetail | campos de WineSummary, `imagenes:ImageSummary[]` | `pais:Text100`, `variedades_uva:Text100[]`, `crianza:Text100`, `meses_crianza:integer`, `graduacion_alcoholica:Percent`, `volumen_ml:integer`, `descripcion_corta:Text500`, `descripcion_completa:Text5000`, `nota_cata:Text5000`, `maridaje:Text5000`, `temperatura_servicio:Text100`, `certificaciones:Text100[]`, `premios:Text100[]`, `produccion_limitada:boolean` | RO; solo imágenes activas |
 | WineOwnSummary | `id:UUID`, `nombre_comercial:Text160`, `estado:WineState`, `stock_disponible:Stock`, `disponible_venta:boolean`, `updated_at:DateTime` | `sku:Text100`, `precio:Money`, `moneda:Currency`, `imagen_principal:ImageSummary` | RO |
@@ -109,8 +109,8 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | Image | campos de ImageSummary, `formato:enum(jpeg,png,webp)`, `activa:boolean`, `fecha_subida:DateTime`, `updated_at:DateTime` | `nombre_archivo:Text200`, `tamanio_bytes:integer(1..10485760)`, `resolucion:Text32` | RO; URL CDN, nunca storage key |
 | UploadRequest | `upload_id:UUID`, `nombre_archivo:Text200`, `content_type:enum(image/jpeg,image/png,image/webp)`, `tamanio_bytes:integer(1..10485760)`, `checksum_sha256:string(base64,44)` | — | WO |
 | RequiredUploadHeaders | `Content-Type:string`, `x-amz-checksum-sha256:string(base64,44)`, `If-None-Match:"*"` | — | RO |
-| UploadAuthorization | `upload_id:UUID`, `upload_url:URI`, `method:"PUT"`, `required_headers:RequiredUploadHeaders`, `confirmation_token:Token`, `upload_expires_at:DateTime`, `confirmation_expires_at:DateTime` | — | RO |
-| ImageConfirmRequest | `upload_id:UUID`, `confirmation_token:Token`, `alt_text:Text500` | `orden:integer(0..999)`, `es_principal:boolean` | WO |
+| UploadAuthorization | `upload_id:UUID`, `upload_url:URI`, `method:"PUT"`, `required_headers:RequiredUploadHeaders`, `confirmation_token:ConfirmationToken`, `upload_expires_at:DateTime`, `confirmation_expires_at:DateTime` | — | RO |
+| ImageConfirmRequest | `upload_id:UUID`, `confirmation_token:ConfirmationToken`, `alt_text:Text500` | `orden:integer(0..999)`, `es_principal:boolean` | WO |
 | ImagePatchRequest | al menos uno | `alt_text:Text500`, `orden:integer(0..999)`, `es_principal:boolean` | WO |
 
 Para API-034/API-025, vino completo significa: nombre, precio positivo, EUR, stock_disponible > 0, disponible_venta=true y al menos una Image activa con alt_text. No se vuelven obligatorios otros campos opcionales del modelo.
@@ -132,9 +132,9 @@ Para API-034/API-025, vino completo significa: nombre, precio positivo, EUR, sto
 
 | Schema | Campos requeridos | Campos opcionales | Flags y reglas |
 |---|---|---|---|
-| AddressCreateRequest | `destinatario:Text160`, `direccion:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `pais:Text100`, `es_envio:boolean`, `es_facturacion:boolean` | `nombre_identificativo:Text100`, `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email`, `es_principal:boolean` | WO; al menos uno de es_envio/es_facturacion true |
+| AddressCreateRequest | `uso:enum(envio,facturacion,ambos)`, `destinatario:Text160`, `direccion:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `pais:Text100` | `nombre_identificativo:Text100`, `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email`, `es_principal:boolean` | WO; uso se mapea internamente a es_envio/es_facturacion |
 | AddressPatchRequest | al menos uno | todos los campos de AddressCreateRequest | WO |
-| Address | campos de AddressCreateRequest, `id:UUID`, `es_principal:boolean`, `activa:boolean`, `created_at:DateTime`, `updated_at:DateTime` | los mismos opcionales salvo es_principal, que es requerido en respuesta | RO; nunca propietario_tipo/id |
+| Address | `id:UUID`, `uso:enum(envio,facturacion,ambos)`, `destinatario:Text160`, `direccion:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `pais:Text100`, `es_principal:boolean`, `activa:boolean`, `created_at:DateTime`, `updated_at:DateTime` | `nombre_identificativo:Text100`, `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email` | RO; nunca propietario_tipo/id |
 | AddressSnapshot | `destinatario:Text160`, `direccion:Text200`, `codigo_postal:string`, `ciudad:Text100`, `pais:Text100` | `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email` | RO; inmutable |
 
 ## Pedidos, pagos y SubPedidos
@@ -176,7 +176,7 @@ Para API-034/API-025, vino completo significa: nombre, precio positivo, EUR, sto
 |---|---|
 | CatalogQuery | `q?:string(1..120)`, `tipo_vino?:Text80`, `region?:Text160`, `denominacion_origen?:Text160`, `precio_min?:Money`, `precio_max?:Money`, `page:Page=1`, `page_size:PageSize=20` |
 | OwnWineQuery | `estado?:WineState`, `page:Page=1`, `page_size:PageSize=20` |
-| AdminWineryQuery | `estado:"pendiente_revision"`, `page:Page=1`, `page_size:PageSize=20` |
+| AdminWineryQuery | `estado:const(pendiente)`, `page:Page=1`, `page_size:PageSize=20`; el alias wire pendiente se mapea internamente a estado_bodega pendiente_revision |
 | AdminWineQuery | `estado:"pendiente_revision"`, `page:Page=1`, `page_size:PageSize=20` |
 | AdminIncidentQuery | `estado?:IncidentState`, `page:Page=1`, `page_size:PageSize=20` |
 | AddressQuery | `uso?:enum(envio,facturacion,ambos)` |
@@ -196,7 +196,7 @@ Todos los errores usan Problem. La columna errores enumera los status permitidos
 | 005 | BodegaRegistrationRequest | 201 BodegaSelf | 400,409,500 |
 | 006 | BodegaProfilePatch | 200 BodegaSelf | 400,401,403,409,500 |
 | 007 | WineCreateRequest | 201 WineOwnDetail | 400,401,403,409,500 |
-| 008 | ResourceIdPath + WinePatchRequest | 200 WineOwnDetail | 400,401,403,404,409,500 |
+| 008 | ResourceIdPath + WineUpdateRequest | 200 WineOwnDetail | 400,401,403,404,409,500 |
 | 009 | CatalogQuery | 200 PageWineSummary | 400,500 |
 | 010 | ResourceIdPath | 200 WinePublicDetail | 404,500 |
 | 011 | CartAddRequest oneOf CartMergeRequest | 200 CartMutationResponse | 400,401,404,409,500 |
