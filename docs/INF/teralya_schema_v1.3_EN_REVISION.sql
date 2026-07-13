@@ -582,6 +582,25 @@ CREATE TABLE pago (
 );
 
 -- ---------------------------------------------------------------------
+-- 12B. EVENTO_WEBHOOK_STRIPE
+-- Ledger técnico mínimo para garantizar la idempotencia de API-029.
+-- No añade funcionalidad de producto.
+-- ---------------------------------------------------------------------
+CREATE TABLE evento_webhook_stripe (
+    stripe_event_id TEXT PRIMARY KEY,
+    tipo_evento     TEXT NOT NULL,
+    pago_id         UUID REFERENCES pago(id),
+    recibido_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    procesado_at    TIMESTAMPTZ,
+    resultado       resultado_auditoria NOT NULL DEFAULT 'correcto',
+
+    CONSTRAINT chk_webhook_tipo_no_vacio CHECK (btrim(tipo_evento) <> ''),
+    CONSTRAINT chk_webhook_procesado CHECK (procesado_at IS NULL OR procesado_at >= recibido_at)
+);
+
+CREATE INDEX idx_webhook_stripe_pago_id ON evento_webhook_stripe(pago_id);
+
+-- ---------------------------------------------------------------------
 -- 12. SUBPEDIDO  (una fila por bodega dentro de un pedido)
 -- Objetivo: parte de un pedido correspondiente a una única bodega;
 --   permite que cada bodega gestione de forma independiente su
@@ -816,12 +835,12 @@ CREATE INDEX idx_vino_bodega_estado ON vino(bodega_id, estado);
 CREATE INDEX idx_incidencia_estado_fecha ON incidencia(estado, fecha DESC);
 
 CREATE OR REPLACE FUNCTION fn_actualizar_updated_at()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     NEW.updated_at := now();
     RETURN NEW;
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_bodega_updated_at BEFORE UPDATE ON bodega
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_updated_at();
@@ -854,8 +873,28 @@ FOR EACH ROW EXECUTE FUNCTION fn_actualizar_updated_at();
 CREATE TRIGGER trg_notificacion_updated_at BEFORE UPDATE ON notificacion
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_updated_at();
 
+CREATE OR REPLACE FUNCTION fn_proteger_coherencia_rol_usuario()
+RETURNS trigger LANGUAGE plpgsql AS $fn$
+BEGIN
+    IF OLD.rol = 'comprador' AND NEW.rol <> 'comprador'
+       AND EXISTS (SELECT 1 FROM comprador WHERE usuario_id = OLD.id) THEN
+        RAISE EXCEPTION 'No puede cambiarse el rol de un usuario vinculado a comprador';
+    END IF;
+    IF OLD.rol = 'administrador'
+       AND (NEW.rol <> 'administrador' OR NEW.estado <> 'activo')
+       AND EXISTS (SELECT 1 FROM bodega WHERE aprobada_por = OLD.id) THEN
+        RAISE EXCEPTION 'No puede retirarse el rol activo de un administrador que figura como aprobador';
+    END IF;
+    RETURN NEW;
+END;
+$fn$;
+
+CREATE TRIGGER trg_proteger_coherencia_rol_usuario
+BEFORE UPDATE OF rol, estado ON usuario
+FOR EACH ROW EXECUTE FUNCTION fn_proteger_coherencia_rol_usuario();
+
 CREATE OR REPLACE FUNCTION fn_validar_rol_comprador()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM usuario
@@ -865,14 +904,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_validar_rol_comprador
 BEFORE INSERT OR UPDATE OF usuario_id ON comprador
 FOR EACH ROW EXECUTE FUNCTION fn_validar_rol_comprador();
 
 CREATE OR REPLACE FUNCTION fn_validar_aprobador_bodega()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     IF NEW.aprobada_por IS NOT NULL AND NOT EXISTS (
         SELECT 1 FROM usuario
@@ -882,14 +921,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_validar_aprobador_bodega
 BEFORE INSERT OR UPDATE OF aprobada_por ON bodega
 FOR EACH ROW EXECUTE FUNCTION fn_validar_aprobador_bodega();
 
 CREATE OR REPLACE FUNCTION fn_validar_imagen_entidad()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     IF NEW.tipo_entidad = 'vino' AND NOT EXISTS (SELECT 1 FROM vino WHERE id = NEW.entidad_id) THEN
         RAISE EXCEPTION 'La imagen referencia un vino inexistente';
@@ -898,14 +937,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_validar_imagen_entidad
 BEFORE INSERT OR UPDATE OF tipo_entidad, entidad_id ON imagen
 FOR EACH ROW EXECUTE FUNCTION fn_validar_imagen_entidad();
 
 CREATE OR REPLACE FUNCTION fn_validar_direccion_propietario()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     IF NEW.propietario_tipo = 'comprador'
        AND NOT EXISTS (SELECT 1 FROM comprador WHERE usuario_id = NEW.propietario_id) THEN
@@ -916,14 +955,42 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_validar_direccion_propietario
 BEFORE INSERT OR UPDATE OF propietario_tipo, propietario_id ON direccion
 FOR EACH ROW EXECUTE FUNCTION fn_validar_direccion_propietario();
 
+CREATE OR REPLACE FUNCTION fn_proteger_referencias_polimorficas()
+RETURNS trigger LANGUAGE plpgsql AS $fn$
+BEGIN
+    IF TG_TABLE_NAME = 'bodega' THEN
+        IF EXISTS (SELECT 1 FROM imagen WHERE tipo_entidad = 'bodega' AND entidad_id = OLD.id)
+           OR EXISTS (SELECT 1 FROM direccion WHERE propietario_tipo = 'bodega' AND propietario_id = OLD.id) THEN
+            RAISE EXCEPTION 'No puede eliminarse una bodega con imágenes o direcciones asociadas';
+        END IF;
+    ELSIF TG_TABLE_NAME = 'vino' THEN
+        IF EXISTS (SELECT 1 FROM imagen WHERE tipo_entidad = 'vino' AND entidad_id = OLD.id) THEN
+            RAISE EXCEPTION 'No puede eliminarse un vino con imágenes asociadas';
+        END IF;
+    ELSIF TG_TABLE_NAME = 'comprador' THEN
+        IF EXISTS (SELECT 1 FROM direccion WHERE propietario_tipo = 'comprador' AND propietario_id = OLD.usuario_id) THEN
+            RAISE EXCEPTION 'No puede eliminarse un comprador con direcciones asociadas';
+        END IF;
+    END IF;
+    RETURN OLD;
+END;
+$fn$;
+
+CREATE TRIGGER trg_proteger_refs_bodega BEFORE DELETE ON bodega
+FOR EACH ROW EXECUTE FUNCTION fn_proteger_referencias_polimorficas();
+CREATE TRIGGER trg_proteger_refs_vino BEFORE DELETE ON vino
+FOR EACH ROW EXECUTE FUNCTION fn_proteger_referencias_polimorficas();
+CREATE TRIGGER trg_proteger_refs_comprador BEFORE DELETE ON comprador
+FOR EACH ROW EXECUTE FUNCTION fn_proteger_referencias_polimorficas();
+
 CREATE OR REPLACE FUNCTION fn_validar_direcciones_pedido()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM direccion
@@ -945,14 +1012,34 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_validar_direcciones_pedido
 BEFORE INSERT OR UPDATE OF comprador_id, direccion_envio_id, direccion_facturacion_id ON pedido
 FOR EACH ROW EXECUTE FUNCTION fn_validar_direcciones_pedido();
 
+CREATE OR REPLACE FUNCTION fn_validar_importe_pago_pedido()
+RETURNS trigger LANGUAGE plpgsql AS $fn$
+DECLARE
+    total_pedido NUMERIC(10,2);
+BEGIN
+    SELECT total INTO total_pedido FROM pedido WHERE id = NEW.pedido_id;
+    IF total_pedido IS NULL THEN
+        RAISE EXCEPTION 'El Pedido asociado al Pago no existe';
+    END IF;
+    IF NEW.total_cobrado <> total_pedido THEN
+        RAISE EXCEPTION 'El importe cobrado debe coincidir con el total del Pedido';
+    END IF;
+    RETURN NEW;
+END;
+$fn$;
+
+CREATE TRIGGER trg_validar_importe_pago_pedido
+BEFORE INSERT OR UPDATE OF pedido_id, total_cobrado ON pago
+FOR EACH ROW EXECUTE FUNCTION fn_validar_importe_pago_pedido();
+
 CREATE OR REPLACE FUNCTION fn_validar_transicion_incidencia()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     IF NEW.estado = OLD.estado THEN
         RETURN NEW;
@@ -966,14 +1053,14 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_validar_transicion_incidencia
 BEFORE UPDATE OF estado ON incidencia
 FOR EACH ROW EXECUTE FUNCTION fn_validar_transicion_incidencia();
 
 CREATE OR REPLACE FUNCTION fn_auditar_estado_incidencia()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     IF NEW.estado IS DISTINCT FROM OLD.estado THEN
         INSERT INTO auditoria (
@@ -989,18 +1076,18 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_auditar_estado_incidencia
 AFTER UPDATE OF estado ON incidencia
 FOR EACH ROW EXECUTE FUNCTION fn_auditar_estado_incidencia();
 
 CREATE OR REPLACE FUNCTION fn_proteger_auditoria()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $fn$
 BEGIN
     RAISE EXCEPTION 'Los registros de auditoría son inmutables';
 END;
-$;
+$fn$;
 
 CREATE TRIGGER trg_proteger_auditoria
 BEFORE UPDATE OR DELETE ON auditoria
@@ -1010,23 +1097,3 @@ FOR EACH ROW EXECUTE FUNCTION fn_proteger_auditoria();
 -- Fin del esquema — 18 tablas. La versión 1.3 incorpora las correcciones
 -- de integridad, idempotencia, estados y restricciones aprobadas.
 -- =====================================================================
--- ---------------------------------------------------------------------
--- 12B. EVENTO_WEBHOOK_STRIPE
--- Ledger técnico mínimo para garantizar la idempotencia de API-029.
--- No añade funcionalidad de producto.
--- ---------------------------------------------------------------------
-CREATE TABLE evento_webhook_stripe (
-    stripe_event_id TEXT PRIMARY KEY,
-    tipo_evento     TEXT NOT NULL,
-    pago_id         UUID REFERENCES pago(id),
-    recibido_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    procesado_at    TIMESTAMPTZ,
-    resultado       resultado_auditoria NOT NULL DEFAULT 'correcto',
-
-    CONSTRAINT chk_webhook_tipo_no_vacio CHECK (btrim(tipo_evento) <> ''),
-    CONSTRAINT chk_webhook_procesado CHECK (procesado_at IS NULL OR procesado_at >= recibido_at)
-);
-
-CREATE INDEX idx_webhook_stripe_pago_id ON evento_webhook_stripe(pago_id);
-
-
