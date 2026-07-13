@@ -965,7 +965,7 @@ Comprador
 pedido_id
 
 **Validaciones**
-El Pedido está preparado para pago. El importe es válido. Solo puede existir una sesión activa de Stripe Checkout por Pedido; un reintento reutiliza la sesión activa y no crea otra.
+El Pedido está `pendiente_pago`, el Pago relacionado está `pendiente` o `cancelado` por expiración de sesión y el importe/moneda son válidos. Solo puede existir una sesión activa de Stripe Checkout por Pedido. Si sustituye una sesión expirada, bajo bloqueo cambia `pago.estado` de `cancelado` a `pendiente` antes de exponer la nueva URL.
 
 **Respuesta correcta**
 200 OK. Crea o reutiliza la sesión de Stripe Checkout y devuelve `pedido_id`, URL de redirección, expiración y `reused`. La operación no confirma ni rechaza el cobro.
@@ -980,7 +980,7 @@ CU-010
 PT-COM-004
 
 **Observaciones**
-El Pedido solo se confirma mediante API-029. API-017 es idempotente por `pedido_id`: reutiliza la sesión válida; si expiró, bajo bloqueo crea como máximo una sustituta. Los rechazos o cancelaciones se reflejan después mediante eventos permitidos, nunca con un 402 sincrónico. DLOG 0020.
+El Pedido solo se confirma mediante API-029. API-017 es idempotente por `pedido_id`: reutiliza la sesión válida; si expiró, bajo bloqueo crea como máximo una sustituta y reactiva el Pago a `pendiente` antes de responder. Los rechazos o cancelaciones se reflejan después mediante eventos permitidos, nunca con un 402 sincrónico. DLOG 0020.
 
 ---
 
