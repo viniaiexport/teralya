@@ -1,28 +1,28 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 4.3 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 4.4 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias | Sustituye a |
 |---|---|---|---|---|---|---|
 | CAP-01 | Entidades del Sistema | 1.0 | ✅ APROBADO | docs/CAP/CAP-01-Entidades-del-Sistema.pdf | — | — |
-| CAP-02 | Modelo de Datos | 1.2 | ✅ APROBADO POR CTO | docs/CAP/CAP-02_v1.2_Modelo_de_Datos_APROBADO.md | CAP-01, INF-05 v1.3, INF-06 v1.2, DLOG 0010/0014–0016 | v1.1 en revisión |
+| CAP-02 | Modelo de Datos | 1.3 | ✅ APROBADO POR CTO | docs/CAP/CAP-02_v1.3_Modelo_de_Datos_APROBADO.md | CAP-01, ADR-001, INF-05 v1.4, INF-06 v1.3, DLOG 0010/0014–0017 | v1.2 aprobada |
 | CAP-03 | Producto del MVP | 1.0 | ✅ APROBADO | docs/CAP/CAP-03-Producto-del-MVP.md | CAP-01 | — |
 | CAP-04 | Flujos Funcionales | 1.0 | ✅ APROBADO | docs/CAP/CAP-04-Flujos-Funcionales.md | CAP-03 | — |
 | CAP-05 | Pantallas del MVP | 1.0 | ✅ APROBADO | docs/CAP/CAP-05-Pantallas-del-MVP.pdf | CAP-03, CAP-04 | — |
 | CAP-06 | Casos de Uso | 1.0 | ✅ APROBADO | docs/CAP/CAP-06-Casos-de-Uso.pdf | CAP-03, CAP-04, CAP-05 | — |
 | CAP-07 | Historias de Usuario | 1.2 | ✅ APROBADO POR CTO | docs/CAP/CAP-07_v1.2_Historias_de_Usuario_APROBADO.md | CAP-06, ADR-001, DLOG 0010/0014–0016 | v1.1 en revisión |
-| CAP-08 | Criterios de Aceptación | 1.1 | 🟡 EN REVISIÓN | docs/CAP/CAP-08_v1.1_Criterios_de_Aceptacion.md | CAP-07 v1.1 | v1.0 incompleta |
+| CAP-08 | Criterios de Aceptación | 1.2 | ✅ APROBADO POR CTO | docs/CAP/CAP-08_v1.2_Criterios_de_Aceptacion_APROBADO.md | CAP-02 v1.3, CAP-07 v1.2, INF-08 v2.3, ADR-001, DLOG 0010/0014–0018 | v1.1 en revisión |
 
 ## INF — Documentación técnica
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias | Sustituye a |
 |---|---|---|---|---|---|---|
-| INF-05 | Esquema de Base de Datos | 1.3 | ✅ APROBADO POR CTO | docs/INF/teralya_schema_v1.3_APROBADO.sql | CAP-01, CAP-02, INF-08 v2.2, DLOG 0014–0016 | v1.2 en revisión |
-| INF-06 | Diccionario de Datos | 1.2 | ✅ APROBADO POR CTO | docs/INF/INF-06_v1.2_Diccionario_de_Datos_APROBADO.md | INF-05 v1.3 | v1.1 en revisión |
+| INF-05 | Esquema de Base de Datos | 1.4 | ✅ APROBADO POR CTO | docs/INF/teralya_schema_v1.4_APROBADO.sql | CAP-01, ADR-001, DLOG 0014–0017 | v1.3 aprobada |
+| INF-06 | Diccionario de Datos | 1.3 | ✅ APROBADO POR CTO | docs/INF/INF-06_v1.3_Diccionario_de_Datos_APROBADO.md | INF-05 v1.4, DLOG 0017 | v1.2 aprobada |
 | INF-07 | Arquitectura Técnica Consolidada | 1.3 | ✅ APROBADO POR CTO | docs/INF/INF-07_v1.3_Arquitectura_Tecnica_Consolidada.md | INF-05, INF-06, ADR-002, ADR-003, ADR-004 | v1.2 |
-| INF-08 | Especificación de APIs | 2.2 | ✅ APROBADO POR CTO | docs/INF/INF-08_v2.2_Especificacion_de_APIs.md | CAP-05, CAP-06, CAP-07, INF-05, INF-06, ADR-002 | v2.1 |
+| INF-08 | Especificación de APIs | 2.3 | ✅ APROBADO POR CTO | docs/INF/INF-08_v2.3_Especificacion_de_APIs.md | CAP-02 v1.3, CAP-05, CAP-06, CAP-07 v1.2, INF-05 v1.4, INF-06 v1.3, ADR-001/002, DLOG 0014–0018 | v2.2 |
 | INF-08-AUD-IDEM | Auditoría limitada de Idempotencia | 1.0 | ✅ Cerrada (incorporada en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
 | INF-08-AUD-COV | Auditoría de cobertura de Pantallas y Casos de Uso | 1.0 | ✅ Cerrada (13 brechas resueltas en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Cobertura_Pantallas_v1.0.md | CAP-05, CAP-06, CAP-07, INF-08 v2.1 | — |
 | INF-09 | Arquitectura Frontend | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, INF-07 v1.3, ADR-001 a ADR-004 | — |
@@ -31,7 +31,7 @@
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log — Teralya | 1.3 | ✅ OFICIAL, incluye 0001–0016 | docs/DECISION_LOG/Decision_Log.md | INF-07, INF-09, ADR-001 a ADR-004 |
+| DLOG | Decision Log — Teralya | 1.4 | ✅ OFICIAL, incluye 0001–0018 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.3, CAP-02 v1.3, CAP-08 v1.2, ADR-001 a ADR-004 |
 
 ### Decisiones de negocio vigentes
 
@@ -75,34 +75,45 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 | `docs/INF/INF-08_v2.0_Especificacion_de_APIs.md` | Sustituido por INF-08 v2.1 |
 | `docs/INF/INF-08_v2.1_Especificacion_de_APIs.md` | Sustituido por INF-08 v2.2 (cierra 13 brechas de cobertura) |
 | `docs/INF/INF-08_Informe_de_Auditoria_Final.md` | Auditoría histórica de INF-08 v2.0 |
+| `docs/INF/teralya_schema_v1.3_APROBADO.sql` | Sustituido por INF-05 v1.4 aprobada |
+| `docs/INF/teralya_schema_v1.4_EN_REVISION.sql` | Sustituido por INF-05 v1.4 aprobada |
+| `docs/INF/INF-06_v1.2_Diccionario_de_Datos_APROBADO.md` | Sustituido por INF-06 v1.3 aprobada |
+| `docs/INF/INF-06_v1.3_Diccionario_de_Datos_EN_REVISION.md` | Sustituido por INF-06 v1.3 aprobada |
+| `docs/CAP/CAP-02_v1.2_Modelo_de_Datos_APROBADO.md` | Sustituido por CAP-02 v1.3 aprobada |
+| `docs/CAP/CAP-02_v1.3_Modelo_de_Datos_EN_REVISION.md` | Sustituido por CAP-02 v1.3 aprobada |
+| `docs/INF/INF-08_v2.2_Especificacion_de_APIs.md` | Sustituido por INF-08 v2.3 aprobada |
+| `docs/INF/INF-08_v2.3_Especificacion_de_APIs_EN_REVISION.md` | Sustituido por INF-08 v2.3 aprobada |
+| `docs/CAP/CAP-08_v1.1_Criterios_de_Aceptacion.md` | Sustituido por CAP-08 v1.2 aprobada |
+| `docs/CAP/CAP-08_v1.2_Criterios_de_Aceptacion_EN_REVISION.md` | Sustituido por CAP-08 v1.2 aprobada |
 
 ## Estado operativo y siguiente documento
 
 ### Cerrado hoy
 
-- INF-07 v1.3 aprobado y alineado con una única aplicación Next.js.
-- INF-09 v1.0 aprobado con 25 apartados.
-- ADR-004 y Decisión 0013 cierran la topología Frontend.
-- INF-08 v2.2 aprobado con 42 endpoints en 9 módulos.
-- Las 13 brechas de cobertura de INF-08 v2.1 quedan cerradas.
-- La trazabilidad de CU-001 a CU-032 y de las 36 pantallas queda documentada; CU-031 y CU-032 son reglas transversales del contrato.
-- INF-09 §19 actualizado para referenciar INF-08 v2.2 aprobada.
-- INF-05 v1.3 aprobado con decisiones 0014–0016, 18 tablas e integridad reforzada.
-- INF-06 v1.2 aprobado y alineado 1:1 con INF-05 v1.3.
-- CAP-02 v1.2 aprobado y alineado con ADR-001, DLOG 0010/0014–0016 e INF-05/06.
-- CAP-07 v1.2 aprobado con 32 historias y actores Visitante/Comprador correctamente delimitados.
+- INF-05 v1.4 aprobado con 19 tablas, 19 ENUM, 46 constraints, 44 índices, 14 funciones y 30 triggers.
+- INF-06 v1.3 aprobado y alineado 1:1 con INF-05 v1.4.
+- CAP-02 v1.3 aprobado con `carrito_fusion` como soporte técnico persistente de DLOG 0017.
+- INF-08 v2.3 aprobado con 42 endpoints estables en 9 módulos.
+- CAP-08 v1.2 aprobado con 32 historias y 93 criterios verificables.
+- DLOG v1.4 oficial con Decisiones 0001–0018.
+- La fusión del carrito suma cantidades hasta stock, usa `fusion_id`, SHA-256 canónico, FK Comprador–Carrito y bloqueo transaccional.
+- La matriz logística de DLOG 0018 deriva `pedido.estado` desde `subpedido.estado`.
+- Las 13 brechas históricas de cobertura de INF-08 permanecen cerradas.
+- INF-07, INF-09 y ADR-001 a ADR-004 no se reabren.
 
 ### Documento actualmente en desarrollo
 
-**CAP-08 v1.2 — Criterios de Aceptación** — siguiente documento; debe alinearse con CAP-07 v1.2.
+**Ninguno.** El cierre documental coordinado queda completado y aprobado.
+
+### Siguiente paso propuesto
+
+Definir y autorizar el contrato técnico implementable de requests, responses, errores y enumeraciones a partir de INF-05 v1.4, INF-06 v1.3, INF-08 v2.3 y CAP-08 v1.2, sin ampliar el MVP.
 
 ### Bloqueos abiertos
 
-- CAP-08 v1.1 está desactualizado respecto a CAP-07 v1.2 y debe reconstruirse como v1.2.
-- CAP-02 v1.1 sigue EN REVISIÓN y debe cerrarse de forma coherente con INF-05 e INF-06.
-- CAP-07 v1.1 y CAP-08 v1.1 siguen EN REVISIÓN y requieren cierre funcional independiente.
-- No quedan bloqueos abiertos de cobertura en INF-08 ni de arquitectura Frontend.
+- No quedan bloqueos documentales abiertos en CAP-02, CAP-07, CAP-08, INF-05, INF-06, INF-08 o arquitectura Frontend.
+- LEGAL y UX siguen sin contenido oficial; su planificación requiere una instrucción independiente.
 
 ### Regla de continuidad
 
-La aprobación de INF-08 v2.2 no reabre INF-09. Cualquier cambio futuro de framework, App Router o topología requiere un nuevo ADR.
+La aprobación de INF-08 v2.3 no reabre INF-09. Cualquier cambio futuro de framework, App Router o topología requiere un nuevo ADR. Cualquier cambio de fórmula de fusión o matriz logística requiere una nueva decisión registrada.
