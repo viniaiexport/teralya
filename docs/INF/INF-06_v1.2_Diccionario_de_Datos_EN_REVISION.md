@@ -132,13 +132,13 @@ Reconstrucción completa 1:1 sobre INF-05 v1.3 aprobada. Documenta 18 tablas, ti
 - `usuario_email_key`: (email) única
 
 **Restricciones (CHECK).**
-- `chk_bodega_solo_si_rol_bodega`: `(((bodega_id IS NULL) OR (rol = 'bodega'::rol_usuario)))`
+- `chk_bodega_segun_rol`: `((rol = 'bodega' AND bodega_id IS NOT NULL) OR (rol IN ('comprador','administrador') AND bodega_id IS NULL))`
 
 **Índices.**
 - `idx_usuario_bodega_id`: (bodega_id)
 - `idx_usuario_rol`: (rol)
 
-**Reglas de negocio asociadas.** El email debe ser único; la contraseña nunca se almacena en texto plano; bodega_id solo puede rellenarse si rol = 'bodega' (constraint chk_bodega_solo_si_rol_bodega)
+**Reglas de negocio asociadas.** El email debe ser único; la contraseña nunca se almacena en texto plano; bodega_id es obligatorio para rol bodega y debe ser nulo para comprador o administrador (constraint chk_bodega_segun_rol)
 
 ---
 
@@ -267,6 +267,7 @@ Reconstrucción completa 1:1 sobre INF-05 v1.3 aprobada. Documenta 18 tablas, ti
 - `bodega_id` → `bodega.id`
 
 **Restricciones de unicidad.**
+- `chk_vino_id_bodega`: (`id`, `bodega_id`)
 - `vino_slug_key`: (slug) única
 
 **Restricciones (CHECK).**
@@ -582,8 +583,12 @@ Reconstrucción completa 1:1 sobre INF-05 v1.3 aprobada. Documenta 18 tablas, ti
 
 **Claves foráneas.**
 - `bodega_id` → `bodega.id`
-- `pago_id` → `pago.id`
 - `pedido_id` → `pedido.id`
+- FK compuesta `fk_subpedido_pago_pedido`: (`pago_id`, `pedido_id`) → `pago(id, pedido_id)`
+
+**Restricciones de unicidad.**
+- `uq_subpedido_pedido_bodega`: (`pedido_id`, `bodega_id`)
+- `uq_subpedido_id_pedido_bodega`: (`id`, `pedido_id`, `bodega_id`)
 
 **Índices.**
 - `idx_subpedido_bodega_id`: (bodega_id)
@@ -787,9 +792,7 @@ Reconstrucción completa 1:1 sobre INF-05 v1.3 aprobada. Documenta 18 tablas, ti
 
 ---
 
-*Borrador EN REVISIÓN. Parte de INF-06 v1.0 e incorpora exclusivamente las decisiones aprobadas para Incidencia, recuperación de contraseña y trazabilidad de mayoría de edad y condiciones de compra de alcohol. Requiere validación técnica antes de aprobación.*
-
-
+*Borrador EN REVISIÓN. 
 ## Catálogo normativo de tipos ENUM
 
 | Tipo | Valores permitidos |
@@ -915,3 +918,97 @@ Total normativo: **13 funciones y 29 triggers**.
 | Fuente económica | PAGO | PAGO |
 | Fuente logística | SUBPEDIDO | SUBPEDIDO |
 | Ledger Stripe | EVENTO_WEBHOOK_STRIPE | EVENTO_WEBHOOK_STRIPE |
+
+## Catálogo literal de constraints nombradas
+
+| Tabla | Constraint | Definición normativa |
+|---|---|---|
+| `bodega` | `chk_bodega_comision` | `CONSTRAINT chk_bodega_comision CHECK (comision IS NULL OR comision BETWEEN 0 AND 100)` |
+| `bodega` | `chk_bodega_plazo_preparacion` | `CONSTRAINT chk_bodega_plazo_preparacion CHECK (plazo_preparacion_dias IS NULL OR plazo_preparacion_dias >= 0)` |
+| `bodega` | `chk_bodega_comision_para_operar` | `CONSTRAINT chk_bodega_comision_para_operar CHECK (estado NOT IN ('aprobada', 'activa') OR comision IS NOT NULL) )` |
+| `usuario` | `chk_bodega_segun_rol` | `CONSTRAINT chk_bodega_segun_rol CHECK ( (rol = 'bodega' AND bodega_id IS NOT NULL) OR (rol IN ('comprador', 'administrador') AND bodega_id IS NULL) )` |
+| `usuario` | `chk_usuario_intentos_fallidos` | `CONSTRAINT chk_usuario_intentos_fallidos CHECK (intentos_fallidos >= 0) )` |
+| `solicitud_recuperacion_password` | `chk_recuperacion_expira_despues` | `CONSTRAINT chk_recuperacion_expira_despues CHECK (expires_at > created_at)` |
+| `solicitud_recuperacion_password` | `chk_recuperacion_uso_despues` | `CONSTRAINT chk_recuperacion_uso_despues CHECK (used_at IS NULL OR used_at >= created_at)` |
+| `solicitud_recuperacion_password` | `chk_recuperacion_estado_uso` | `CONSTRAINT chk_recuperacion_estado_uso CHECK ((estado = 'utilizada') = (used_at IS NOT NULL)) )` |
+| `bodega` | `fk_bodega_aprobada_por` | `CONSTRAINT fk_bodega_aprobada_por FOREIGN KEY (aprobada_por) REFERENCES usuario(id)` |
+| `bodega` | `fk_bodega_updated_by` | `CONSTRAINT fk_bodega_updated_by FOREIGN KEY (updated_by) REFERENCES usuario(id)` |
+| `comprador` | `chk_comprador_contadores` | `CONSTRAINT chk_comprador_contadores CHECK ( num_total_pedidos >= 0 AND importe_total_comprado >= 0 ) )` |
+| `vino` | `chk_vino_id_bodega` | `CONSTRAINT chk_vino_id_bodega UNIQUE (id, bodega_id)` |
+| `vino` | `chk_vino_precio` | `CONSTRAINT chk_vino_precio CHECK (precio IS NULL OR precio > 0)` |
+| `vino` | `chk_stock_no_negativo` | `CONSTRAINT chk_stock_no_negativo CHECK (stock_disponible >= 0 AND stock_reservado >= 0 AND stock_minimo >= 0)` |
+| `vino` | `chk_vino_medidas` | `CONSTRAINT chk_vino_medidas CHECK ( (volumen_ml IS NULL OR volumen_ml > 0) AND (peso_gramos IS NULL OR peso_gramos > 0) AND (botellas_por_caja IS NULL OR botellas_por_caja > 0) AND (plazo_preparacion_dias IS NULL OR plazo_preparacion_dias >= 0) ) )` |
+| `carrito` | `chk_carrito_contadores` | `CONSTRAINT chk_carrito_contadores CHECK (num_productos >= 0 AND num_botellas >= 0)` |
+| `carrito` | `chk_carrito_importes` | `CONSTRAINT chk_carrito_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND descuentos >= 0 AND total >= 0 )` |
+| `carrito` | `chk_carrito_total` | `CONSTRAINT chk_carrito_total CHECK (total = subtotal + gastos_envio - descuentos) )` |
+| `carrito_item` | `chk_cantidad_minima` | `CONSTRAINT chk_cantidad_minima CHECK (cantidad >= 1)` |
+| `carrito_item` | `chk_carrito_item_importes` | `CONSTRAINT chk_carrito_item_importes CHECK ( precio_unitario >= 0 AND importe_total >= 0 AND importe_total = precio_unitario * cantidad )` |
+| `carrito_item` | `uq_carrito_vino` | `CONSTRAINT uq_carrito_vino UNIQUE (carrito_id, vino_id) )` |
+| `pedido` | `chk_pedido_importes` | `CONSTRAINT chk_pedido_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND descuentos >= 0 AND total >= 0 )` |
+| `pedido` | `chk_pedido_total` | `CONSTRAINT chk_pedido_total CHECK (total = subtotal + gastos_envio + impuestos - descuentos) )` |
+| `pago` | `uq_pago_id_pedido` | `CONSTRAINT uq_pago_id_pedido UNIQUE (id, pedido_id)` |
+| `pago` | `chk_pago_importes` | `CONSTRAINT chk_pago_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND comision_marketplace >= 0 AND total_cobrado >= 0 AND total_repartido >= 0 AND total_reembolsado >= 0 )` |
+| `pago` | `chk_reparto_no_supera_cobrado` | `CONSTRAINT chk_reparto_no_supera_cobrado CHECK (total_repartido <= total_cobrado)` |
+| `pago` | `chk_reembolso_no_supera_cobrado` | `CONSTRAINT chk_reembolso_no_supera_cobrado CHECK (total_reembolsado <= total_cobrado)` |
+| `pago` | `chk_checkout_session_coherente` | `CONSTRAINT chk_checkout_session_coherente CHECK ( stripe_checkout_session_id IS NULL OR stripe_checkout_expires_at IS NOT NULL ) )` |
+| `evento_webhook_stripe` | `chk_webhook_tipo_no_vacio` | `CONSTRAINT chk_webhook_tipo_no_vacio CHECK (btrim(tipo_evento) <> '')` |
+| `evento_webhook_stripe` | `chk_webhook_procesado` | `CONSTRAINT chk_webhook_procesado CHECK (procesado_at IS NULL OR procesado_at >= recibido_at) )` |
+| `subpedido` | `fk_subpedido_pago_pedido` | `CONSTRAINT fk_subpedido_pago_pedido FOREIGN KEY (pago_id, pedido_id) REFERENCES pago(id, pedido_id)` |
+| `subpedido` | `uq_subpedido_pedido_bodega` | `CONSTRAINT uq_subpedido_pedido_bodega UNIQUE (pedido_id, bodega_id)` |
+| `subpedido` | `uq_subpedido_id_pedido_bodega` | `CONSTRAINT uq_subpedido_id_pedido_bodega UNIQUE (id, pedido_id, bodega_id)` |
+| `subpedido` | `chk_subpedido_importes` | `CONSTRAINT chk_subpedido_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND comision_marketplace >= 0 AND total >= 0 ) )` |
+| `pedido_item` | `fk_item_subpedido_pedido_bodega` | `CONSTRAINT fk_item_subpedido_pedido_bodega FOREIGN KEY (subpedido_id, pedido_id, bodega_id) REFERENCES subpedido(id, pedido_id, bodega_id)` |
+| `pedido_item` | `fk_item_vino_bodega` | `CONSTRAINT fk_item_vino_bodega FOREIGN KEY (vino_id, bodega_id) REFERENCES vino(id, bodega_id)` |
+| `pedido_item` | `chk_cantidad_positiva` | `CONSTRAINT chk_cantidad_positiva CHECK (cantidad > 0)` |
+| `pedido_item` | `chk_pedido_item_importes` | `CONSTRAINT chk_pedido_item_importes CHECK ( precio_unitario >= 0 AND importe_total >= 0 AND importe_total = precio_unitario * cantidad ) )` |
+| `incidencia` | `chk_incidencia_tipo_no_vacio` | `CONSTRAINT chk_incidencia_tipo_no_vacio CHECK (btrim(tipo) <> '')` |
+| `incidencia` | `chk_incidencia_descripcion_no_vacia` | `CONSTRAINT chk_incidencia_descripcion_no_vacia CHECK (btrim(descripcion) <> '')` |
+| `incidencia` | `chk_incidencia_relacion` | `CONSTRAINT chk_incidencia_relacion CHECK ( pedido_id IS NOT NULL OR subpedido_id IS NOT NULL OR bodega_id IS NOT NULL OR vino_id IS NOT NULL ) )` |
+
+## Catálogo literal de índices
+
+| Índice | Tabla | Definición normativa |
+|---|---|---|
+| `idx_usuario_bodega_id` | `usuario` | `CREATE INDEX idx_usuario_bodega_id ON usuario(bodega_id);` |
+| `idx_usuario_rol` | `usuario` | `CREATE INDEX idx_usuario_rol ON usuario(rol);` |
+| `idx_solicitud_recuperacion_usuario_id` | `solicitud_recuperacion_password` | `CREATE INDEX idx_solicitud_recuperacion_usuario_id ON solicitud_recuperacion_password(usuario_id);` |
+| `idx_solicitud_recuperacion_estado_expires` | `solicitud_recuperacion_password` | `CREATE INDEX idx_solicitud_recuperacion_estado_expires ON solicitud_recuperacion_password(estado, expires_at);` |
+| `idx_vino_bodega_id` | `vino` | `CREATE INDEX idx_vino_bodega_id ON vino(bodega_id);` |
+| `idx_vino_estado` | `vino` | `CREATE INDEX idx_vino_estado ON vino(estado);` |
+| `idx_imagen_entidad` | `imagen` | `CREATE INDEX idx_imagen_entidad ON imagen(tipo_entidad, entidad_id);` |
+| `uq_imagen_principal` | `imagen` | `CREATE UNIQUE INDEX uq_imagen_principal ON imagen(tipo_entidad, entidad_id) WHERE es_principal;` |
+| `idx_direccion_propietario` | `direccion` | `CREATE INDEX idx_direccion_propietario ON direccion(propietario_tipo, propietario_id);` |
+| `uq_direccion_principal` | `direccion` | `CREATE UNIQUE INDEX uq_direccion_principal ON direccion(propietario_tipo, propietario_id) WHERE es_principal;` |
+| `uq_carrito_activo_por_comprador` | `carrito` | `CREATE UNIQUE INDEX uq_carrito_activo_por_comprador ON carrito(comprador_id) WHERE estado = 'activo';` |
+| `idx_pedido_comprador_id` | `pedido` | `CREATE INDEX idx_pedido_comprador_id ON pedido(comprador_id);` |
+| `idx_pedido_estado` | `pedido` | `CREATE INDEX idx_pedido_estado ON pedido(estado);` |
+| `idx_webhook_stripe_pago_id` | `evento_webhook_stripe` | `CREATE INDEX idx_webhook_stripe_pago_id ON evento_webhook_stripe(pago_id);` |
+| `idx_subpedido_pedido_id` | `subpedido` | `CREATE INDEX idx_subpedido_pedido_id ON subpedido(pedido_id);` |
+| `idx_subpedido_bodega_id` | `subpedido` | `CREATE INDEX idx_subpedido_bodega_id ON subpedido(bodega_id);` |
+| `idx_subpedido_pago_id` | `subpedido` | `CREATE INDEX idx_subpedido_pago_id ON subpedido(pago_id);` |
+| `idx_pedido_item_pedido_id` | `pedido_item` | `CREATE INDEX idx_pedido_item_pedido_id ON pedido_item(pedido_id);` |
+| `idx_pedido_item_subpedido_id` | `pedido_item` | `CREATE INDEX idx_pedido_item_subpedido_id ON pedido_item(subpedido_id);` |
+| `idx_incidencia_estado` | `incidencia` | `CREATE INDEX idx_incidencia_estado ON incidencia(estado);` |
+| `idx_incidencia_fecha` | `incidencia` | `CREATE INDEX idx_incidencia_fecha ON incidencia(fecha);` |
+| `idx_incidencia_pedido_id` | `incidencia` | `CREATE INDEX idx_incidencia_pedido_id ON incidencia(pedido_id) WHERE pedido_id IS NOT NULL;` |
+| `idx_incidencia_subpedido_id` | `incidencia` | `CREATE INDEX idx_incidencia_subpedido_id ON incidencia(subpedido_id) WHERE subpedido_id IS NOT NULL;` |
+| `idx_incidencia_bodega_id` | `incidencia` | `CREATE INDEX idx_incidencia_bodega_id ON incidencia(bodega_id) WHERE bodega_id IS NOT NULL;` |
+| `idx_incidencia_vino_id` | `incidencia` | `CREATE INDEX idx_incidencia_vino_id ON incidencia(vino_id) WHERE vino_id IS NOT NULL;` |
+| `idx_notificacion_usuario_id` | `notificacion` | `CREATE INDEX idx_notificacion_usuario_id ON notificacion(usuario_id);` |
+| `idx_auditoria_entidad` | `auditoria` | `CREATE INDEX idx_auditoria_entidad ON auditoria(tipo_entidad, entidad_id);` |
+| `idx_auditoria_usuario_id` | `auditoria` | `CREATE INDEX idx_auditoria_usuario_id ON auditoria(usuario_id);` |
+| `idx_auditoria_fecha` | `auditoria` | `CREATE INDEX idx_auditoria_fecha ON auditoria(fecha_hora);` |
+| `uq_usuario_email_normalizado` | `usuario` | `CREATE UNIQUE INDEX uq_usuario_email_normalizado ON usuario(lower(email));` |
+| `idx_carrito_comprador_id` | `carrito` | `CREATE INDEX idx_carrito_comprador_id ON carrito(comprador_id);` |
+| `idx_carrito_item_carrito_id` | `carrito_item` | `CREATE INDEX idx_carrito_item_carrito_id ON carrito_item(carrito_id);` |
+| `idx_carrito_item_vino_id` | `carrito_item` | `CREATE INDEX idx_carrito_item_vino_id ON carrito_item(vino_id);` |
+| `idx_pedido_item_vino_id` | `pedido_item` | `CREATE INDEX idx_pedido_item_vino_id ON pedido_item(vino_id);` |
+| `idx_pedido_item_bodega_id` | `pedido_item` | `CREATE INDEX idx_pedido_item_bodega_id ON pedido_item(bodega_id);` |
+| `idx_notificacion_pedido_id` | `notificacion` | `CREATE INDEX idx_notificacion_pedido_id ON notificacion(pedido_id) WHERE pedido_id IS NOT NULL;` |
+| `idx_notificacion_subpedido_id` | `notificacion` | `CREATE INDEX idx_notificacion_subpedido_id ON notificacion(subpedido_id) WHERE subpedido_id IS NOT NULL;` |
+| `idx_bodega_aprobada_por` | `bodega` | `CREATE INDEX idx_bodega_aprobada_por ON bodega(aprobada_por) WHERE aprobada_por IS NOT NULL;` |
+| `idx_bodega_updated_by` | `bodega` | `CREATE INDEX idx_bodega_updated_by ON bodega(updated_by) WHERE updated_by IS NOT NULL;` |
+| `idx_pedido_estado_created` | `pedido` | `CREATE INDEX idx_pedido_estado_created ON pedido(estado, created_at);` |
+| `idx_subpedido_bodega_estado` | `subpedido` | `CREATE INDEX idx_subpedido_bodega_estado ON subpedido(bodega_id, estado);` |
+| `idx_vino_bodega_estado` | `vino` | `CREATE INDEX idx_vino_bodega_estado ON vino(bodega_id, estado);` |
+| `idx_incidencia_estado_fecha` | `incidencia` | `CREATE INDEX idx_incidencia_estado_fecha ON incidencia(estado, fecha DESC);` |
