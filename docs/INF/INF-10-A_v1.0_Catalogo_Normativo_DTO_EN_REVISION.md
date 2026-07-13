@@ -68,6 +68,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | GenericAck | `message:Text500`, `request_id:UUID` | — | RO |
 | PageMeta | `page:Page`, `page_size:PageSize`, `total_items:integer>=0`, `total_pages:integer>=0` | — | RO; `total_pages=ceil(total_items/page_size)` |
 | MoneyBreakdown | `subtotal:Money`, `gastos_envio:Money`, `impuestos:Money`, `descuentos:Money`, `total:Money`, `moneda:Currency` | — | RO |
+| SubOrderMoneyBreakdown | `subtotal:Money`, `gastos_envio:Money`, `impuestos:Money`, `total:Money`, `moneda:Currency` | — | RO; no expone comisión ni inventa descuentos |
 
 ## Autenticación
 
@@ -98,7 +99,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | Schema | Campos requeridos | Campos opcionales | Flags y reglas |
 |---|---|---|---|
 | WineCreateRequest | `nombre_comercial:Text160`, `precio:PositiveMoney`, `moneda:Currency`, `stock_disponible:Stock`, `disponible_venta:boolean` | `sku:Text100`, `tipo_vino:Text80`, `anada:Year`, `pais:Text100`, `region:Text160`, `denominacion_origen:Text160`, `variedades_uva:Text100[]`, `crianza:Text100`, `meses_crianza:integer(0..120)`, `graduacion_alcoholica:Percent`, `volumen_ml:integer(1..10000)`, `descripcion_corta:Text500`, `descripcion_completa:Text5000`, `nota_cata:Text5000`, `maridaje:Text5000`, `temperatura_servicio:Text100`, `certificaciones:Text100[]`, `premios:Text100[]`, `produccion_limitada:boolean`, `peso_gramos:integer(1..100000)`, `plazo_preparacion_dias:integer(0..365)`, `botellas_por_caja:integer(1..100)` | WO |
-| WineUpdateRequest | `nombre_comercial:Text160`, `precio:PositiveMoney`, `moneda:Currency`, `stock_disponible:Stock`, `disponible_venta:boolean` | los mismos opcionales de WineCreateRequest | WO; reemplazo PUT, sin id, bodega_id, estado ni timestamps |
+| WineUpdateRequest | `nombre_comercial:Text160`, `precio:PositiveMoney`, `moneda:Currency`, `stock_disponible:Stock`, `disponible_venta:boolean` | los mismos opcionales de WineCreateRequest | WO; reemplazo PUT: todo opcional omitido se restablece a NULL/default de persistencia y nunca conserva el valor anterior; sin id, bodega_id, estado ni timestamps |
 | WineSummary | `id:UUID`, `nombre_comercial:Text160`, `precio:Money`, `moneda:Currency`, `disponible_venta:boolean`, `bodega:BodegaSummary` | `slug:Text160`, `tipo_vino:Text80`, `anada:Year`, `region:Text160`, `denominacion_origen:Text160`, `imagen_principal:ImageSummary` | RO; sin stock exacto |
 | WinePublicDetail | campos de WineSummary, `imagenes:ImageSummary[]` | `pais:Text100`, `variedades_uva:Text100[]`, `crianza:Text100`, `meses_crianza:integer`, `graduacion_alcoholica:Percent`, `volumen_ml:integer`, `descripcion_corta:Text500`, `descripcion_completa:Text5000`, `nota_cata:Text5000`, `maridaje:Text5000`, `temperatura_servicio:Text100`, `certificaciones:Text100[]`, `premios:Text100[]`, `produccion_limitada:boolean` | RO; solo imágenes activas |
 | WineOwnSummary | `id:UUID`, `nombre_comercial:Text160`, `estado:WineState`, `stock_disponible:Stock`, `disponible_venta:boolean`, `updated_at:DateTime` | `sku:Text100`, `precio:Money`, `moneda:Currency`, `imagen_principal:ImageSummary` | RO |
@@ -111,7 +112,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | ImageSummary | `id:UUID`, `url:URI`, `es_principal:boolean`, `orden:integer>=0`, `alt_text:Text500` | `resolucion:Text32` | RO |
 | Image | campos de ImageSummary, `formato:enum(jpeg,png,webp)`, `activa:boolean`, `fecha_subida:DateTime`, `updated_at:DateTime` | `nombre_archivo:Text200`, `tamanio_bytes:integer(1..10485760)`, `resolucion:Text32` | RO; URL CDN, nunca storage key |
 | UploadRequest | `upload_id:UUID`, `nombre_archivo:Text200`, `content_type:enum(image/jpeg,image/png,image/webp)`, `tamanio_bytes:integer(1..10485760)`, `checksum_sha256:string(base64,44)` | — | WO |
-| RequiredUploadHeaders | `Content-Type:string`, `x-amz-checksum-sha256:string(base64,44)`, `If-None-Match:"*"` | — | RO |
+| RequiredUploadHeaders | `Content-Type:enum(image/jpeg,image/png,image/webp)`, `x-amz-checksum-sha256:string(base64,44)`, `If-None-Match:"*"` | — | RO; Content-Type y checksum coinciden exactamente con UploadRequest y claims del token |
 | UploadAuthorization | `upload_id:UUID`, `upload_url:URI`, `method:"PUT"`, `required_headers:RequiredUploadHeaders`, `confirmation_token:ConfirmationToken`, `upload_expires_at:DateTime`, `confirmation_expires_at:DateTime` | — | RO |
 | ImageConfirmRequest | `upload_id:UUID`, `confirmation_token:ConfirmationToken`, `alt_text:Text500` | `orden:integer(0..999)`, `es_principal:boolean` | WO |
 | ImagePatchRequest | al menos uno | `alt_text:Text500`, `orden:integer(0..999)`, `es_principal:boolean` | WO |
@@ -156,7 +157,7 @@ Para API-034/API-025, vino completo significa: nombre, precio positivo, EUR, sto
 | SubOrderStatePatch | `estado_destino:SubOrderState` | — | WO |
 | Tracking | — | `transportista:Text100`, `numero_seguimiento:Text100`, `fecha_preparacion:DateTime`, `fecha_envio:DateTime`, `fecha_entrega_prevista:DateTime`, `fecha_entrega_real:DateTime` | RO |
 | SubOrderSummary | `id:UUID`, `pedido_id:UUID`, `estado:SubOrderState`, `total:Money`, `moneda:Currency`, `fecha_ultimo_cambio_estado:DateTime` | — | RO |
-| SubOrderDetail | campos SubOrderSummary, `totales:MoneyBreakdown`, `lineas:OrderLine[]`, `direccion_envio_snapshot:AddressSnapshot`, `tracking:Tracking` | `pedido_estado:OrderState` | RO |
+| SubOrderDetail | campos SubOrderSummary, `totales:SubOrderMoneyBreakdown`, `lineas:OrderLine[]`, `direccion_envio_snapshot:AddressSnapshot`, `tracking:Tracking` | `pedido_estado:OrderState` | RO |
 | PageSubOrderSummary | `items:SubOrderSummary[]` y campos PageMeta | — | RO |
 | OrderAdminDetail | campos OrderBuyerDetail, `subpedidos:SubOrderDetail[]` | `comprador_id:UUID` | RO |
 | Dashboard | `ventas_dia:DashboardSales`, `pedidos_pendientes:integer>=0` | — | RO |
@@ -209,7 +210,7 @@ Todos los errores usan Problem. La columna errores enumera los status permitidos
 | 015 | — | 200 Cart | 401,500 |
 | 016 | CheckoutRequest | 200 OrderPrepared | 400,401,403,404,409,500 |
 | 017 | CheckoutSessionRequest | 200 CheckoutSession | 400,401,404,409,502,503 |
-| 018 | pedido_id path | 200 OrderConfirmation | 401,404,409,500 |
+| 018 | pedido_id path | 200 OrderConfirmation | 401,404,500 |
 | 019 | PageQuery | 200 PageOrderSummary | 400,401,500 |
 | 020 | ResourceIdPath | 200 OrderBuyerDetail | 401,403,404,500 |
 | 021 | PageQuery | 200 PageSubOrderSummary | 400,401,403,500 |
