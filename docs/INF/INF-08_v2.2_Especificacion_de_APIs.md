@@ -1,6 +1,6 @@
 # INF-08 – Especificación de APIs
 
-**Teralya · Versión 2.2 · Julio 2026 · EN REVISIÓN**
+**Teralya · Versión 2.2 · Julio 2026 · APROBADO POR EL CTO**
 
 *INF-08 v2.2: conserva los 29 identificadores originales de v2.1 sin cambio (API-001 a API-029, salvo la confirmación de credenciales en API-005 por ADR-002). Añade las 13 operaciones de la Auditoría de cobertura v1.0 como API-030 a API-042. No modifica INF-07, INF-09, ADR-003 ni ADR-004.*
 Especificación funcional de las APIs del MVP, derivada directamente de los Casos de Uso de CAP-06 y las Pantallas de CAP-05. Documento puramente funcional: no incluye código, no diseña la implementación, no especifica TypeScript ni SQL, no diseña autenticación JWT ni Supabase. 42 endpoints en 9 módulos (API-001 a API-042) — cada uno corresponde a un Caso de Uso o pantalla aprobados (CAP-05/CAP-06/CAP-07); no se ha añadido funcionalidad más allá del MVP.
@@ -90,10 +90,10 @@ Email y password obligatorios. Credenciales correctas. Usuario activo. Bodega de
 401 credenciales incorrectas · 403 cuenta no activa · 403 bodega no validada.
 
 **Casos de uso relacionados**
-CU-002
+CU-002 / CU-013 / CU-020
 
 **Pantallas relacionadas**
-PT-ACC-003
+PT-ACC-003, PT-BOD-001, PT-ADM-001, PT-SIS-003
 
 **Observaciones**
 —
@@ -1247,13 +1247,13 @@ El SubPedido pertenece a la bodega. El cambio de estado está permitido para el 
 403 el SubPedido no pertenece a la bodega · 409 cambio de estado no permitido.
 
 **Casos de uso relacionados**
-CU-019
+CU-019 / CU-030
 
 **Pantallas relacionadas**
-PT-BOD-008
+PT-BOD-008, PT-COM-007, PT-ADM-007
 
 **Observaciones**
-La bodega no puede modificar el Pedido completo.
+La bodega no puede modificar el Pedido completo. El recálculo del estado global del Pedido se ejecuta como consecuencia interna de esta operación.
 
 ---
 
@@ -1880,7 +1880,7 @@ Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido 
 | API | Caso de Uso | Pantalla |
 |---|---|---|
 | API-001 | CU-001 | PT-ACC-001 |
-| API-002 | CU-002 | PT-ACC-003 |
+| API-002 | CU-002 / CU-013 / CU-020 | PT-ACC-003, PT-BOD-001, PT-ADM-001, PT-SIS-003 |
 | API-003 | CU-003 | PT-ACC-004 |
 | API-004 | CU-003 | PT-ACC-005 |
 | API-005 | CU-012 | PT-ACC-002 |
@@ -1901,7 +1901,7 @@ Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido 
 | API-020 | CU-011 | PT-COM-007 |
 | API-021 | CU-018 | PT-BOD-007 |
 | API-022 | CU-018 | PT-BOD-008 |
-| API-023 | CU-019 | PT-BOD-008 |
+| API-023 | CU-019 / CU-030 | PT-BOD-008, PT-COM-007, PT-ADM-007 |
 | API-024 | CU-021 | PT-ADM-002 / PT-ADM-003 |
 | API-025 | CU-023 | PT-ADM-004 / PT-ADM-005 |
 | API-026 | CU-024 | PT-ADM-004 / PT-ADM-005 |
@@ -1922,6 +1922,12 @@ Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido 
 | API-041 | CU-027 | PT-ADM-009 |
 | API-042 | CU-027 | PT-ADM-008, PT-ADM-009 |
 
-Matriz completa: 42 endpoints (API-001 a API-042), cada uno con Caso de Uso y/o Pantalla trazados. Ninguna de las 36 pantallas de CAP-05 ni de los 32 Casos de Uso de CAP-06 queda sin al menos un endpoint que la implemente.
+### Reglas transversales de trazabilidad
 
-*INF-08 v2.2 — 42 endpoints en 9 módulos. API-001 a API-029 conservan su identificador original de v2.1. API-030 a API-042 cierran las 13 brechas de la Auditoría de cobertura v1.0. Estado: EN REVISIÓN.*
+- **CU-031 — Control de acceso por rol:** aplica transversalmente a todos los endpoints autenticados. Cada contrato define actor autorizado, validación de sesión, rol, validación de bodega y/o propiedad del recurso según corresponda.
+- **CU-032 — Recursos no disponibles o no encontrados:** aplica transversalmente a los endpoints que consultan o modifican recursos. Los contratos contemplan respuestas 403, 404 y/o 409 según autorización, existencia, disponibilidad y estado del recurso.
+- Estos dos Casos de Uso no requieren endpoints independientes: son reglas obligatorias del contrato completo.
+
+Matriz completa: 42 endpoints (API-001 a API-042), cada uno con Caso de Uso y/o Pantalla trazados. Los 32 Casos de Uso de CAP-06 quedan cubiertos por endpoints explícitos o, en CU-031 y CU-032, por reglas transversales del contrato. Las 36 pantallas de CAP-05 quedan cubiertas por operaciones API o por estados de interfaz derivados de sus respuestas.
+
+*INF-08 v2.2 — 42 endpoints en 9 módulos. API-001 a API-029 conservan su identificador original de v2.1. API-030 a API-042 cierran las 13 brechas de la Auditoría de cobertura v1.0. Estado: APROBADO POR EL CTO.*
