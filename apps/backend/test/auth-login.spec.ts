@@ -39,6 +39,13 @@ interface UsuarioFixture {
   bodegaId?: string;
 }
 
+interface ProblemBody {
+  status: number;
+  code: string;
+  detail: string;
+  retryable: boolean;
+}
+
 describe('API-002 — POST /auth/login', () => {
   let app: NestExpressApplication;
   let pool: Pool;
@@ -235,15 +242,18 @@ describe('API-002 — POST /auth/login', () => {
     for (const response of [wrongPassword, wrongEmail]) {
       expect(response.headers['content-type']).toContain('application/problem+json');
       expect(response.headers['www-authenticate']).toBe('Bearer');
-      expect(response.body).toMatchObject({
+      const body = response.body as ProblemBody;
+      expect(body).toMatchObject({
         status: 401,
         code: 'AUTHENTICATION_REQUIRED',
         detail: 'Las credenciales proporcionadas no son válidas.',
         retryable: false,
       });
     }
-    expect(wrongPassword.body.code).toBe(wrongEmail.body.code);
-    expect(wrongPassword.body.detail).toBe(wrongEmail.body.detail);
+    const wrongPasswordBody = wrongPassword.body as ProblemBody;
+    const wrongEmailBody = wrongEmail.body as ProblemBody;
+    expect(wrongPasswordBody.code).toBe(wrongEmailBody.code);
+    expect(wrongPasswordBody.detail).toBe(wrongEmailBody.detail);
 
     const stored = await pool.query<{ intentos_fallidos: number }>(
       'SELECT intentos_fallidos FROM usuario WHERE id = $1',
