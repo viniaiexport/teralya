@@ -1,6 +1,6 @@
 # Decision Log — Teralya
 
-**Versión 1.2 · Julio 2026 · Registro oficial de decisiones del proyecto.** Cada decisión relevante queda aquí con fecha y motivo, para no perder el razonamiento ni repetir discusiones ya cerradas.
+**Versión 1.3 · Julio 2026 · Registro oficial de decisiones del proyecto.** Cada decisión relevante queda aquí con fecha y motivo, para no perder el razonamiento ni repetir discusiones ya cerradas.
 
 | ID | Decisión | Motivo | Fecha | Estado |
 |---|---|---|---|---|
@@ -17,6 +17,9 @@
 | 0011 | Autenticación autogestionada por el backend de Teralya; sin proveedor de identidad externo en el MVP | Mantener coherencia entre esquema, API y Frontend | 12/07/2026 | Aprobada por el CEO (ADR-002) |
 | 0012 | Frontend con **Next.js y App Router**, no Pages Router, manteniendo React + TypeScript | Cerrar framework y sistema de rutas antes de implementar | 12/07/2026 | Aprobada por el CTO (ADR-003) |
 | 0013 | **Una única aplicación Next.js y un único despliegue Frontend para público, acceso, comprador, bodega, administrador y sistema**, con grupos de rutas y layouts separados; autorización real en backend | Resolver la contradicción entre los dos frontends históricos de INF-07 v1.2 y la aplicación única de INF-09; reducir duplicación y retrabajo sin debilitar seguridad | 12/07/2026 | Aprobada por el CTO con autorización expresa del CEO (ADR-004) |
+| 0014 | `pago.estado` es la única fuente persistente del estado económico del pago; se eliminan los campos duplicados de Pedido | Evitar divergencias y mantener al webhook de Stripe como autoridad de confirmación | 13/07/2026 | Aprobada por el CEO; aplicada en INF-05 v1.3 |
+| 0015 | Ciclo mínimo de Incidencia: `abierta → en_revision → resuelta → cerrada`, sin reaperturas ni soporte avanzado en el MVP | Hacer implementable API-042 y conservar un flujo administrativo mínimo y auditable | 13/07/2026 | Aprobada por el CEO; aplicada en INF-05 v1.3 |
+| 0016 | Idempotencia e integridad comercial garantizadas en base de datos mediante carrito único por Pedido, ledger de eventos Stripe y claves compuestas Pedido–Pago–SubPedido–Línea–Bodega | Evitar duplicidades de cobro, SubPedidos duplicados y relaciones comerciales incoherentes | 13/07/2026 | Aprobada por el CEO; aplicada en INF-05 v1.3 |
 
 ---
 
