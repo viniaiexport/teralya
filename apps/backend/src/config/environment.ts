@@ -11,6 +11,16 @@ const environmentSchema = z.object({
   ALCOHOL_TERMS_VERSION: z.string().trim().min(1).max(100),
   LOGIN_RATE_LIMIT_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(1_000),
   LOGIN_RATE_LIMIT_WINDOW_SECONDS: z.coerce.number().int().min(1).max(86_400),
+  PASSWORD_RECOVERY_TOKEN_TTL_SECONDS: z.coerce.number().int().min(300).max(86_400),
+  PASSWORD_RECOVERY_RATE_LIMIT_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(100),
+  PASSWORD_RECOVERY_RATE_LIMIT_WINDOW_SECONDS: z.coerce.number().int().min(60).max(86_400),
+  PASSWORD_RECOVERY_URL: z.url(),
+  PASSWORD_RECOVERY_FROM_EMAIL: z.email(),
+  SMTP_HOST: z.string().trim().min(1),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65_535),
+  SMTP_SECURE: z.stringbool(),
+  SMTP_USER: z.string().min(1),
+  SMTP_PASSWORD: z.string().min(1),
 });
 
 export type Environment = z.infer<typeof environmentSchema>;
