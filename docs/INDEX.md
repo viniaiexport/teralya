@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 4.4 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 4.5 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -26,6 +26,7 @@
 | INF-08-AUD-IDEM | Auditoría limitada de Idempotencia | 1.0 | ✅ Cerrada (incorporada en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
 | INF-08-AUD-COV | Auditoría de cobertura de Pantallas y Casos de Uso | 1.0 | ✅ Cerrada (13 brechas resueltas en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Cobertura_Pantallas_v1.0.md | CAP-05, CAP-06, CAP-07, INF-08 v2.1 | — |
 | INF-09 | Arquitectura Frontend | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, INF-07 v1.3, ADR-001 a ADR-004 | — |
+| INF-10 | Contrato Técnico de APIs | 1.0 | 🟡 EN REVISIÓN | docs/INF/INF-10_v1.0_Contrato_Tecnico_APIs_EN_REVISION.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.3, CAP-08 v1.2, ADR-001/002, DLOG 0014–0018 | — |
 
 ## DECISION_LOG
 
@@ -103,15 +104,16 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 
 ### Documento actualmente en desarrollo
 
-**Ninguno.** El cierre documental coordinado queda completado y aprobado.
+**INF-10 v1.0 — Contrato Técnico de APIs** — gobernanza y matriz 42/42 creadas; OpenAPI pendiente de cerrar TAPI-01 a TAPI-09.
 
 ### Siguiente paso propuesto
 
-Definir y autorizar el contrato técnico implementable de requests, responses, errores y enumeraciones a partir de INF-05 v1.4, INF-06 v1.3, INF-08 v2.3 y CAP-08 v1.2, sin ampliar el MVP.
+Resolver TAPI-07 — operaciones faltantes para Direcciones e Imágenes— y cerrar las convenciones TAPI-01 a TAPI-09 antes de generar el OpenAPI 3.1.
 
 ### Bloqueos abiertos
 
-- No quedan bloqueos documentales abiertos en CAP-02, CAP-07, CAP-08, INF-05, INF-06, INF-08 o arquitectura Frontend.
+- INF-10 no puede declararse implementable end-to-end hasta resolver cómo se crean Direcciones y se cargan/asocian Imágenes.
+- No quedan bloqueos abiertos en los documentos aprobados CAP-02, CAP-07, CAP-08, INF-05, INF-06, INF-08 o arquitectura Frontend.
 - LEGAL y UX siguen sin contenido oficial; su planificación requiere una instrucción independiente.
 
 ### Regla de continuidad
