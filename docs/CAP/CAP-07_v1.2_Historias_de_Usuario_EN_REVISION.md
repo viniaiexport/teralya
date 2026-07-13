@@ -226,7 +226,7 @@ Todas las historias tienen prioridad **MVP — Obligatoria**, porque derivan de 
 ### HU-028 — Confirmación de Pedido tras el pago
 
 - **Actor:** Sistema
-- **Historia:** Como sistema, quiero confirmar un Pedido únicamente tras validar la firma, la unicidad del evento, la aprobación de Stripe y la coincidencia del importe, para impedir confirmaciones duplicadas o Pedidos confirmados sin pago aprobado.
+- **Historia:** Como sistema, quiero confirmar un Pedido únicamente tras validar la firma, la unicidad del evento, la aprobación de Stripe y la coincidencia del importe, actualizando `pago.estado` como única fuente económica persistente, para impedir confirmaciones duplicadas o Pedidos confirmados sin pago aprobado.
 - **Prioridad:** MVP — Obligatoria
 - **Trazabilidad:** CAP-03 Módulo 11 · CAP-04 FL-SIS-003 y FL-COM-011 · CAP-05 PT-COM-004, PT-COM-005, PT-COM-006 y PT-COM-007 · CAP-06 CU-028.
 
@@ -240,7 +240,7 @@ Todas las historias tienen prioridad **MVP — Obligatoria**, porque derivan de 
 ### HU-030 — Recálculo del estado global
 
 - **Actor:** Sistema
-- **Historia:** Como sistema, quiero recalcular cuando corresponda el estado global de un Pedido tras una actualización válida de uno de sus SubPedidos, para mostrar al comprador y al administrador un estado coherente.
+- **Historia:** Como sistema, quiero recalcular cuando corresponda el estado global de un Pedido a partir de `subpedido.estado` tras una actualización válida, para mostrar al comprador y al administrador un estado coherente sin duplicar la fuente logística.
 - **Prioridad:** MVP — Obligatoria
 - **Trazabilidad:** CAP-03 Módulo 11 · CAP-04 FL-SIS-005 · CAP-05 PT-BOD-008, PT-COM-007 y PT-ADM-007 · CAP-06 CU-030.
 
