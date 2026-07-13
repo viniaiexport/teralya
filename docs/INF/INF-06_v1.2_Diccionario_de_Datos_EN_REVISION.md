@@ -925,45 +925,45 @@ Total normativo: **13 funciones y 29 triggers**.
 |---|---|---|
 | `bodega` | `chk_bodega_comision` | `CONSTRAINT chk_bodega_comision CHECK (comision IS NULL OR comision BETWEEN 0 AND 100)` |
 | `bodega` | `chk_bodega_plazo_preparacion` | `CONSTRAINT chk_bodega_plazo_preparacion CHECK (plazo_preparacion_dias IS NULL OR plazo_preparacion_dias >= 0)` |
-| `bodega` | `chk_bodega_comision_para_operar` | `CONSTRAINT chk_bodega_comision_para_operar CHECK (estado NOT IN ('aprobada', 'activa') OR comision IS NOT NULL) )` |
-| `usuario` | `chk_bodega_segun_rol` | `CONSTRAINT chk_bodega_segun_rol CHECK ( (rol = 'bodega' AND bodega_id IS NOT NULL) OR (rol IN ('comprador', 'administrador') AND bodega_id IS NULL) )` |
-| `usuario` | `chk_usuario_intentos_fallidos` | `CONSTRAINT chk_usuario_intentos_fallidos CHECK (intentos_fallidos >= 0) )` |
+| `bodega` | `chk_bodega_comision_para_operar` | `CONSTRAINT chk_bodega_comision_para_operar CHECK (estado NOT IN ('aprobada', 'activa') OR comision IS NOT NULL)` |
+| `usuario` | `chk_bodega_segun_rol` | `CONSTRAINT chk_bodega_segun_rol CHECK ( (rol = 'bodega' AND bodega_id IS NOT NULL) OR (rol IN ('comprador', 'administrador') AND bodega_id IS NULL)` |
+| `usuario` | `chk_usuario_intentos_fallidos` | `CONSTRAINT chk_usuario_intentos_fallidos CHECK (intentos_fallidos >= 0)` |
 | `solicitud_recuperacion_password` | `chk_recuperacion_expira_despues` | `CONSTRAINT chk_recuperacion_expira_despues CHECK (expires_at > created_at)` |
 | `solicitud_recuperacion_password` | `chk_recuperacion_uso_despues` | `CONSTRAINT chk_recuperacion_uso_despues CHECK (used_at IS NULL OR used_at >= created_at)` |
-| `solicitud_recuperacion_password` | `chk_recuperacion_estado_uso` | `CONSTRAINT chk_recuperacion_estado_uso CHECK ((estado = 'utilizada') = (used_at IS NOT NULL)) )` |
+| `solicitud_recuperacion_password` | `chk_recuperacion_estado_uso` | `CONSTRAINT chk_recuperacion_estado_uso CHECK ((estado = 'utilizada') = (used_at IS NOT NULL))` |
 | `bodega` | `fk_bodega_aprobada_por` | `CONSTRAINT fk_bodega_aprobada_por FOREIGN KEY (aprobada_por) REFERENCES usuario(id)` |
 | `bodega` | `fk_bodega_updated_by` | `CONSTRAINT fk_bodega_updated_by FOREIGN KEY (updated_by) REFERENCES usuario(id)` |
-| `comprador` | `chk_comprador_contadores` | `CONSTRAINT chk_comprador_contadores CHECK ( num_total_pedidos >= 0 AND importe_total_comprado >= 0 ) )` |
+| `comprador` | `chk_comprador_contadores` | `CONSTRAINT chk_comprador_contadores CHECK ( num_total_pedidos >= 0 AND importe_total_comprado >= 0 )` |
 | `vino` | `chk_vino_id_bodega` | `CONSTRAINT chk_vino_id_bodega UNIQUE (id, bodega_id)` |
 | `vino` | `chk_vino_precio` | `CONSTRAINT chk_vino_precio CHECK (precio IS NULL OR precio > 0)` |
 | `vino` | `chk_stock_no_negativo` | `CONSTRAINT chk_stock_no_negativo CHECK (stock_disponible >= 0 AND stock_reservado >= 0 AND stock_minimo >= 0)` |
-| `vino` | `chk_vino_medidas` | `CONSTRAINT chk_vino_medidas CHECK ( (volumen_ml IS NULL OR volumen_ml > 0) AND (peso_gramos IS NULL OR peso_gramos > 0) AND (botellas_por_caja IS NULL OR botellas_por_caja > 0) AND (plazo_preparacion_dias IS NULL OR plazo_preparacion_dias >= 0) ) )` |
+| `vino` | `chk_vino_medidas` | `CONSTRAINT chk_vino_medidas CHECK ( (volumen_ml IS NULL OR volumen_ml > 0) AND (peso_gramos IS NULL OR peso_gramos > 0) AND (botellas_por_caja IS NULL OR botellas_por_caja > 0) AND (plazo_preparacion_dias IS NULL OR plazo_preparacion_dias >= 0) )` |
 | `carrito` | `chk_carrito_contadores` | `CONSTRAINT chk_carrito_contadores CHECK (num_productos >= 0 AND num_botellas >= 0)` |
 | `carrito` | `chk_carrito_importes` | `CONSTRAINT chk_carrito_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND descuentos >= 0 AND total >= 0 )` |
-| `carrito` | `chk_carrito_total` | `CONSTRAINT chk_carrito_total CHECK (total = subtotal + gastos_envio - descuentos) )` |
+| `carrito` | `chk_carrito_total` | `CONSTRAINT chk_carrito_total CHECK (total = subtotal + gastos_envio - descuentos)` |
 | `carrito_item` | `chk_cantidad_minima` | `CONSTRAINT chk_cantidad_minima CHECK (cantidad >= 1)` |
 | `carrito_item` | `chk_carrito_item_importes` | `CONSTRAINT chk_carrito_item_importes CHECK ( precio_unitario >= 0 AND importe_total >= 0 AND importe_total = precio_unitario * cantidad )` |
-| `carrito_item` | `uq_carrito_vino` | `CONSTRAINT uq_carrito_vino UNIQUE (carrito_id, vino_id) )` |
+| `carrito_item` | `uq_carrito_vino` | `CONSTRAINT uq_carrito_vino UNIQUE (carrito_id, vino_id)` |
 | `pedido` | `chk_pedido_importes` | `CONSTRAINT chk_pedido_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND descuentos >= 0 AND total >= 0 )` |
-| `pedido` | `chk_pedido_total` | `CONSTRAINT chk_pedido_total CHECK (total = subtotal + gastos_envio + impuestos - descuentos) )` |
+| `pedido` | `chk_pedido_total` | `CONSTRAINT chk_pedido_total CHECK (total = subtotal + gastos_envio + impuestos - descuentos)` |
 | `pago` | `uq_pago_id_pedido` | `CONSTRAINT uq_pago_id_pedido UNIQUE (id, pedido_id)` |
 | `pago` | `chk_pago_importes` | `CONSTRAINT chk_pago_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND comision_marketplace >= 0 AND total_cobrado >= 0 AND total_repartido >= 0 AND total_reembolsado >= 0 )` |
 | `pago` | `chk_reparto_no_supera_cobrado` | `CONSTRAINT chk_reparto_no_supera_cobrado CHECK (total_repartido <= total_cobrado)` |
 | `pago` | `chk_reembolso_no_supera_cobrado` | `CONSTRAINT chk_reembolso_no_supera_cobrado CHECK (total_reembolsado <= total_cobrado)` |
-| `pago` | `chk_checkout_session_coherente` | `CONSTRAINT chk_checkout_session_coherente CHECK ( stripe_checkout_session_id IS NULL OR stripe_checkout_expires_at IS NOT NULL ) )` |
+| `pago` | `chk_checkout_session_coherente` | `CONSTRAINT chk_checkout_session_coherente CHECK ( stripe_checkout_session_id IS NULL OR stripe_checkout_expires_at IS NOT NULL )` |
 | `evento_webhook_stripe` | `chk_webhook_tipo_no_vacio` | `CONSTRAINT chk_webhook_tipo_no_vacio CHECK (btrim(tipo_evento) <> '')` |
-| `evento_webhook_stripe` | `chk_webhook_procesado` | `CONSTRAINT chk_webhook_procesado CHECK (procesado_at IS NULL OR procesado_at >= recibido_at) )` |
+| `evento_webhook_stripe` | `chk_webhook_procesado` | `CONSTRAINT chk_webhook_procesado CHECK (procesado_at IS NULL OR procesado_at >= recibido_at)` |
 | `subpedido` | `fk_subpedido_pago_pedido` | `CONSTRAINT fk_subpedido_pago_pedido FOREIGN KEY (pago_id, pedido_id) REFERENCES pago(id, pedido_id)` |
 | `subpedido` | `uq_subpedido_pedido_bodega` | `CONSTRAINT uq_subpedido_pedido_bodega UNIQUE (pedido_id, bodega_id)` |
 | `subpedido` | `uq_subpedido_id_pedido_bodega` | `CONSTRAINT uq_subpedido_id_pedido_bodega UNIQUE (id, pedido_id, bodega_id)` |
-| `subpedido` | `chk_subpedido_importes` | `CONSTRAINT chk_subpedido_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND comision_marketplace >= 0 AND total >= 0 ) )` |
+| `subpedido` | `chk_subpedido_importes` | `CONSTRAINT chk_subpedido_importes CHECK ( subtotal >= 0 AND gastos_envio >= 0 AND impuestos >= 0 AND comision_marketplace >= 0 AND total >= 0 )` |
 | `pedido_item` | `fk_item_subpedido_pedido_bodega` | `CONSTRAINT fk_item_subpedido_pedido_bodega FOREIGN KEY (subpedido_id, pedido_id, bodega_id) REFERENCES subpedido(id, pedido_id, bodega_id)` |
 | `pedido_item` | `fk_item_vino_bodega` | `CONSTRAINT fk_item_vino_bodega FOREIGN KEY (vino_id, bodega_id) REFERENCES vino(id, bodega_id)` |
 | `pedido_item` | `chk_cantidad_positiva` | `CONSTRAINT chk_cantidad_positiva CHECK (cantidad > 0)` |
-| `pedido_item` | `chk_pedido_item_importes` | `CONSTRAINT chk_pedido_item_importes CHECK ( precio_unitario >= 0 AND importe_total >= 0 AND importe_total = precio_unitario * cantidad ) )` |
+| `pedido_item` | `chk_pedido_item_importes` | `CONSTRAINT chk_pedido_item_importes CHECK ( precio_unitario >= 0 AND importe_total >= 0 AND importe_total = precio_unitario * cantidad )` |
 | `incidencia` | `chk_incidencia_tipo_no_vacio` | `CONSTRAINT chk_incidencia_tipo_no_vacio CHECK (btrim(tipo) <> '')` |
 | `incidencia` | `chk_incidencia_descripcion_no_vacia` | `CONSTRAINT chk_incidencia_descripcion_no_vacia CHECK (btrim(descripcion) <> '')` |
-| `incidencia` | `chk_incidencia_relacion` | `CONSTRAINT chk_incidencia_relacion CHECK ( pedido_id IS NOT NULL OR subpedido_id IS NOT NULL OR bodega_id IS NOT NULL OR vino_id IS NOT NULL ) )` |
+| `incidencia` | `chk_incidencia_relacion` | `CONSTRAINT chk_incidencia_relacion CHECK ( pedido_id IS NOT NULL OR subpedido_id IS NOT NULL OR bodega_id IS NOT NULL OR vino_id IS NOT NULL )` |
 
 ## Catálogo literal de índices
 
