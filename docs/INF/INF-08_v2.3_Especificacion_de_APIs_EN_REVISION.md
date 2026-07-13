@@ -2,7 +2,7 @@
 
 **Teralya · Versión 2.3 · 13/07/2026 · EN REVISIÓN**
 
-*INF-08 v2.3: corrección documental autorizada para alinear el contrato con ADR-001, CAP-02 v1.2 y CAP-07 v1.2. Precisa la fusión idempotente del carrito local, ambas direcciones de checkout, el estado inicial del vino, la disponibilidad del catálogo, la publicación administrativa, la autoridad del webhook y la derivación logística del Pedido. Conserva 42 endpoints en 9 módulos y no cambia arquitectura ni alcance del MVP.*
+*INF-08 v2.3: corrección documental autorizada para alinear el contrato con ADR-001, CAP-02 v1.3 y CAP-07 v1.2. Precisa la fusión idempotente del carrito local, ambas direcciones de checkout, el estado inicial del vino, la disponibilidad del catálogo, la publicación administrativa, la autoridad del webhook y la derivación logística del Pedido. Conserva 42 endpoints en 9 módulos; no cambia topología ni alcance del MVP e incorpora únicamente la persistencia técnica autorizada por DLOG 0017.*
 Especificación funcional de las APIs del MVP, derivada directamente de los Casos de Uso de CAP-06 y las Pantallas de CAP-05. Documento puramente funcional: no incluye código, no diseña la implementación, no especifica TypeScript ni SQL, no diseña autenticación JWT ni Supabase. 42 endpoints en 9 módulos (API-001 a API-042) — cada uno corresponde a un Caso de Uso o pantalla aprobados (CAP-05/CAP-06/CAP-07); no se ha añadido funcionalidad más allá del MVP.
 
 ## Índice de módulos
