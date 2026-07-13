@@ -1039,7 +1039,7 @@ BEFORE INSERT OR UPDATE OF pedido_id, total_cobrado ON pago
 FOR EACH ROW EXECUTE FUNCTION fn_validar_importe_pago_pedido();
 
 CREATE OR REPLACE FUNCTION fn_proteger_total_pedido_con_pago()
-RETURNS trigger LANGUAGE plpgsql AS $
+RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     IF NEW.total IS DISTINCT FROM OLD.total
        AND EXISTS (
@@ -1051,7 +1051,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$;
+$$;
 
 CREATE TRIGGER trg_proteger_total_pedido_con_pago
 BEFORE UPDATE OF total ON pedido
