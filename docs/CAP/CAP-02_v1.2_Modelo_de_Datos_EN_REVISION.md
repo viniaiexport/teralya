@@ -15,7 +15,7 @@
 |---|---|---|---|---|
 | 1.0 | Julio de 2026 | Arquitecto de Producto Teralya | INCOMPLETA | Archivo inicial sin el desarrollo completo del modelo de datos. |
 | 1.1 | 11/07/2026 | Arquitecto de Datos Teralya | SUSTITUIDA | Reconstrucción inicial del modelo funcional. |
-| 1.2 | 13/07/2026 | CTO Teralya | EN REVISIÓN | Alineación con INF-05 v1.3, INF-06 v1.2 y Decisiones 0014–0016. |
+| 1.2 | 13/07/2026 | CTO Teralya | EN REVISIÓN | Alineación con ADR-001, Decisión 0010, INF-05 v1.3, INF-06 v1.2 y Decisiones 0014–0016. |
 
 ---
 
@@ -321,9 +321,9 @@ Checkout no conserva identidad persistente propia. Utiliza y valida:
 ### Relaciones y cardinalidades
 
 - Un Comprador realiza Checkout sobre un Carrito válido.
-- Checkout utiliza una Dirección de envío.
-- Un Checkout correcto prepara un único Pedido vinculado al Carrito y un Pago.
-- Una compra genera exactamente un SubPedido por cada Bodega presente en el Carrito.
+- Checkout utiliza obligatoriamente una Dirección de envío y una de facturación; pueden coincidir si admiten ambos usos.
+- Un Checkout correcto prepara un único Pedido `pendiente_pago` vinculado al Carrito; el Pago puede asociarse cuando se inicia el pago.
+- Tras la confirmación válida del webhook, el sistema genera exactamente un SubPedido por cada Bodega presente en el Pedido.
 
 ### Reglas de integridad
 
@@ -384,7 +384,7 @@ Registrar el cobro único al comprador, la comisión de Teralya y el reparto cor
 - Cada Pago pertenece a un único Pedido.
 - Durante la preparación, un Pedido puede no tener todavía Pago; cuando se generan SubPedidos debe existir exactamente un Pago.
 - Un Pago puede asociarse a muchos eventos técnicos de webhook, cada uno identificado de forma única.
-- Un Pago se distribuye entre uno o muchos SubPedidos.
+- Un Pago puede no tener SubPedidos antes de la confirmación; tras confirmarse se distribuye entre uno o muchos SubPedidos.
 - Cada SubPedido representa la porción económica de una Bodega.
 - Cada Bodega tiene como máximo una Cuenta Stripe Connect.
 
@@ -423,7 +423,7 @@ Representar la compra completa visible para el comprador.
 - Un Comprador puede tener muchos Pedidos.
 - Un Pedido contiene una o muchas líneas `pedido_item`.
 - Cada línea referencia un Vino y conserva sus datos comerciales históricos.
-- Un Pedido tiene uno o muchos SubPedidos según el número de bodegas implicadas.
+- Un Pedido puede no tener SubPedidos mientras está pendiente de pago; tras confirmarse tiene uno o muchos, exactamente uno por bodega implicada.
 - Un Pedido se relaciona con un Pago.
 - Un Pedido puede tener muchas Incidencias.
 
@@ -610,7 +610,7 @@ Registra operaciones relevantes, autenticaciones y cambios de estado. Puede vinc
 | Comprador | realiza | Pedido | 1 : 0..N |
 | Pedido | registra | Pago | 1 : 0..1 |
 | Pago | recibe | Evento Webhook Stripe | 1 : 0..N |
-| Pedido | genera | SubPedido | 1 : 1..N |
+| Pedido | genera | SubPedido | 1 : 0..N durante el ciclo; exactamente 1 por Bodega tras confirmación |
 | Bodega | recibe | SubPedido | 1 : 0..N |
 | Pedido | contiene | Línea de Pedido | 1 : 1..N |
 | SubPedido | contiene | Línea de Pedido | 1 : 1..N |
@@ -687,7 +687,7 @@ Stripe Checkout procesa el cobro único. La sesión se reutiliza mientras sea v�
 
 ## 5. Pedido
 
-El Carrito origina como máximo un Pedido. La compra confirmada genera un Pedido completo para el Comprador. Se congelan líneas, precios y direcciones para conservar el histórico.
+El Carrito origina como máximo un Pedido. Checkout genera y prepara el Pedido pendiente de pago. El webhook válido confirma el Pedido y genera los SubPedidos. Se congelan líneas, precios y direcciones para conservar el histórico.
 
 ## 6. SubPedidos
 
@@ -714,6 +714,7 @@ Administración puede registrar Incidencias mínimas relacionadas con Pedido, Su
 | Checkout e Idioma sin tabla independiente | CAP-01 e INF-05 v1.3 |
 | Pedido completo y SubPedidos por bodega | CAP-01, INF-05 v1.3 e INF-06 v1.2 |
 | Evento Webhook Stripe como soporte técnico | INF-05 v1.3, INF-06 v1.2 e INF-08 API-029 |
+| Carrito visitante local, fusión tras autenticación y checkout autenticado | ADR-001 y Decisión 0010 |
 
 ---
 
