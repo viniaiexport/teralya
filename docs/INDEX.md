@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 5.2 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 5.3 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -104,20 +104,23 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - Cimentación backend NestJS contract-first integrada en `main`.
 - API-001 — `POST /auth/registro/comprador` implementada e integrada en `main` mediante el commit `d59b19a`.
 - API-001 incluye PostgreSQL, sesión opaca Redis, edad mínima configurable, versión de condiciones y pruebas de integración.
+- API-002 — `POST /auth/login` implementada e integrada en `main` mediante el commit `423c3f6`.
+- API-002 incluye acceso por rol y estado, sesión opaca, rate limit Redis, contadores de seguridad, auditoría inmutable y pruebas E2E.
 - GitHub Actions valida esquema INF-05 v1.4, lint, pruebas, build, contrato OpenAPI y Redocly.
 
 ### Actualmente en desarrollo
 
-La implementación del backend está en curso. El siguiente incremento autorizado es API-002 — `POST /auth/login`, sin reabrir el contrato aprobado.
+La implementación del backend está en curso. El siguiente incremento propuesto es API-003 — recuperación de contraseña, sin reabrir el contrato aprobado.
 
 ### Siguiente paso propuesto
 
-Implementar y validar API-002 como segunda rebanada vertical, reutilizando la infraestructura de contraseña, PostgreSQL y sesión opaca ya integrada.
+Preparar e implementar API-003 como tercera rebanada vertical, reutilizando PostgreSQL, Redis y el patrón de auditoría ya integrado.
 
 ### Bloqueos abiertos
 
-- No existen bloqueos funcionales ni contractuales para API-002.
+- No existen bloqueos funcionales ni contractuales identificados para iniciar API-003.
 - Antes de producción, Legal debe fijar los valores de `MINIMUM_PURCHASE_AGE` y `ALCOHOL_TERMS_VERSION`.
+- Antes de producción, Seguridad debe aprobar los valores de `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` y `LOGIN_RATE_LIMIT_WINDOW_SECONDS`.
 - LEGAL y UX siguen sin contenido oficial; su planificación requiere una instrucción independiente.
 
 ### Regla de continuidad
