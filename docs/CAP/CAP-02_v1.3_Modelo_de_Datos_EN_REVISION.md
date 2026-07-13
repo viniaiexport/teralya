@@ -81,7 +81,7 @@ CAP-01 define entidades funcionales. INF-05 e INF-06 definen cómo se persiste l
 | Bodega | `bodega`; su personal se relaciona mediante `usuario.bodega_id` |
 | Administrador | Rol `administrador` dentro de `usuario`; no existe tabla propia |
 | Vino | `vino`, con recursos gráficos en `imagen` |
-| Carrito | `carrito` y `carrito_item` |
+| Carrito | `carrito`, `carrito_item` y ledger técnico `carrito_fusion` |
 | Checkout | Proceso de validación y conversión; no existe tabla propia |
 | Dirección de envío | `direccion` y snapshots congelados en `pedido` |
 | Pago | `pago`, `cuenta_stripe_connect`, ledger técnico `evento_webhook_stripe` y distribución económica por `subpedido` |
@@ -91,7 +91,7 @@ CAP-01 define entidades funcionales. INF-05 e INF-06 definen cómo se persiste l
 | Solicitud de recuperación de contraseña | `solicitud_recuperacion_password` |
 | Idioma | Preferencia en `usuario.idioma` y datos lingüísticos relacionados; no existe tabla propia |
 
-Las estructuras `imagen`, `cuenta_stripe_connect`, `carrito_item`, `pedido_item`, `evento_webhook_stripe`, `notificacion` y `auditoria` son entidades persistentes de soporte ya aprobadas en INF-05/INF-06. No amplían por sí mismas el alcance funcional.
+Las estructuras `imagen`, `cuenta_stripe_connect`, `carrito_item`, `carrito_fusion`, `pedido_item`, `evento_webhook_stripe`, `notificacion` y `auditoria` son estructuras persistentes de soporte reflejadas en INF-05/INF-06 vigentes o en revisión coordinada. No amplían por sí mismas el alcance funcional.
 
 ---
 
