@@ -18,18 +18,18 @@
 
 ## Objetivo
 
-Convertir INF-08 v2.3 en un contrato técnico implementable de requests, responses, errores y enumeraciones sin modificar las funcionalidades del MVP, la arquitectura ni los identificadores funcionales API-001 a API-042.
+Convertir INF-08 v2.4 en un contrato técnico implementable de requests, responses, errores y enumeraciones sin modificar las funcionalidades del MVP ni la arquitectura. API-001 a API-042 conservan códigos, métodos y rutas; API-043 a API-050 formalizan Direcciones e Imágenes conforme a DLOG 0019.
 
-INF-08 v2.3 continúa siendo la especificación funcional aprobada. INF-10 definirá el contrato wire. El futuro YAML OpenAPI será la fuente normativa de schemas y no se duplicarán sus definiciones completas en este Markdown.
+INF-08 v2.4 permanece EN REVISIÓN hasta el dictamen técnico final. INF-10 definirá el contrato wire. El futuro YAML OpenAPI será la fuente normativa de schemas y no se duplicarán sus definiciones completas en este Markdown.
 
 ## Fuentes normativas
 
 - INF-05 v1.4 — esquema aprobado.
 - INF-06 v1.3 — diccionario aprobado.
-- INF-08 v2.3 — 42 contratos funcionales aprobados.
-- CAP-02 v1.3 y CAP-08 v1.2.
+- INF-08 v2.4 — 50 contratos funcionales EN REVISIÓN.
+- CAP-02 v1.3 y CAP-08 v1.3 EN REVISIÓN.
 - ADR-001 y ADR-002.
-- DLOG 0014 a 0018.
+- DLOG 0014 a 0019.
 - INF-07 v1.3 e INF-09 v1.0 únicamente para coherencia; no se reabren.
 
 ## Artefactos coordinados
@@ -39,14 +39,14 @@ INF-08 v2.3 continúa siendo la especificación funcional aprobada. INF-10 defin
 
 ## Invariantes no negociables
 
-- Exactamente 42 pares método–ruta y nueve módulos.
+- Exactamente 50 pares método–ruta y once módulos.
 - Cero rutas o funcionalidades nuevas sin autorización y trazabilidad previa.
 - Cada operación conservará `operationId` o extensión `x-teralya-api-code` con su código API.
 - API-035 y API-037 se representarán como paths sin query embebida y parámetro `estado`.
 - No se afirmará JWT ni otro formato de token no aprobado.
 - Los DTO no expondrán tablas completas por defecto.
 - Solo se publicarán enums usados por el contrato.
-- No se añadirá una cabecera global `Idempotency-Key`; se conservarán las reglas específicas de API-011, API-016, API-017 y API-029.
+- No se añadirá una cabecera global `Idempotency-Key`; se conservarán las reglas específicas de API-011, API-016, API-017 y API-029. API-043 usa `Idempotency-Key` UUID y API-047/API-048 usan `upload_id` UUID como reglas locales.
 - API-029 mantendrá `/sistema/webhooks/stripe` y `Stripe-Signature`.
 - El contrato OpenAPI no se aprobará mientras exista una dependencia obligatoria sin operación o entrada implementable.
 
@@ -96,8 +96,16 @@ INF-08 v2.3 continúa siendo la especificación funcional aprobada. INF-10 defin
 | API-040 | Administración | GET | `/admin/incidencias` | Administrador |
 | API-041 | Administración | GET | `/admin/incidencias/{id}` | Administrador |
 | API-042 | Administración | PATCH | `/admin/incidencias/{id}` | Administrador |
+| API-043 | Direcciones | POST | `/direcciones` | Comprador, Bodega validada |
+| API-044 | Direcciones | GET | `/direcciones` | Comprador, Bodega validada |
+| API-045 | Direcciones | PATCH | `/direcciones/{id}` | Comprador, Bodega validada |
+| API-046 | Direcciones | DELETE | `/direcciones/{id}` | Comprador, Bodega validada |
+| API-047 | Imágenes | POST | `/bodegas/yo/vinos/{id}/imagenes/upload-url` | Bodega validada |
+| API-048 | Imágenes | POST | `/bodegas/yo/vinos/{id}/imagenes` | Bodega validada |
+| API-049 | Imágenes | PATCH | `/bodegas/yo/vinos/{id}/imagenes/{imagen_id}` | Bodega validada |
+| API-050 | Imágenes | DELETE | `/bodegas/yo/vinos/{id}/imagenes/{imagen_id}` | Bodega validada |
 
-**Distribución verificada:** Autenticación 4 · Bodegas 4 · Vinos 7 · Carrito 5 · Checkout 3 · Pedidos 2 · SubPedidos 3 · Administración 13 · Sistema 1 = **42**.
+**Distribución verificada:** Autenticación 4 · Bodegas 4 · Vinos 7 · Carrito 5 · Checkout 3 · Pedidos 2 · SubPedidos 3 · Administración 13 · Sistema 1 · Direcciones 4 · Imágenes 4 = **50**.
 
 ## Convenciones técnicas propuestas
 
@@ -121,6 +129,8 @@ Estas convenciones pueden incorporarse al YAML después de su aprobación técni
 | API-016 | Un carrito origina como máximo un Pedido `pendiente_pago`; el reintento devuelve el mismo. |
 | API-017 | Una sola sesión Stripe activa por Pedido; se reutiliza mientras sea válida y puede sustituirse tras expirar. |
 | API-029 | Un `stripe_event_id` produce como máximo un efecto comercial exitoso; Pago, stock y SubPedidos se confirman atómicamente. |
+| API-043 | `Idempotency-Key` UUID identifica la Dirección; mismo payload devuelve el mismo resultado y payload distinto produce 409. |
+| API-047/048 | `upload_id` UUID vincula presignado y confirmación; el objeto se verifica y solo puede registrarse una Imagen activa por confirmación. |
 
 ## Decisiones necesarias antes de generar OpenAPI
 
@@ -132,37 +142,28 @@ Estas convenciones pueden incorporarse al YAML después de su aprobación técni
 | TAPI-04 | Paginación | `page` y `page_size`; fijar límite por defecto y máximo. | PROPUESTA |
 | TAPI-05 | Eventos Stripe | Definir allowlist mínima de eventos aceptados por API-029. | PENDIENTE |
 | TAPI-06 | Transiciones de SubPedido | Definir matriz exacta entre `pendiente`, `aceptado`, `en_preparacion`, `enviado`, `entregado`, `cancelado` e `incidencia`. | PENDIENTE |
-| TAPI-07 | Direcciones e imágenes | Resolver cómo se crean direcciones y se incorporan imágenes sin rutas actuales, dado que API-016 y API-025 las exigen. | BLOQUEO |
+| TAPI-07 | Direcciones e imágenes | Alternativa A autorizada: API-043 a API-050; ownership por sesión, carga prefirmada, confirmación verificada y desactivación lógica. | RESUELTA — DLOG 0019 |
 | TAPI-08 | Error 402 de API-017 | Aclarar si pertenece a creación de sesión o a un resultado previo del pago. | PENDIENTE |
 | TAPI-09 | Proyecciones DTO | Cerrar campos obligatorios y límites de bodega, vino, catálogo y respuestas de detalle sin exponer columnas internas. | PENDIENTE |
 
-## Brecha de implementabilidad TAPI-07
+## Resolución de TAPI-07
 
-INF-08 v2.3 exige:
+La brecha queda resuelta funcionalmente mediante DLOG 0019 e INF-08 v2.4:
 
-- API-016 recibe `direccion_envio_id` y `direccion_facturacion_id`.
-- API-025 publica únicamente vinos con al menos una imagen.
+- API-043 a API-046 crean, consultan, actualizan y desactivan lógicamente Direcciones propias de Comprador o Bodega.
+- API-047 y API-048 implementan carga directa prefirmada y confirmación verificada de Imágenes sin transferir binarios por el backend.
+- API-049 y API-050 actualizan metadatos y desactivan lógicamente Imágenes, protegiendo la última imagen activa requerida por un vino en revisión o publicado.
+- La propiedad siempre se deriva de la sesión. API-001 a API-042 no cambian de código, método ni ruta.
+- Los snapshots de dirección se congelan al crear el Pedido `pendiente_pago`; API-029 los conserva y congela líneas y precios al confirmar el pago.
 
-Sin embargo, las 42 operaciones aprobadas no contienen una forma explícita de crear/gestionar Direcciones ni de cargar/asociar Imágenes. Un OpenAPI que conserve literalmente las 42 operaciones no puede demostrar cómo se obtienen esos identificadores o precondiciones.
-
-No se añade ninguna ruta en esta versión. La resolución requiere una autorización expresa y, según la alternativa elegida, podría exigir actualizar INF-08 y la matriz de cobertura antes de generar el YAML.
-
-## Alternativas para TAPI-07
-
-| Alternativa | Descripción | Impacto |
-|---|---|---|
-| A — Operaciones explícitas | Añadir contratos mínimos de Direcciones y de Imágenes. | Más claro y REST; cambia el total de operaciones y exige versionar INF-08. |
-| B — Entradas anidadas | Permitir crear direcciones dentro de API-016 e imágenes dentro de API-007/API-008. | Conserva 42 operaciones, pero modifica requests funcionales existentes y mezcla responsabilidades. |
-| C — Precondición externa | Declarar que los IDs/Imágenes se obtienen por un proceso fuera de estas APIs. | No implementable end-to-end y contrario al objetivo de INF-10. No recomendada. |
-
-**Recomendación técnica:** Alternativa A. No amplía el objetivo funcional del MVP —Dirección e Imagen ya existen y son obligatorias—, pero sí formaliza operaciones que hoy faltan. Requiere autorización antes de cambiar el contrato funcional.
+La solución no añade una capacidad de negocio nueva: hace implementables requisitos de Dirección e Imagen ya presentes en INF-05/INF-06, API-016 y API-025. La generación del OpenAPI sigue condicionada al cierre de TAPI-01 a TAPI-06 y TAPI-08 a TAPI-09 y a la aprobación de INF-08 v2.4.
 
 ## Gate de aprobación
 
 INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
 1. TAPI-01 a TAPI-09 estén cerradas.
-2. La brecha TAPI-07 esté resuelta en las fuentes funcionales.
+2. INF-08 v2.4, CAP-07 v1.3 y CAP-08 v1.3 estén aprobados tras revisión binaria.
 3. El YAML sea válido y todos los `$ref` se resuelvan.
 4. Existan exactamente las operaciones autorizadas, sin duplicados.
 5. Cada operación tenga seguridad, parámetros, request, éxito, errores, ejemplos y trazabilidad.
@@ -172,4 +173,4 @@ INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
 ## Estado
 
-INF-10 v1.0 queda **EN REVISIÓN**. La matriz de 42 operaciones está fijada, pero la generación del OpenAPI queda bloqueada por TAPI-07 y por las decisiones técnicas pendientes.
+INF-10 v1.0 queda **EN REVISIÓN**. La matriz de 50 operaciones está fijada y TAPI-07 queda resuelta por DLOG 0019. La generación del OpenAPI continúa bloqueada únicamente por la aprobación de las fuentes revisadas y las restantes decisiones TAPI pendientes.
