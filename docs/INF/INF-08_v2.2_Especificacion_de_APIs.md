@@ -1922,6 +1922,13 @@ Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido 
 | API-041 | CU-027 | PT-ADM-009 |
 | API-042 | CU-027 | PT-ADM-008, PT-ADM-009 |
 
+### Cobertura explícita de pantallas sin operación exclusiva
+
+- **PT-PUB-001 — Inicio público:** consume API-009 para mostrar catálogo destacado o estado vacío; no requiere un endpoint independiente.
+- **PT-COM-001 — Área del comprador:** se habilita mediante API-002 y presenta accesos/resúmenes derivados de API-019 y API-020; no introduce una operación de negocio adicional.
+- **PT-SIS-001 — No encontrado** y **PT-SIS-002 — No disponible:** son estados de interfaz derivados de las respuestas 404, 403 y 409 del contrato; no requieren endpoints propios.
+- **PT-SIS-003 — Acceso denegado:** deriva de las validaciones de autenticación, rol y propiedad descritas transversalmente en CU-031.
+
 ### Reglas transversales de trazabilidad
 
 - **CU-031 — Control de acceso por rol:** aplica transversalmente a todos los endpoints autenticados. Cada contrato define actor autorizado, validación de sesión, rol, validación de bodega y/o propiedad del recurso según corresponda.
@@ -1929,5 +1936,9 @@ Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido 
 - Estos dos Casos de Uso no requieren endpoints independientes: son reglas obligatorias del contrato completo.
 
 Matriz completa: 42 endpoints (API-001 a API-042), cada uno con Caso de Uso y/o Pantalla trazados. Los 32 Casos de Uso de CAP-06 quedan cubiertos por endpoints explícitos o, en CU-031 y CU-032, por reglas transversales del contrato. Las 36 pantallas de CAP-05 quedan cubiertas por operaciones API o por estados de interfaz derivados de sus respuestas.
+
+### Alcance de la aprobación técnica
+
+La aprobación de INF-08 v2.2 cierra la cobertura funcional del contrato API. No aprueba por extensión CAP-07 v1.1, CAP-08 v1.1, INF-05 v1.2 ni INF-06 v1.1, que conservan su estado EN REVISIÓN y deben cerrarse de forma independiente. Los esquemas técnicos implementables de request/response, errores, enumeraciones y convenciones se definirán tras cerrar INF-05 e INF-06, sin ampliar el MVP.
 
 *INF-08 v2.2 — 42 endpoints en 9 módulos. API-001 a API-029 conservan su identificador original de v2.1. API-030 a API-042 cierran las 13 brechas de la Auditoría de cobertura v1.0. Estado: APROBADO POR EL CTO.*
