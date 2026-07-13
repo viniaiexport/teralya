@@ -38,7 +38,7 @@ Todas las historias tienen prioridad **MVP — Obligatoria**, porque derivan de 
 ### HU-002 — Inicio de sesión de comprador
 
 - **Actor:** Comprador
-- **Historia:** Como comprador, quiero iniciar sesión con mis credenciales, para acceder a mi cuenta y continuar las acciones permitidas a mi rol.
+- **Historia:** Como comprador, quiero iniciar sesión con mis credenciales y fusionar el carrito local de visitante cuando exista, para acceder a mi cuenta y continuar sin perder mi selección.
 - **Prioridad:** MVP — Obligatoria
 - **Trazabilidad:** CAP-03 Módulo 1 · CAP-04 FL-COM-002 · CAP-05 PT-ACC-003, PT-COM-001 y PT-COM-003 · CAP-06 CU-002.
 
@@ -73,7 +73,7 @@ Todas las historias tienen prioridad **MVP — Obligatoria**, porque derivan de 
 ### HU-007 — Añadir vino al carrito
 
 - **Actor:** Comprador
-- **Historia:** Como comprador, quiero añadir al carrito una cantidad válida de un vino publicado y disponible, incluyendo la fusión del carrito local previo si navegué como visitante, para incorporarlo a mi compra sin perder la selección.
+- **Historia:** Como comprador, quiero añadir al carrito una cantidad válida de un vino publicado y disponible, para incorporarlo a mi compra.
 - **Prioridad:** MVP — Obligatoria
 - **Trazabilidad:** CAP-03 Módulo 11 · CAP-04 FL-COM-008 · CAP-05 PT-PUB-002, PT-PUB-003, PT-PUB-004 y PT-COM-002 · CAP-06 CU-007.
 
@@ -189,7 +189,7 @@ Todas las historias tienen prioridad **MVP — Obligatoria**, porque derivan de 
 ### HU-023 — Publicación de vino
 
 - **Actor:** Administrador
-- **Historia:** Como administrador, quiero publicar un vino completo de una bodega validada, para hacerlo visible y comprable en el catálogo.
+- **Historia:** Como administrador, quiero publicar un vino completo en estado `pendiente_revision`, con al menos una imagen y perteneciente a una bodega validada, para hacerlo visible y comprable en el catálogo.
 - **Prioridad:** MVP — Obligatoria
 - **Trazabilidad:** CAP-03 Módulo 10 · CAP-04 FL-ADM-006 · CAP-05 PT-ADM-004, PT-ADM-005, PT-PUB-002 y PT-PUB-003 · CAP-06 CU-023.
 
