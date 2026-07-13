@@ -31,7 +31,7 @@
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log — Teralya | 1.2 | ✅ OFICIAL, incluye 0010–0013 | docs/DECISION_LOG/Decision_Log.md | INF-07, INF-09, ADR-001 a ADR-004 |
+| DLOG | Decision Log — Teralya | 1.3 | ✅ OFICIAL, incluye 0001–0016 | docs/DECISION_LOG/Decision_Log.md | INF-07, INF-09, ADR-001 a ADR-004 |
 
 ### Decisiones de negocio vigentes
 
