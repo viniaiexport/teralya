@@ -503,9 +503,9 @@ CREATE TABLE pedido (
     -- El estado y los datos económicos del pago viven exclusivamente en pago.
     -- Direcciones: FK de referencia + snapshot congelado (la dirección
     -- puede cambiar después; el pedido conserva los datos usados).
-    direccion_envio_id                     UUID REFERENCES direccion(id),
+    direccion_envio_id                     UUID NOT NULL REFERENCES direccion(id),
     direccion_envio_snapshot                 JSONB NOT NULL,
-    direccion_facturacion_id                   UUID REFERENCES direccion(id),
+    direccion_facturacion_id                   UUID NOT NULL REFERENCES direccion(id),
     direccion_facturacion_snapshot               JSONB NOT NULL,
 
     estado                                        estado_pedido NOT NULL DEFAULT 'pendiente_pago',
@@ -1037,6 +1037,25 @@ $$;
 CREATE TRIGGER trg_validar_importe_pago_pedido
 BEFORE INSERT OR UPDATE OF pedido_id, total_cobrado ON pago
 FOR EACH ROW EXECUTE FUNCTION fn_validar_importe_pago_pedido();
+
+CREATE OR REPLACE FUNCTION fn_proteger_total_pedido_con_pago()
+RETURNS trigger LANGUAGE plpgsql AS $
+BEGIN
+    IF NEW.total IS DISTINCT FROM OLD.total
+       AND EXISTS (
+           SELECT 1 FROM pago
+           WHERE pedido_id = OLD.id
+             AND total_cobrado IS DISTINCT FROM NEW.total
+       ) THEN
+        RAISE EXCEPTION 'No puede modificarse el total del Pedido de forma incoherente con su Pago';
+    END IF;
+    RETURN NEW;
+END;
+$;
+
+CREATE TRIGGER trg_proteger_total_pedido_con_pago
+BEFORE UPDATE OF total ON pedido
+FOR EACH ROW EXECUTE FUNCTION fn_proteger_total_pedido_con_pago();
 
 CREATE OR REPLACE FUNCTION fn_validar_transicion_incidencia()
 RETURNS trigger LANGUAGE plpgsql AS $$
