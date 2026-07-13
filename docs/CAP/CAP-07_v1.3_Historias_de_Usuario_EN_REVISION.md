@@ -281,7 +281,7 @@ Todas las historias tienen prioridad **MVP — Obligatoria**, porque derivan de 
 1. La incidencia sí dispone de trazabilidad suficiente en las fuentes utilizadas: Módulo 10 de CAP-03, FL-ADM-010 de CAP-04, PT-ADM-008 y PT-ADM-009 de CAP-05, y CU-027 de CAP-06.
 2. CAP-04 separa algunos recorridos que CAP-06 consolida en un solo Caso de Uso. Por ello una historia puede relacionarse con más de un flujo o pantalla sin crear funcionalidad adicional.
 3. CAP-06 no define un Caso de Uso independiente para la ficha pública de bodega. CU-006 incorpora expresamente la navegación a dicha ficha como flujo alternativo; HU-006 conserva esa misma delimitación.
-4. Este documento no define criterios de aceptación. Corresponden a CAP-08 y deberán alinearse con estas 32 historias tras la aprobación de CAP-07 v1.2.
+4. Este documento no define criterios de aceptación. CAP-08 v1.3 debe alinearse con esta versión antes de la aprobación coordinada de ambos documentos.
 
 ## CIERRE
 
