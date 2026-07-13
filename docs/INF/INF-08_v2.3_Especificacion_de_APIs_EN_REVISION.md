@@ -2,7 +2,7 @@
 
 **Teralya · Versión 2.3 · 13/07/2026 · EN REVISIÓN**
 
-*INF-08 v2.3: corrección documental autorizada para alinear el contrato con ADR-001, CAP-02 v1.2 y CAP-07 v1.2. Precisa la fusión del carrito local tras registro o inicio de sesión, el estado inicial no publicado del vino, la disponibilidad del catálogo y las precondiciones de publicación administrativa. Conserva 42 endpoints en 9 módulos y no cambia arquitectura ni alcance del MVP.*
+*INF-08 v2.3: corrección documental autorizada para alinear el contrato con ADR-001, CAP-02 v1.2 y CAP-07 v1.2. Precisa la fusión idempotente del carrito local, ambas direcciones de checkout, el estado inicial del vino, la disponibilidad del catálogo, la publicación administrativa, la autoridad del webhook y la derivación logística del Pedido. Conserva 42 endpoints en 9 módulos y no cambia arquitectura ni alcance del MVP.*
 Especificación funcional de las APIs del MVP, derivada directamente de los Casos de Uso de CAP-06 y las Pantallas de CAP-05. Documento puramente funcional: no incluye código, no diseña la implementación, no especifica TypeScript ni SQL, no diseña autenticación JWT ni Supabase. 42 endpoints en 9 módulos (API-001 a API-042) — cada uno corresponde a un Caso de Uso o pantalla aprobados (CAP-05/CAP-06/CAP-07); no se ha añadido funcionalidad más allá del MVP.
 
 ## Índice de módulos
@@ -636,7 +636,7 @@ API-034
 Solicitar publicación de vino
 
 **Objetivo**
-Permitir que la bodega solicite la revisión y posible publicación de un vino propio, sin poder publicarlo directamente.
+Permitir que una bodega validada solicite la revisión de un vino propio, sin publicarlo directamente.
 
 **Método HTTP**
 POST
@@ -651,13 +651,13 @@ Bodega
 id (en la ruta)
 
 **Validaciones**
-El vino pertenece a la bodega; tiene información mínima completa (precio, disponibilidad); no está ya publicado ni pendiente de revisión.
+Bodega autenticada, validada y asociada al usuario. El vino pertenece a esa bodega, tiene información mínima completa, precio y disponibilidad válidos, y está en su estado inicial no publicado; no está publicado ni en `pendiente_revision`.
 
 **Respuesta correcta**
-200 OK. Vino pasa a estado de revisión pendiente.
+200 OK. El vino cambia exactamente a `pendiente_revision` y continúa sin estar publicado.
 
 **Posibles errores**
-400 información incompleta · 403 no pertenece a la bodega · 409 ya publicado o ya pendiente.
+400 información/precio/disponibilidad inválidos · 403 bodega no validada, asociación inválida o vino ajeno · 404 vino inexistente · 409 ya publicado o ya en `pendiente_revision`.
 
 **Casos de uso relacionados**
 CU-017
@@ -666,25 +666,20 @@ CU-017
 PT-BOD-003, PT-BOD-005, PT-BOD-006, PT-ADM-004
 
 **Observaciones**
-La bodega nunca publica directamente: publicar (API-025) y despublicar (API-026) siguen siendo exclusivas del Administrador (CU-023/024). Brecha 5 de la Auditoría de cobertura v1.0.
+La bodega nunca publica directamente; API-025 y API-026 son exclusivas de Administración.
 
 ---
 
-
-## Módulo: Carrito
-
-**Regla de carrito visitante:** el carrito del Visitante permanece exclusivamente en almacenamiento local y no invoca API-011 a API-015 ni crea filas persistentes. Tras registro o inicio de sesión como Comprador, el cliente fusiona las líneas locales válidas con el carrito persistente autenticado, revalidando publicación, disponibilidad, cantidad y precio; las líneas inválidas no se persisten y se informan al usuario.
-
-### API-011 — Añadir vino al carrito
+### API-011 — Añadir vino o fusionar carrito local
 
 **Código**
 API-011
 
 **Nombre**
-Añadir vino al carrito
+Añadir vino al carrito / Fusionar carrito local autenticado
 
 **Objetivo**
-Permitir que el comprador añada un vino disponible al carrito.
+Permitir que el Comprador añada un vino válido o fusione, tras registro o inicio de sesión, el carrito local del Visitante con su carrito persistente.
 
 **Método HTTP**
 POST
@@ -696,28 +691,27 @@ POST
 Comprador
 
 **Parámetros de entrada**
-vino_id, cantidad
+Modo ordinario: vino_id, cantidad. Modo fusión: fusion_id único e items locales [{vino_id, cantidad_local}].
 
 **Validaciones**
-El vino está publicado y disponible. La cantidad es válida y no supera la disponibilidad. Si el vino ya está en el carrito, se actualiza la cantidad.
+Comprador autenticado y único carrito persistente activo. Cada vino debe estar publicado, disponible y pertenecer a bodega validada. Cantidades positivas y no superiores al stock tras la combinación. `fusion_id` obligatorio y único para cada instantánea local fusionada.
 
 **Respuesta correcta**
-200 OK. Carrito actualizado con el importe recalculado.
+200 OK. En modo ordinario crea o actualiza una única línea por vino. En modo fusión, para cada vino coincidente establece `min(stock_disponible, cantidad_persistente + cantidad_local)`; conserva las líneas válidas, informa por línea las descartadas o limitadas y devuelve el carrito completo recalculado.
 
 **Posibles errores**
-400 cantidad inválida · 409 stock insuficiente · 404 vino no encontrado, despublicado o no disponible.
+400 cantidad o estructura inválida · 401 sesión ausente · 404 vino no encontrado/despublicado/no disponible · 409 stock insuficiente en modo ordinario · 409 `fusion_id` reutilizado con contenido distinto.
 
 **Casos de uso relacionados**
-CU-007
+CU-002 / CU-007 / CU-008
 
 **Pantallas relacionadas**
-PT-COM-002
+PT-ACC-001, PT-ACC-003, PT-COM-002
 
 **Observaciones**
-El carrito conserva la bodega asociada a cada vino.
+La fusión se ejecuta transaccionalmente sobre el conjunto de líneas válidas. Repetir el mismo `fusion_id` con el mismo contenido devuelve exactamente el resultado registrado y no vuelve a sumar cantidades. El carrito visitante nunca se persiste antes de autenticar. DLOG 0010, 0016 y 0017.
 
 ---
-
 
 ### API-012 — Gestionar carrito — consultar
 
@@ -907,7 +901,7 @@ API-016
 Realizar checkout
 
 **Objetivo**
-Confirmar los datos necesarios para preparar el Pedido antes del pago.
+Confirmar los datos necesarios para preparar un único Pedido antes del pago.
 
 **Método HTTP**
 POST
@@ -922,13 +916,13 @@ Comprador
 direccion_envio_id, direccion_facturacion_id
 
 **Validaciones**
-Comprador autenticado. Carrito no vacío. Datos obligatorios completos. Dirección de envío válida. Disponibilidad revalidada. Un carrito activo solo puede originar un Pedido en estado `pendiente_pago`; si se repite la misma solicitud, se devuelve el Pedido ya creado sin generar otro.
+Comprador autenticado. Carrito activo no vacío. Líneas, precios y disponibilidad revalidados. Ambas direcciones existen, pertenecen al comprador y están activas; la primera está habilitada para envío y la segunda para facturación. Pueden ser el mismo registro únicamente si admite ambos usos. Un carrito activo solo puede originar un Pedido `pendiente_pago`; el reintento devuelve el ya creado.
 
 **Respuesta correcta**
-200 OK. Pedido preparado para pago, con total calculado.
+200 OK. Pedido `pendiente_pago` preparado con total calculado y referencias a ambas direcciones. Los snapshots comerciales y de direcciones se congelan únicamente tras la confirmación válida de pago por API-029.
 
 **Posibles errores**
-400 carrito vacío o datos incompletos · 404 dirección inválida · 409 disponibilidad cambiada.
+400 carrito vacío/datos incompletos/dirección no habilitada · 403 dirección ajena · 404 dirección inexistente o inactiva · 409 disponibilidad o precio cambiado.
 
 **Casos de uso relacionados**
 CU-009
@@ -937,10 +931,9 @@ CU-009
 PT-COM-003
 
 **Observaciones**
-No se inicia el pago si el checkout no es válido. La operación es idempotente por carrito activo mientras exista su Pedido `pendiente_pago`.
+No se inicia el pago si el checkout no es válido. Operación idempotente por carrito activo mientras exista su Pedido `pendiente_pago`. DLOG 0016.
 
 ---
-
 
 ### API-017 — Pagar Pedido
 
@@ -995,7 +988,7 @@ API-018
 Consultar confirmación de Pedido
 
 **Objetivo**
-Permitir que el comprador consulte la confirmación de su Pedido tras el retorno desde Stripe Checkout.
+Permitir que el comprador consulte el resultado persistido de su Pedido tras el retorno desde Stripe Checkout.
 
 **Método HTTP**
 GET
@@ -1013,7 +1006,7 @@ pedido_id (en la ruta)
 El Pedido pertenece al comprador autenticado.
 
 **Respuesta correcta**
-200 OK. Devuelve la confirmación del Pedido si el pago ya fue aprobado por el sistema.
+200 OK. Devuelve la confirmación únicamente si API-029 ya procesó con éxito el webhook firmado y `pago.estado` refleja pago aprobado.
 
 **Posibles errores**
 404 Pedido no encontrado o pago aún no confirmado.
@@ -1025,13 +1018,9 @@ CU-010 / CU-028
 PT-COM-005
 
 **Observaciones**
-La confirmación solo se muestra como válida tras pago aprobado por Stripe.
+El retorno del navegador y esta consulta no confirman pagos; solo presentan el resultado cuya autoridad es API-029.
 
 ---
-
-
-
-## Módulo: Pedidos
 
 ### API-019 — Consultar Pedidos
 
@@ -1218,10 +1207,10 @@ PT-BOD-008
 API-023
 
 **Nombre**
-Cambiar estado de SubPedido
+Cambiar estado de SubPedido y recalcular Pedido
 
 **Objetivo**
-Permitir que la bodega actualice el estado operativo de un SubPedido asignado.
+Permitir que la bodega actualice el estado operativo de un SubPedido propio y derivar de forma determinista el estado global del Pedido.
 
 **Método HTTP**
 PATCH
@@ -1236,13 +1225,19 @@ Bodega
 estado_destino
 
 **Validaciones**
-El SubPedido pertenece a la bodega. El cambio de estado está permitido para el estado actual.
+El SubPedido pertenece a la bodega asociada al usuario. La bodega está validada. La transición desde el estado actual está permitida; un entregado no retrocede a preparación.
 
 **Respuesta correcta**
-200 OK. Estado del SubPedido actualizado; el sistema recalcula automáticamente el estado global del Pedido cuando corresponde (CU-030).
+200 OK. Actualiza `subpedido.estado`, única fuente logística, y recalcula `pedido.estado` usando todos sus SubPedidos:
+- todos `pendiente` → `pagado`;
+- ninguno enviado/entregado y al menos uno `aceptado`, `en_preparacion` o `incidencia` → `en_preparacion`;
+- existe al menos uno `enviado` o `entregado` y otro sigue `pendiente`, `aceptado`, `en_preparacion` o `incidencia` → `parcialmente_enviado`;
+- todos los no cancelados están en `enviado` o `entregado`, y al menos uno sigue `enviado` → `enviado`;
+- todos los no cancelados están `entregado` y existe al menos uno no cancelado → `entregado`;
+- todos están `cancelado` → `cancelado`.
 
 **Posibles errores**
-403 el SubPedido no pertenece a la bodega · 409 cambio de estado no permitido.
+403 SubPedido ajeno, bodega no validada o asociación usuario–bodega inválida · 404 SubPedido inexistente · 409 transición no permitida o relación inconsistente.
 
 **Casos de uso relacionados**
 CU-019 / CU-030
@@ -1251,13 +1246,9 @@ CU-019 / CU-030
 PT-BOD-008, PT-COM-007, PT-ADM-007
 
 **Observaciones**
-La bodega no puede modificar el Pedido completo. El recálculo del estado global del Pedido se ejecuta como consecuencia interna de esta operación.
+La bodega no modifica directamente `pedido.estado`. `pendiente_pago` se mantiene antes del pago y `devuelto` pertenece al flujo de devolución, no a esta matriz logística. DLOG 0005 y 0018.
 
 ---
-
-
-
-## Módulo: Administración
 
 ### API-024 — Validar bodega
 
@@ -1788,7 +1779,7 @@ API-042
 Actualizar estado de incidencia
 
 **Objetivo**
-Permitir que el administrador cambie el estado de una incidencia dentro de las transiciones permitidas.
+Permitir que el administrador avance una incidencia por el ciclo mínimo auditable del MVP.
 
 **Método HTTP**
 PATCH
@@ -1803,13 +1794,13 @@ Administrador
 estado_destino
 
 **Validaciones**
-Administrador autenticado; la incidencia debe existir; la transición debe estar permitida para el estado actual.
+Administrador autenticado. Incidencia existente y asociada al menos a Pedido, SubPedido, Bodega o Vino. Solo se permiten las transiciones consecutivas `abierta → en_revision → resuelta → cerrada`; se prohíben saltos, retrocesos y reaperturas.
 
 **Respuesta correcta**
-200 OK. Incidencia actualizada; se registra el cambio para auditoría.
+200 OK. Incidencia actualizada al siguiente estado y cambio registrado automáticamente en `auditoria`.
 
 **Posibles errores**
-401 · 403 · 404 · 409 transición no permitida.
+401 sesión ausente · 403 rol insuficiente · 404 incidencia inexistente · 409 salto, retroceso, reapertura o relación inválida.
 
 **Casos de uso relacionados**
 CU-027
@@ -1818,12 +1809,9 @@ CU-027
 PT-ADM-008, PT-ADM-009
 
 **Observaciones**
-Todo cambio de estado de incidencia genera un registro en la tabla `auditoria` (INF-05). Brecha 13 de la Auditoría de cobertura v1.0.
+Una incidencia cerrada es terminal en el MVP. DLOG 0015.
 
 ---
-
-
-## Módulo: Sistema
 
 ### API-029 — Webhook de Stripe
 
@@ -1831,31 +1819,31 @@ Todo cambio de estado de incidencia genera un registro en la tabla `auditoria` (
 API-029
 
 **Nombre**
-Webhook de Stripe
+Webhook de Stripe — confirmar pago y generar SubPedidos
 
 **Objetivo**
-Recibir la confirmación de Stripe y confirmar el Pedido, generando los SubPedidos internos correspondientes.
+Procesar la autoridad económica de Stripe de forma firmada, idempotente y atómica para confirmar el pago y materializar la división operativa del Pedido.
 
 **Método HTTP**
 POST
 
 **Ruta**
-`/sistema/webhooks/stripe`
+`/webhooks/stripe`
 
 **Actor autorizado**
-Sistema (Stripe, autenticado por firma de webhook)
+Stripe mediante firma verificada
 
 **Parámetros de entrada**
-Payload de evento de Stripe
+Payload Stripe, firma Stripe y `stripe_event_id`.
 
 **Validaciones**
-La firma del webhook se verifica antes de procesar el evento. El Pedido solo se confirma si el pago está aprobado. El procesamiento es idempotente.
+Firma válida. Tipo de evento reconocido. `stripe_event_id` registrado en el ledger. Pedido y Pago existentes y relacionados. Pago aprobado. Moneda e importe coinciden exactamente con Pedido/Pago. El identificador de sesión/pago de Stripe corresponde al Pedido.
 
 **Respuesta correcta**
-200 OK. Confirmación de recepción a Stripe; el Pedido queda confirmado y los SubPedidos generados si el pago es correcto.
+200 OK. En una única transacción: registra el resultado del evento; actualiza `pago.estado` como única fuente económica persistente; congela líneas, precios y direcciones confirmados; aplica el efecto de stock; y crea exactamente un SubPedido por combinación Pedido–Bodega, con solo las líneas de esa bodega y el mismo Pedido/Pago. La confirmación queda disponible para API-018.
 
 **Posibles errores**
-400 firma inválida · 422 evento no reconocido · pago rechazado o cancelado: el Pedido no se confirma.
+400 firma inválida · 404 Pedido/Pago inexistente · 409 importe, moneda o asociación discrepante · 422 evento no reconocido. Un pago no aprobado no confirma ni genera SubPedidos.
 
 **Casos de uso relacionados**
 CU-028 / CU-029
@@ -1864,78 +1852,7 @@ CU-028 / CU-029
 —
 
 **Observaciones**
-Es la fuente definitiva de verdad sobre el estado del pago; genera un SubPedido por cada bodega incluida en el Pedido.
+El primer procesamiento exitoso de un `stripe_event_id` produce como máximo un efecto comercial. Su reenvío devuelve el resultado registrado sin repetir Pago, stock ni SubPedidos. Un fallo transitorio previo al éxito puede reintentarse; la unicidad impide dos efectos exitosos. Cualquier fallo transaccional revierte el conjunto completo, sin SubPedidos parciales. DLOG 0014 y 0016.
 
 ---
 
-
-
----
-
-## Matriz de trazabilidad CU/PT → API
-
-| API | Caso de Uso | Pantalla |
-|---|---|---|
-| API-001 | CU-001 | PT-ACC-001 |
-| API-002 | CU-002 / CU-013 / CU-020 | PT-ACC-003, PT-BOD-001, PT-ADM-001, PT-SIS-003 |
-| API-003 | CU-003 | PT-ACC-004 |
-| API-004 | CU-003 | PT-ACC-005 |
-| API-005 | CU-012 | PT-ACC-002 |
-| API-006 | CU-014 | PT-BOD-002 |
-| API-007 | CU-015 | PT-BOD-004 |
-| API-008 | CU-016 | PT-BOD-005 |
-| API-009 | CU-004 / CU-005 | PT-PUB-002 |
-| API-010 | CU-006 | PT-PUB-003 |
-| API-011 | CU-007 | PT-COM-002 |
-| API-012 | CU-008 | PT-COM-002 |
-| API-013 | CU-008 | PT-COM-002 |
-| API-014 | CU-008 | PT-COM-002 |
-| API-015 | CU-008 | PT-COM-002 |
-| API-016 | CU-009 | PT-COM-003 |
-| API-017 | CU-010 | PT-COM-004 |
-| API-018 | CU-010 / CU-028 | PT-COM-005 |
-| API-019 | CU-011 | PT-COM-006 |
-| API-020 | CU-011 | PT-COM-007 |
-| API-021 | CU-018 | PT-BOD-007 |
-| API-022 | CU-018 | PT-BOD-008 |
-| API-023 | CU-019 / CU-030 | PT-BOD-008, PT-COM-007, PT-ADM-007 |
-| API-024 | CU-021 | PT-ADM-002 / PT-ADM-003 |
-| API-025 | CU-023 | PT-ADM-004 / PT-ADM-005 |
-| API-026 | CU-024 | PT-ADM-004 / PT-ADM-005 |
-| API-027 | CU-025 | PT-ADM-006 / PT-ADM-007 |
-| API-028 | CU-026 | PT-ADM-001 |
-| API-029 | CU-028 / CU-029 | — |
-| API-030 | CU-006 (navegación alternativa) | PT-PUB-004 |
-| API-031 | CU-014 | PT-BOD-002 |
-| API-032 | CU-015 / CU-016 / CU-017 | PT-BOD-003 |
-| API-033 | CU-015 / CU-016 / CU-017 | PT-BOD-006 |
-| API-034 | CU-017 | PT-BOD-003, PT-BOD-005, PT-BOD-006, PT-ADM-004 |
-| API-035 | CU-021 | PT-ADM-002 |
-| API-036 | CU-021 | PT-ADM-003 |
-| API-037 | CU-022 / CU-023 / CU-024 | PT-ADM-004 |
-| API-038 | CU-022 / CU-023 / CU-024 | PT-ADM-005 |
-| API-039 | CU-025 | PT-ADM-007 |
-| API-040 | CU-027 | PT-ADM-008 |
-| API-041 | CU-027 | PT-ADM-009 |
-| API-042 | CU-027 | PT-ADM-008, PT-ADM-009 |
-
-### Cobertura explícita de pantallas sin operación exclusiva
-
-- **PT-PUB-001 — Inicio público:** consume API-009 para mostrar catálogo destacado o estado vacío; no requiere un endpoint independiente.
-- **PT-COM-001 — Área del comprador:** se habilita mediante API-002 y presenta accesos/resúmenes derivados de API-019 y API-020; no introduce una operación de negocio adicional.
-- **PT-SIS-001 — No encontrado** y **PT-SIS-002 — No disponible:** son estados de interfaz derivados de las respuestas 404, 403 y 409 del contrato; no requieren endpoints propios.
-- **PT-SIS-003 — Acceso denegado:** deriva de las validaciones de autenticación, rol y propiedad descritas transversalmente en CU-031.
-
-### Reglas transversales de trazabilidad
-
-- **CU-031 — Control de acceso por rol:** aplica transversalmente a todos los endpoints autenticados. Cada contrato define actor autorizado, validación de sesión, rol, validación de bodega y/o propiedad del recurso según corresponda.
-- **CU-032 — Recursos no disponibles o no encontrados:** aplica transversalmente a los endpoints que consultan o modifican recursos. Los contratos contemplan respuestas 403, 404 y/o 409 según autorización, existencia, disponibilidad y estado del recurso.
-- Estos dos Casos de Uso no requieren endpoints independientes: son reglas obligatorias del contrato completo.
-
-Matriz completa: 42 endpoints (API-001 a API-042), cada uno con Caso de Uso y/o Pantalla trazados. Los 32 Casos de Uso de CAP-06 quedan cubiertos por endpoints explícitos o, en CU-031 y CU-032, por reglas transversales del contrato. Las 36 pantallas de CAP-05 quedan cubiertas por operaciones API o por estados de interfaz derivados de sus respuestas.
-
-### Alcance de la aprobación técnica
-
-INF-08 v2.3 mantiene cerrada la cobertura funcional de 42 endpoints y corrige su alineación con ADR-001, CAP-02 v1.2 y CAP-07 v1.2. Su aprobación no altera INF-07, INF-09, ADR-003 ni ADR-004 y no amplía el MVP. CAP-08 v1.2 se cierra de forma independiente mediante criterios verificables.
-
-*INF-08 v2.3 — 42 endpoints en 9 módulos. Corrección documental de alineación autorizada el 13/07/2026. Estado: EN REVISIÓN.*
