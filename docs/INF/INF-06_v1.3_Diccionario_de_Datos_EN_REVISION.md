@@ -22,7 +22,7 @@ Actualización 1:1 sobre INF-05 v1.4 en revisión. Documenta 19 tablas, tipos ex
 - Decisión 0015: ciclo de Incidencia `abierta → en_revision → resuelta → cerrada`.
 - Decisión 0016: idempotencia e integridad comercial mediante unicidad, ledger Stripe y claves compuestas.
 - Decisión 0017: fusión por suma limitada al stock e idempotencia por `fusion_id`.
-- Documento sustituido: INF-06 v1.1.
+- Documento sustituido: INF-06 v1.2.
 
 ## Índice
 
