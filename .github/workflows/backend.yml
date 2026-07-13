@@ -1,0 +1,42 @@
+name: Backend
+
+on:
+  pull_request:
+    paths:
+      - "apps/backend/**"
+      - "docs/INF/openapi/**"
+      - "scripts/validate_openapi_contract.py"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/backend.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/backend/**"
+      - "docs/INF/openapi/**"
+      - "scripts/validate_openapi_contract.py"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/backend.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run backend:check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --disable-pip-version-check pyyaml
+      - run: python scripts/validate_openapi_contract.py docs/INF/openapi/teralya-openapi-v1.0.yaml
+      - run: npx --yes @redocly/cli lint docs/INF/openapi/teralya-openapi-v1.0.yaml
