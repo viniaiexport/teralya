@@ -1229,7 +1229,7 @@ El SubPedido pertenece a la bodega asociada al usuario. La bodega está validada
 
 **Respuesta correcta**
 200 OK. Actualiza `subpedido.estado`, única fuente logística, y recalcula `pedido.estado` usando todos sus SubPedidos:
-- todos `pendiente` → `pagado`;
+- todos los no cancelados están `pendiente` y existe al menos uno no cancelado → `pagado`;
 - ninguno enviado/entregado y al menos uno `aceptado`, `en_preparacion` o `incidencia` → `en_preparacion`;
 - existe al menos uno `enviado` o `entregado` y otro sigue `pendiente`, `aceptado`, `en_preparacion` o `incidencia` → `parcialmente_enviado`;
 - todos los no cancelados están en `enviado` o `entregado`, y al menos uno sigue `enviado` → `enviado`;
