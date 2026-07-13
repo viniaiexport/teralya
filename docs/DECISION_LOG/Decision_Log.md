@@ -1,6 +1,6 @@
 # Decision Log — Teralya
 
-**Versión 1.3 · Julio 2026 · Registro oficial de decisiones del proyecto.** Cada decisión relevante queda aquí con fecha y motivo, para no perder el razonamiento ni repetir discusiones ya cerradas.
+**Versión 1.4 · Julio 2026 · Registro oficial de decisiones del proyecto.** Cada decisión relevante queda aquí con fecha y motivo, para no perder el razonamiento ni repetir discusiones ya cerradas.
 
 | ID | Decisión | Motivo | Fecha | Estado |
 |---|---|---|---|---|
@@ -20,6 +20,8 @@
 | 0014 | `pago.estado` es la única fuente persistente del estado económico del pago; se eliminan los campos duplicados de Pedido | Evitar divergencias y mantener al webhook de Stripe como autoridad de confirmación | 13/07/2026 | Aprobada por el CEO; aplicada en INF-05 v1.3 |
 | 0015 | Ciclo mínimo de Incidencia: `abierta → en_revision → resuelta → cerrada`, sin reaperturas ni soporte avanzado en el MVP | Hacer implementable API-042 y conservar un flujo administrativo mínimo y auditable | 13/07/2026 | Aprobada por el CEO; aplicada en INF-05 v1.3 |
 | 0016 | Idempotencia e integridad comercial garantizadas en base de datos mediante carrito único por Pedido, ledger de eventos Stripe y claves compuestas Pedido–Pago–SubPedido–Línea–Bodega | Evitar duplicidades de cobro, SubPedidos duplicados y relaciones comerciales incoherentes | 13/07/2026 | Aprobada por el CEO; aplicada en INF-05 v1.3 |
+| 0017 | Al fusionar el mismo vino desde carrito local y persistente, la cantidad resultante es `min(stock_disponible, cantidad_persistente + cantidad_local)`; cada instantánea local usa un `fusion_id` idempotente | Conservar la intención de compra sin superar stock ni duplicar cantidades en reintentos | 13/07/2026 | Aprobada por el CEO; aplicada en INF-08 v2.3 y CAP-08 v1.2 |
+| 0018 | `pedido.estado` logístico se deriva determinísticamente del conjunto de `subpedido.estado` mediante la matriz pagado / en_preparacion / parcialmente_enviado / enviado / entregado / cancelado | Convertir DLOG 0005 en una regla comprobable y evitar escrituras globales arbitrarias | 13/07/2026 | Aprobada por el CEO; aplicada en INF-08 v2.3 y CAP-08 v1.2 |
 
 ---
 
