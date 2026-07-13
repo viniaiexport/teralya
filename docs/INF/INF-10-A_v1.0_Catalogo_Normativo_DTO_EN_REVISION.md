@@ -24,6 +24,7 @@ Este catálogo cierra TAPI-09. Cada schema es un objeto JSON con `additionalProp
 | DateTime | string, format date-time UTC |
 | Email | string, format email, 3..254, comparación case-insensitive |
 | Password | string WO, 12..128, no trim |
+| RecoveryToken | string WO, 32..512 |
 | ConfirmationToken | string sensible, 32..4096; RO en UploadAuthorization y WO en ImageConfirmRequest |
 | Lang | enum es, en, fr, de, it |
 | URI | string, format uri, 1..2048 |
@@ -73,7 +74,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 | RegisterBuyerRequest | `email:Email`, `password:Password`, `nombre:Text100`, `apellidos:Text100`, `fecha_nacimiento:Date`, `declaracion_mayoria_edad:true`, `aceptacion_condiciones_alcohol:true` | `idioma:Lang` | WO |
 | LoginRequest | `email:Email`, `password:Password` | — | WO |
 | PasswordRecoveryRequest | `email:Email` | — | WO |
-| PasswordResetRequest | `token:Token`, `password_nueva:Password`, `confirmacion_password:Password` | — | WO; passwords idénticos |
+| PasswordResetRequest | `token:RecoveryToken`, `password_nueva:Password`, `confirmacion_password:Password` | — | WO; passwords idénticos |
 | UsuarioSesion | `id:UUID`, `email:Email`, `rol:Role`, `idioma:Lang`, `estado:UserState` | `nombre:Text100`, `apellidos:Text100`, `bodega_id:UUID` | RO; bodega_id solo para rol bodega |
 | AuthSession | `access_token:string(43)`, `token_type:"Bearer"`, `expires_in:28800`, `expires_at:DateTime`, `usuario:UsuarioSesion` | — | RO; access_token solo API-001/002 |
 
