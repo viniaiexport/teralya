@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 3.7 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 3.8 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -22,7 +22,7 @@
 | INF-05 | Esquema de Base de Datos | 1.2 | 🟡 EN REVISIÓN | docs/INF/teralya_schema_v1.2_EN_REVISION.sql | CAP-01, CAP-02 | v1.1 aprobada |
 | INF-06 | Diccionario de Datos | 1.1 | 🟡 EN REVISIÓN | docs/INF/INF-06_v1.1_Diccionario_de_Datos.md | INF-05 v1.2 | v1.0 aprobada |
 | INF-07 | Arquitectura Técnica Consolidada | 1.3 | ✅ APROBADO POR CTO | docs/INF/INF-07_v1.3_Arquitectura_Tecnica_Consolidada.md | INF-05, INF-06, ADR-002, ADR-003, ADR-004 | v1.2 |
-| INF-08 | Especificación de APIs | 2.2 | 🟡 EN REVISIÓN | docs/INF/INF-08_v2.2_Especificacion_de_APIs.md | CAP-05, CAP-06, CAP-07, INF-05, INF-06, ADR-002 | v2.1 |
+| INF-08 | Especificación de APIs | 2.2 | ✅ APROBADO POR CTO | docs/INF/INF-08_v2.2_Especificacion_de_APIs.md | CAP-05, CAP-06, CAP-07, INF-05, INF-06, ADR-002 | v2.1 |
 | INF-08-AUD-IDEM | Auditoría limitada de Idempotencia | 1.0 | ✅ Cerrada (incorporada en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
 | INF-08-AUD-COV | Auditoría de cobertura de Pantallas y Casos de Uso | 1.0 | ✅ Cerrada (13 brechas resueltas en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Cobertura_Pantallas_v1.0.md | CAP-05, CAP-06, CAP-07, INF-08 v2.1 | — |
 | INF-09 | Arquitectura Frontend | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, INF-07 v1.3, ADR-001 a ADR-004 | — |
@@ -75,17 +75,22 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - INF-07 v1.3 aprobado y alineado con una única aplicación Next.js.
 - INF-09 v1.0 aprobado con 25 apartados.
 - ADR-004 y Decisión 0013 cierran la topología Frontend.
-- La arquitectura Frontend no tiene decisiones pendientes.
+- INF-08 v2.2 aprobado con 42 endpoints en 9 módulos.
+- Las 13 brechas de cobertura de INF-08 v2.1 quedan cerradas.
+- La trazabilidad de CU-001 a CU-032 y de las 36 pantallas queda documentada; CU-031 y CU-032 son reglas transversales del contrato.
+- INF-09 §19 actualizado para referenciar INF-08 v2.2 aprobada.
 
 ### Documento actualmente en desarrollo
 
-**INF-08 v2.2 — Especificación de APIs completa** — entregada. 42 endpoints, 9 módulos, cierra las 13 brechas de cobertura, matriz CU/PT → API sin huecos. Pendiente de revisión del CTO.
+**INF-05 v1.2 — Esquema de Base de Datos** — siguiente documento técnico pendiente de revisión y cierre.
 
 ### Bloqueos abiertos
 
-- Trece operaciones aprobadas carecen de contrato API explícito. Las pantallas afectadas no deben implementarse hasta aprobar INF-08 v2.2.
-- INF-05 v1.2, INF-06 v1.1, CAP-02 v1.1, CAP-07 v1.1 y CAP-08 v1.1 siguen EN REVISIÓN y requieren cierre independiente.
+- INF-05 v1.2 e INF-06 v1.1 siguen EN REVISIÓN; deben aprobarse antes de implementar persistencia y migraciones definitivas.
+- CAP-02 v1.1 sigue EN REVISIÓN y debe cerrarse de forma coherente con INF-05 e INF-06.
+- CAP-07 v1.1 y CAP-08 v1.1 siguen EN REVISIÓN y requieren cierre funcional independiente.
+- No quedan bloqueos abiertos de cobertura en INF-08 ni de arquitectura Frontend.
 
 ### Regla de continuidad
 
-Los huecos de INF-08 no reabren INF-09. Cualquier cambio futuro de framework, App Router o topología requiere un nuevo ADR.
+La aprobación de INF-08 v2.2 no reabre INF-09. Cualquier cambio futuro de framework, App Router o topología requiere un nuevo ADR.
