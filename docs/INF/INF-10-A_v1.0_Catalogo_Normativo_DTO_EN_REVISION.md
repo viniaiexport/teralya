@@ -133,10 +133,10 @@ Para API-034/API-025, vino completo significa: nombre, precio positivo, EUR, sto
 
 | Schema | Campos requeridos | Campos opcionales | Flags y reglas |
 |---|---|---|---|
-| AddressCreateRequest | `uso:enum(envio,facturacion,ambos)`, `destinatario:Text160`, `direccion:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `pais:Text100` | `nombre_identificativo:Text100`, `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email`, `es_principal:boolean` | WO; uso se mapea internamente a es_envio/es_facturacion |
+| AddressCreateRequest | `uso:enum(envio,facturacion,ambos)`, `nombre_destinatario:Text160`, `direccion:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `pais:Text100` | `nombre_identificativo:Text100`, `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email`, `es_principal:boolean` | WO; uso se mapea internamente a es_envio/es_facturacion |
 | AddressPatchRequest | al menos uno | todos los campos de AddressCreateRequest | WO |
-| Address | `id:UUID`, `uso:enum(envio,facturacion,ambos)`, `destinatario:Text160`, `direccion:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `pais:Text100`, `es_principal:boolean`, `activa:boolean`, `created_at:DateTime`, `updated_at:DateTime` | `nombre_identificativo:Text100`, `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email` | RO; nunca propietario_tipo/id |
-| AddressSnapshot | `destinatario:Text160`, `direccion:Text200`, `codigo_postal:string`, `ciudad:Text100`, `pais:Text100` | `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email` | RO; inmutable |
+| Address | `id:UUID`, `uso:enum(envio,facturacion,ambos)`, `nombre_destinatario:Text160`, `direccion:Text200`, `codigo_postal:string(1..20)`, `ciudad:Text100`, `pais:Text100`, `es_principal:boolean`, `activa:boolean`, `created_at:DateTime`, `updated_at:DateTime` | `nombre_identificativo:Text100`, `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email` | RO; nunca propietario_tipo/id |
+| AddressSnapshot | `nombre_destinatario:Text160`, `direccion:Text200`, `codigo_postal:string`, `ciudad:Text100`, `pais:Text100` | `empresa:Text160`, `direccion_adicional:Text200`, `provincia:Text100`, `persona_contacto:Text100`, `telefono:Text32`, `email:Email` | RO; inmutable |
 
 ## Pedidos, pagos y SubPedidos
 
