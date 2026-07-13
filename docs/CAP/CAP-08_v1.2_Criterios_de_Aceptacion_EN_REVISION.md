@@ -346,7 +346,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 | Rango | Actor | Historias | Criterios | Fuentes principales |
 |---|---|---:|---:|---|
-| HU-001 a HU-011 | Comprador | 11 | 36 | CU-001 a CU-011 |
+| HU-001 a HU-011 | Comprador | 11 | 37 | CU-001 a CU-011 |
 | HU-012 a HU-019 | Bodega | 8 | 17 | CU-012 a CU-019 |
 | HU-020 a HU-027 | Administrador | 8 | 19 | CU-020 a CU-027 |
 | HU-028 a HU-032 | Sistema | 5 | 20 | CU-028 a CU-032 |
