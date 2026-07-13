@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 4.2 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 4.3 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -12,7 +12,7 @@
 | CAP-04 | Flujos Funcionales | 1.0 | ✅ APROBADO | docs/CAP/CAP-04-Flujos-Funcionales.md | CAP-03 | — |
 | CAP-05 | Pantallas del MVP | 1.0 | ✅ APROBADO | docs/CAP/CAP-05-Pantallas-del-MVP.pdf | CAP-03, CAP-04 | — |
 | CAP-06 | Casos de Uso | 1.0 | ✅ APROBADO | docs/CAP/CAP-06-Casos-de-Uso.pdf | CAP-03, CAP-04, CAP-05 | — |
-| CAP-07 | Historias de Usuario | 1.1 | 🟡 EN REVISIÓN | docs/CAP/CAP-07_v1.1_Historias_de_Usuario.md | CAP-06 | v1.0 incompleta |
+| CAP-07 | Historias de Usuario | 1.2 | ✅ APROBADO POR CTO | docs/CAP/CAP-07_v1.2_Historias_de_Usuario_APROBADO.md | CAP-06, ADR-001, DLOG 0010/0014–0016 | v1.1 en revisión |
 | CAP-08 | Criterios de Aceptación | 1.1 | 🟡 EN REVISIÓN | docs/CAP/CAP-08_v1.1_Criterios_de_Aceptacion.md | CAP-07 v1.1 | v1.0 incompleta |
 
 ## INF — Documentación técnica
@@ -69,6 +69,8 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 | `docs/CAP/CAP-02_v1.1_Modelo_de_Datos.md` | Sustituido por CAP-02 v1.2 aprobada |
 | `docs/CAP/CAP-02_v1.2_Modelo_de_Datos_EN_REVISION.md` | Sustituido por CAP-02 v1.2 aprobada |
 | `docs/CAP/CAP-07-Historias-de-Usuario.md` | Sustituido por CAP-07 v1.1 |
+| `docs/CAP/CAP-07_v1.1_Historias_de_Usuario.md` | Sustituido por CAP-07 v1.2 aprobada |
+| `docs/CAP/CAP-07_v1.2_Historias_de_Usuario_EN_REVISION.md` | Sustituido por CAP-07 v1.2 aprobada |
 | `docs/CAP/CAP-08-Criterios-de-Aceptacion.md` | Sustituido por CAP-08 v1.1 |
 | `docs/INF/INF-08_v2.0_Especificacion_de_APIs.md` | Sustituido por INF-08 v2.1 |
 | `docs/INF/INF-08_v2.1_Especificacion_de_APIs.md` | Sustituido por INF-08 v2.2 (cierra 13 brechas de cobertura) |
@@ -88,14 +90,15 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - INF-05 v1.3 aprobado con decisiones 0014–0016, 18 tablas e integridad reforzada.
 - INF-06 v1.2 aprobado y alineado 1:1 con INF-05 v1.3.
 - CAP-02 v1.2 aprobado y alineado con ADR-001, DLOG 0010/0014–0016 e INF-05/06.
+- CAP-07 v1.2 aprobado con 32 historias y actores Visitante/Comprador correctamente delimitados.
 
 ### Documento actualmente en desarrollo
 
-**CAP-07 v1.1 — Historias de Usuario** — siguiente documento funcional pendiente de revisión y cierre.
+**CAP-08 v1.2 — Criterios de Aceptación** — siguiente documento; debe alinearse con CAP-07 v1.2.
 
 ### Bloqueos abiertos
 
-- CAP-07 v1.1 y CAP-08 v1.1 continúan EN REVISIÓN y requieren cierre funcional.
+- CAP-08 v1.1 está desactualizado respecto a CAP-07 v1.2 y debe reconstruirse como v1.2.
 - CAP-02 v1.1 sigue EN REVISIÓN y debe cerrarse de forma coherente con INF-05 e INF-06.
 - CAP-07 v1.1 y CAP-08 v1.1 siguen EN REVISIÓN y requieren cierre funcional independiente.
 - No quedan bloqueos abiertos de cobertura en INF-08 ni de arquitectura Frontend.
