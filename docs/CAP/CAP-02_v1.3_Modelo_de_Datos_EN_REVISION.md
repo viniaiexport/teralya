@@ -15,7 +15,7 @@
 |---|---|---|---|---|
 | 1.0 | Julio de 2026 | Arquitecto de Producto Teralya | INCOMPLETA | Archivo inicial sin el desarrollo completo del modelo de datos. |
 | 1.1 | 11/07/2026 | Arquitecto de Datos Teralya | SUSTITUIDA | Reconstrucción inicial del modelo funcional. |
-| 1.2 | 13/07/2026 | CTO Teralya | APROBADO | Alineación con ADR-001, Decisión 0010, INF-05 v1.3, INF-06 v1.2 y Decisiones 0014–0016. |
+| 1.2 | 13/07/2026 | CTO Teralya | APROBADO | Alineación con ADR-001, Decisión 0010, INF-05 v1.4, INF-06 v1.3 y Decisiones 0014–0016. |
 | 1.3 | 13/07/2026 | CTO + Arquitecto de Datos | EN REVISIÓN | Soporte persistente mínimo de DLOG 0017 mediante CarritoFusion; alineación con INF-05 v1.4 e INF-06 v1.3. |
 
 ---
@@ -305,13 +305,14 @@ Agrupar temporalmente los vinos seleccionados antes de la compra.
 
 Para hacer idempotente la fusión tras registro o inicio de sesión, cada instantánea local procesada genera un registro técnico **CarritoFusion**.
 
-- Pertenece a un Comprador autenticado y al Carrito persistente afectado.
+- Pertenece a un Comprador autenticado y, mediante una relación compuesta, únicamente a un Carrito del mismo Comprador.
 - Identifica la instantánea mediante `fusion_id`.
-- Conserva una huella del contenido recibido y el resultado por línea.
+- El servidor calcula una huella SHA-256 hexadecimal del JSON canónico —líneas ordenadas por vino y cantidades enteras normalizadas— y conserva un resultado versionado por línea.
 - La combinación del mismo vino suma cantidad persistente y local hasta el stock disponible.
 - La pareja Comprador–`fusion_id` es única.
 - Repetir la misma clave y contenido devuelve el resultado registrado sin volver a sumar.
 - Reutilizar la clave con contenido diferente se rechaza.
+- La transacción bloquea el Carrito y sus líneas afectadas antes de combinar cantidades, evitando pérdidas ante fusiones concurrentes con claves distintas.
 - El registro es inmutable y no representa un carrito anónimo ni una nueva función comercial.
 
 
@@ -716,7 +717,7 @@ Administración puede registrar Incidencias mínimas relacionadas con Pedido, Su
 
 # TRAZABILIDAD DOCUMENTAL
 
-| Contenido de CAP-02 v1.2 | Fuente oficial |
+| Contenido de CAP-02 v1.3 | Fuente oficial |
 |---|---|
 | Entidades funcionales, objetivos y responsabilidades | CAP-01 v1.0, APROBADO |
 | Representación persistente y relaciones | INF-05 v1.4, EN REVISIÓN |
@@ -725,11 +726,11 @@ Administración puede registrar Incidencias mínimas relacionadas con Pedido, Su
 | Ciclo cerrado de Incidencia | Decisión 0015 |
 | Idempotencia e integridad comercial | Decisión 0016 |
 | Fusión idempotente por suma limitada al stock | Decisión 0017 |
-| Contratos operativos del MVP | INF-08 v2.2, APROBADO POR CTO |
-| Administrador como rol sin tabla propia | Decision Log 0003 e INF-05 v1.3 |
-| Checkout e Idioma sin tabla independiente | CAP-01 e INF-05 v1.3 |
-| Pedido completo y SubPedidos por bodega | CAP-01, INF-05 v1.3 e INF-06 v1.2 |
-| Evento Webhook Stripe como soporte técnico | INF-05 v1.3, INF-06 v1.2 e INF-08 API-029 |
+| Contratos operativos del MVP | INF-08 v2.3, EN REVISIÓN coordinada |
+| Administrador como rol sin tabla propia | Decision Log 0003 e INF-05 v1.4, EN REVISIÓN coordinada |
+| Checkout e Idioma sin tabla independiente | CAP-01 e INF-05 v1.4, EN REVISIÓN coordinada |
+| Pedido completo y SubPedidos por bodega | CAP-01, INF-05 v1.4 e INF-06 v1.3, EN REVISIÓN coordinada |
+| Evento Webhook Stripe como soporte técnico | INF-05 v1.4, INF-06 v1.3 e INF-08 v2.3 API-029, EN REVISIÓN coordinada |
 | Carrito visitante local, fusión tras autenticación y checkout autenticado | ADR-001 y Decisiones 0010/0017 |
 
 ---
