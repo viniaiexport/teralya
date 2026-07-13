@@ -926,7 +926,7 @@ Total normativo: **13 funciones y 29 triggers**.
 | `bodega` | `chk_bodega_comision` | `CONSTRAINT chk_bodega_comision CHECK (comision IS NULL OR comision BETWEEN 0 AND 100)` |
 | `bodega` | `chk_bodega_plazo_preparacion` | `CONSTRAINT chk_bodega_plazo_preparacion CHECK (plazo_preparacion_dias IS NULL OR plazo_preparacion_dias >= 0)` |
 | `bodega` | `chk_bodega_comision_para_operar` | `CONSTRAINT chk_bodega_comision_para_operar CHECK (estado NOT IN ('aprobada', 'activa') OR comision IS NOT NULL)` |
-| `usuario` | `chk_bodega_segun_rol` | `CONSTRAINT chk_bodega_segun_rol CHECK ( (rol = 'bodega' AND bodega_id IS NOT NULL) OR (rol IN ('comprador', 'administrador') AND bodega_id IS NULL)` |
+| `usuario` | `chk_bodega_segun_rol` | `CONSTRAINT chk_bodega_segun_rol CHECK ( (rol = 'bodega' AND bodega_id IS NOT NULL) OR (rol IN ('comprador', 'administrador') AND bodega_id IS NULL) )` |
 | `usuario` | `chk_usuario_intentos_fallidos` | `CONSTRAINT chk_usuario_intentos_fallidos CHECK (intentos_fallidos >= 0)` |
 | `solicitud_recuperacion_password` | `chk_recuperacion_expira_despues` | `CONSTRAINT chk_recuperacion_expira_despues CHECK (expires_at > created_at)` |
 | `solicitud_recuperacion_password` | `chk_recuperacion_uso_despues` | `CONSTRAINT chk_recuperacion_uso_despues CHECK (used_at IS NULL OR used_at >= created_at)` |
