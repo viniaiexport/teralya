@@ -30,12 +30,14 @@ INF-08 v2.5 y CAP-08 v1.4 están EN REVISIÓN como correcciones coordinadas auto
 - CAP-02 v1.3 aprobado y CAP-08 v1.4 EN REVISIÓN.
 - ADR-001 y ADR-002.
 - DLOG 0014 a 0020.
+- INF-10-A v1.0 — catálogo normativo exacto de DTO y mapeo API-001→050, EN REVISIÓN.
 - INF-07 v1.3 e INF-09 v1.0 únicamente para coherencia; no se reabren.
 
 ## Artefactos coordinados
 
 1. `docs/INF/INF-10_v1.0_Contrato_Tecnico_APIs_EN_REVISION.md`: gobernanza, decisiones e informe de cobertura.
-2. `docs/INF/openapi/teralya-openapi-v1.0_EN_REVISION.yaml`: futuro contrato OpenAPI 3.1, creado únicamente tras cerrar los bloqueos de este documento.
+2. `docs/INF/INF-10-A_v1.0_Catalogo_Normativo_DTO_EN_REVISION.md`: propiedades exactas, required/optional, nullability, flags, límites y mapeo API-001→050.
+3. `docs/INF/openapi/teralya-openapi-v1.0_EN_REVISION.yaml`: futuro contrato OpenAPI 3.1, generado literalmente desde INF-10/INF-10-A tras su aprobación coordinada.
 
 ## Invariantes no negociables
 
@@ -284,14 +286,14 @@ Todos los schemas usan `additionalProperties:false`. Se excluyen hashes, intento
 
 Requests mínimos: registro comprador conserva fecha de nacimiento y dos aceptaciones; registro bodega exige nombre comercial, razón social, CIF/VAT, email, password, persona de contacto, teléfono y aceptación; `WineWrite` exige nombre, precio positivo, EUR, stock y disponibilidad; publicación exige además stock positivo y una imagen confirmada/activa con alt. El catálogo admite `q,tipo_vino,region,denominacion_origen,precio_min,precio_max,page,page_size`.
 
-Proyecciones públicas nunca muestran stock exacto, comisiones, verificación, credenciales, Stripe, auditoría ni direcciones privadas. Proyecciones propias/admin solo añaden campos necesarios por operación. Los campos completos de cada schema se materializarán una sola vez en el YAML y este Markdown conservará la matriz normativa.
+Proyecciones públicas nunca muestran stock exacto, comisiones, verificación, credenciales, Stripe, auditoría ni direcciones privadas. INF-10-A v1.0 enumera exhaustivamente cada propiedad permitida, obligatoriedad, tipo, nullability, readOnly/writeOnly y límite, además del request, éxito y errores de API-001→050. El YAML deberá materializar ese catálogo literalmente y no podrá decidir ni añadir campos.
 
 ## Gate de aprobación
 
 INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
 1. TAPI-01 a TAPI-09 estén cerradas. **CUMPLIDO por DLOG 0019/0020.**
-2. INF-08 v2.5 y CAP-08 v1.4 estén aprobados tras revisión binaria; CAP-07 v1.3 permanece vigente. **PENDIENTE.**
+2. INF-08 v2.5, CAP-08 v1.4 e INF-10-A v1.0 estén aprobados tras revisión binaria; CAP-07 v1.3 permanece vigente. **PENDIENTE.**
 3. El YAML sea válido y todos los `$ref` se resuelvan.
 4. Existan exactamente las operaciones autorizadas, sin duplicados.
 5. Cada operación tenga seguridad, parámetros, request, éxito, errores, ejemplos y trazabilidad.
@@ -301,4 +303,4 @@ INF-10 v1.0 y su OpenAPI solo serán aprobables cuando:
 
 ## Estado
 
-INF-10 v1.0 queda **EN REVISIÓN** con TAPI-01 a TAPI-09 cerradas documentalmente y 50 operaciones fijadas. Antes de generar el OpenAPI deben aprobarse CAP-08 v1.4 e INF-08 v2.5 mediante dictamen binario; después se generará y validará el YAML contra este contrato.
+INF-10 v1.0 queda **EN REVISIÓN** con TAPI-01 a TAPI-09 cerradas documentalmente, 50 operaciones fijadas y catálogo DTO exhaustivo en INF-10-A. Antes de generar el OpenAPI deben aprobarse CAP-08 v1.4, INF-08 v2.5 e INF-10-A mediante dictamen binario; después se generará y validará el YAML contra ambos contratos.
