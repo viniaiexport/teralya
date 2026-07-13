@@ -128,17 +128,17 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-010.1 — Sesión única activa:** DADO un Pedido `pendiente_pago` sin sesión Stripe activa, CUANDO API-017 inicia el pago, ENTONCES crea una sola sesión activa y devuelve su URL y expiración; si existe una activa, el reintento devuelve la misma URL. API-017 no confirma ni rechaza el cobro.
 
-**CA-010.2 — Sustitución de sesión expirada:** DADO una sesión Stripe expirada o inválida, CUANDO se reintenta el pago, ENTONCES puede sustituirse, manteniendo como máximo una sesión activa por Pedido.
+**CA-010.2 — Sustitución de sesión expirada:** DADO una sesión Stripe expirada que dejó `pago.estado=cancelado`, CUANDO se reintenta API-017, ENTONCES bajo bloqueo crea como máximo una sesión sustituta, cambia el Pago de `cancelado` a `pendiente` antes de exponer la nueva URL y conserva el Pedido `pendiente_pago`.
 
 **CA-010.3 — Retorno no confirmatorio:** DADO cualquier retorno del navegador desde Stripe, CUANDO el comprador vuelve a Teralya, ENTONCES el retorno no confirma Pago ni Pedido.
 
 **CA-010.4 — Confirmación autorizada:** DADO un webhook firmado, único, aprobado y con importe/moneda coincidentes, CUANDO API-029 lo procesa, ENTONCES actualiza `pago.estado` y deja la confirmación disponible para API-018.
 
-**CA-010.5 — Pago no aprobado:** DADO pago asíncrono fallido, sesión expirada, firma inválida o importe discrepante, CUANDO API-029 procesa un evento permitido, ENTONCES no confirma ni genera SubPedidos. Un rechazo o cancelación no se comunica como 402 de API-017.
+**CA-010.5 — Pago no aprobado:** DADO pago asíncrono fallido, sesión expirada, firma inválida o importe discrepante, CUANDO API-029 recibe la solicitud o evento, ENTONCES no confirma ni genera SubPedidos. Un rechazo o cancelación no se comunica como 402 de API-017.
 
 **CA-010.6 — Reenvío exitoso:** DADO un `stripe_event_id` ya procesado con éxito, CUANDO se reenvía, ENTONCES devuelve el resultado registrado sin repetir efectos; un fallo transitorio anterior al éxito puede reintentarse.
 
-**Trazabilidad:** CAP-07 v1.3 HU-010 · CU-010 · DLOG 0014/0016 · INF-08 v2.5 API-017/API-018/API-029.
+**Trazabilidad:** CAP-07 v1.3 HU-010 · CU-010 · DLOG 0014/0016/0020 · INF-08 v2.5 API-017/API-018/API-029.
 
 ### HU-011 — Consulta de Pedidos
 
@@ -228,7 +228,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-019.3 — Sin edición global directa:** DADO una bodega autenticada, CUANDO intenta modificar directamente el estado global del Pedido, ENTONCES el sistema deniega la operación.
 
-**Trazabilidad:** CAP-07 v1.3 HU-019 · CU-019 · DLOG 0005 · API-023 · INF-08 v2.5.
+**Trazabilidad:** CAP-07 v1.3 HU-019 · CU-019 · DLOG 0005/0020 · API-023 · INF-08 v2.5.
 
 ## ADMINISTRADOR
 
@@ -314,7 +314,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-028.4 — Datos congelados:** DADO la primera confirmación válida, CUANDO finaliza, ENTONCES los snapshots de dirección ya congelados se conservan y las líneas y precios quedan congelados, todos inmutables frente a cambios posteriores.
 
-**Trazabilidad:** CAP-07 v1.3 HU-028 · CU-028 · DLOG 0014/0016 · INF-08 v2.5 API-029/API-018.
+**Trazabilidad:** CAP-07 v1.3 HU-028 · CU-028 · DLOG 0014/0016/0020 · INF-08 v2.5 API-029/API-018.
 
 ### HU-029 — Generación de SubPedidos
 
@@ -342,7 +342,7 @@ Definir criterios verificables para HU-001 a HU-032 en formato DADO/CUANDO/ENTON
 
 **CA-030.7 — Protección:** DADO transición inválida, relación inconsistente o intento de escritura global directa por bodega, CUANDO se procesa, ENTONCES no cambia `subpedido.estado` ni `pedido.estado`. `pendiente_pago` y `devuelto` quedan fuera de esta matriz logística.
 
-**Trazabilidad:** CAP-07 v1.3 HU-030 · CU-030 · DLOG 0005/0018 · INF-08 v2.5 API-023.
+**Trazabilidad:** CAP-07 v1.3 HU-030 · CU-030 · DLOG 0005/0018/0020 · INF-08 v2.5 API-023.
 
 ### HU-031 — Control de acceso por rol
 
