@@ -15,6 +15,8 @@ process.env.PUBLIC_BASE_URL ??= 'http://localhost:3001';
 process.env.STRIPE_WEBHOOK_SECRET ??= 'whsec_test_placeholder_0000000000';
 process.env.MINIMUM_PURCHASE_AGE ??= '18';
 process.env.ALCOHOL_TERMS_VERSION ??= 'test-v1';
+process.env.LOGIN_RATE_LIMIT_MAX_ATTEMPTS ??= '5';
+process.env.LOGIN_RATE_LIMIT_WINDOW_SECONDS ??= '60';
 
 function cuerpoValido(email: string): Record<string, unknown> {
   return {
@@ -136,6 +138,9 @@ describe('API-001 — POST /auth/registro/comprador', () => {
       const raw = await redis.get(key);
       if (raw !== null && raw.includes(body.usuario.id) && !raw.includes(body.access_token)) {
         sessionEncontrada = true;
+        const storedSession = JSON.parse(raw) as { issued_at?: string; expires_at?: string };
+        expect(storedSession.issued_at).toBeTruthy();
+        expect(storedSession.expires_at).toBeTruthy();
         const ttl = await redis.ttl(key);
         expect(ttl).toBeGreaterThan(0);
         expect(ttl).toBeLessThanOrEqual(28_800);
