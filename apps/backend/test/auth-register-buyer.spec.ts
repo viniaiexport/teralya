@@ -13,6 +13,8 @@ process.env.DATABASE_URL ??= 'postgresql://teralya:teralya_local@localhost:5432/
 process.env.REDIS_URL ??= 'redis://localhost:6379';
 process.env.PUBLIC_BASE_URL ??= 'http://localhost:3001';
 process.env.STRIPE_WEBHOOK_SECRET ??= 'whsec_test_placeholder_0000000000';
+process.env.MINIMUM_PURCHASE_AGE ??= '18';
+process.env.ALCOHOL_TERMS_VERSION ??= 'test-v1';
 
 function cuerpoValido(email: string): Record<string, unknown> {
   return {
@@ -47,6 +49,19 @@ describe('API-001 — POST /auth/registro/comprador', () => {
 
   afterAll(async () => {
     if (emailsCreados.length > 0) {
+      const usuarios = await pool.query<{ id: string }>('SELECT id FROM usuario WHERE email = ANY($1)', [emailsCreados]);
+      const usuarioIds = new Set(usuarios.rows.map((row) => row.id));
+      for (const key of await redis.keys('session:*')) {
+        const raw = await redis.get(key);
+        if (raw === null) {
+          continue;
+        }
+        const session = JSON.parse(raw) as { usuario_id?: string };
+        if (session.usuario_id !== undefined && usuarioIds.has(session.usuario_id)) {
+          await redis.del(key);
+        }
+      }
+
       await pool.query('DELETE FROM comprador WHERE usuario_id IN (SELECT id FROM usuario WHERE email = ANY($1))', [
         emailsCreados,
       ]);
@@ -91,13 +106,29 @@ describe('API-001 — POST /auth/registro/comprador', () => {
     expect(storedHash).not.toContain('contraseña-larga-123');
     expect(storedHash.startsWith('scrypt$')).toBe(true);
 
-    const compradorRows = await pool.query(
-      'SELECT declaracion_mayoria_edad, aceptacion_condiciones_alcohol FROM comprador c JOIN usuario u ON u.id = c.usuario_id WHERE u.email = $1',
+    const compradorRows = await pool.query<{
+      declaracion_mayoria_edad: boolean;
+      aceptacion_condiciones_alcohol: boolean;
+      declaracion_mayoria_edad_at: Date;
+      aceptacion_condiciones_alcohol_at: Date;
+      version_condiciones_alcohol: string;
+    }>(
+      `SELECT declaracion_mayoria_edad, aceptacion_condiciones_alcohol,
+              declaracion_mayoria_edad_at, aceptacion_condiciones_alcohol_at,
+              version_condiciones_alcohol
+         FROM comprador c
+         JOIN usuario u ON u.id = c.usuario_id
+        WHERE u.email = $1`,
       [email],
     );
-    expect(compradorRows.rows).toMatchObject([
-      { declaracion_mayoria_edad: true, aceptacion_condiciones_alcohol: true },
-    ]);
+    expect(compradorRows.rows).toHaveLength(1);
+    expect(compradorRows.rows[0]).toMatchObject({
+      declaracion_mayoria_edad: true,
+      aceptacion_condiciones_alcohol: true,
+      version_condiciones_alcohol: 'test-v1',
+    });
+    expect(compradorRows.rows[0]?.declaracion_mayoria_edad_at).toBeInstanceOf(Date);
+    expect(compradorRows.rows[0]?.aceptacion_condiciones_alcohol_at).toBeInstanceOf(Date);
 
     const sessionKeys = await redis.keys('session:*');
     let sessionEncontrada = false;
@@ -151,6 +182,58 @@ describe('API-001 — POST /auth/registro/comprador', () => {
     const response = await request(app.getHttpServer())
       .post('/auth/registro/comprador')
       .send({ ...cuerpoValido(email), declaracion_mayoria_edad: false })
+      .expect(400);
+
+    expect(response.body).toMatchObject({ status: 400, code: 'VALIDATION_ERROR' });
+  });
+
+  it('rechaza una fecha de nacimiento que no cumple la edad mínima configurada', async () => {
+    const email = `comprador-${randomUUID()}@example.com`;
+    const today = new Date();
+    const underageDate = new Date(
+      Date.UTC(today.getUTCFullYear() - 17, today.getUTCMonth(), today.getUTCDate()),
+    )
+      .toISOString()
+      .slice(0, 10);
+
+    const response = await request(app.getHttpServer())
+      .post('/auth/registro/comprador')
+      .send({ ...cuerpoValido(email), fecha_nacimiento: underageDate })
+      .expect(400);
+
+    expect(response.body).toMatchObject({ status: 400, code: 'VALIDATION_ERROR' });
+    const usuarioRows = await pool.query('SELECT id FROM usuario WHERE email = $1', [email]);
+    expect(usuarioRows.rows).toHaveLength(0);
+  });
+
+  it('normaliza email, nombre, apellidos e idioma antes de persistir', async () => {
+    const email = `comprador-${randomUUID()}@example.com`;
+    emailsCreados.push(email);
+
+    const response = await request(app.getHttpServer())
+      .post('/auth/registro/comprador')
+      .send({
+        ...cuerpoValido(`  ${email.toUpperCase()}  `),
+        nombre: '  Ada  ',
+        apellidos: '  Lovelace  ',
+        idioma: '  ES  ',
+      })
+      .expect(201);
+
+    expect(response.body).toMatchObject({ usuario: { email, idioma: 'es' } });
+    const usuarioRows = await pool.query<{ nombre: string; apellidos: string }>(
+      'SELECT nombre, apellidos FROM usuario WHERE email = $1',
+      [email],
+    );
+    expect(usuarioRows.rows).toEqual([{ nombre: 'Ada', apellidos: 'Lovelace' }]);
+  });
+
+  it('rechaza fecha_nacimiento con hora porque el contrato exige format date', async () => {
+    const email = `comprador-${randomUUID()}@example.com`;
+
+    const response = await request(app.getHttpServer())
+      .post('/auth/registro/comprador')
+      .send({ ...cuerpoValido(email), fecha_nacimiento: '1990-01-01T00:00:00Z' })
       .expect(400);
 
     expect(response.body).toMatchObject({ status: 400, code: 'VALIDATION_ERROR' });
