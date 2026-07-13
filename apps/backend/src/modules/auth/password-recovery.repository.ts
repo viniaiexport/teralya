@@ -30,6 +30,10 @@ export class PasswordRecoveryRepository {
     expiresAt: Date,
   ): Promise<SolicitudRecuperacionCreada> {
     return this.databaseService.withTransaction(async (client: PoolClient) => {
+      // Serializa todas las rotaciones de token del mismo usuario para que dos
+      // solicitudes concurrentes no puedan dejar más de una fila pendiente.
+      await client.query('SELECT id FROM usuario WHERE id = $1 FOR UPDATE', [usuarioId]);
+
       await client.query(
         `UPDATE solicitud_recuperacion_password
             SET estado = 'expirada'
