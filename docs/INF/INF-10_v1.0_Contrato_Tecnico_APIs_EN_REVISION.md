@@ -127,7 +127,7 @@ Estas convenciones pueden incorporarse al YAML después de su aprobación técni
 |---|---|
 | API-011 | Fusión por `fusion_id`, SHA-256 canónico y resultado persistido; reintento idéntico no vuelve a sumar. |
 | API-016 | Un carrito origina como máximo un Pedido `pendiente_pago`; el reintento devuelve el mismo. |
-| API-017 | Una sola sesión Stripe activa por Pedido; se reutiliza mientras sea válida y puede sustituirse tras expirar. |
+| API-017 | Una sola sesión Stripe activa por Pedido; se reutiliza mientras sea válida y, al sustituirla tras expirar, reactiva `pago.estado` de `cancelado` a `pendiente` bajo el mismo bloqueo. |
 | API-029 | Un `stripe_event_id` produce como máximo un efecto comercial exitoso; Pago, stock y SubPedidos se confirman atómicamente. |
 | API-043 | `Idempotency-Key` UUID identifica la Dirección; mismo payload devuelve el mismo resultado y payload distinto produce 409. |
 | API-047/048 | `upload_id` UUID vincula presignado y confirmación; el objeto se verifica y solo puede registrarse una Imagen activa por confirmación. |
@@ -173,7 +173,7 @@ El token de confirmación firmado contiene actor/bodega, `vino_id`, `upload_id`,
 
 Las promociones de Dirección o Imagen principal se ejecutan en transacción con bloqueo de las filas activas del propietario o vino. La Dirección principal es única por propietario, no por uso. La Imagen principal es única por vino. Las desactivaciones repetidas de recursos propios ya inactivos devuelven 204 sin nuevo efecto.
 
-La solución no añade una capacidad de negocio nueva: hace implementables requisitos de Dirección e Imagen ya presentes en INF-05/INF-06, API-016 y API-025. La generación del OpenAPI sigue condicionada al cierre de TAPI-01 a TAPI-06 y TAPI-08 a TAPI-09 y a la aprobación de INF-08 v2.5.
+La solución no añade una capacidad de negocio nueva: hace implementables requisitos de Dirección e Imagen ya presentes en INF-05/INF-06, API-016 y API-025. La generación del OpenAPI queda condicionada a la aprobación de CAP-08 v1.4 e INF-08 v2.5 y a la generación y validación del YAML.
 
 ## Cierre técnico TAPI-01 a TAPI-06 y TAPI-08 a TAPI-09
 
@@ -252,7 +252,7 @@ Mismo estado devuelve 200 sin nueva mutación. Otro salto devuelve 409. API-023 
 
 - Request `{pedido_id:uuid}`.
 - 200 `CheckoutSession {pedido_id,checkout_url,session_expires_at,reused}`.
-- Reutiliza la sesión activa; si expiró, crea bajo bloqueo como máximo una sustituta.
+- Reutiliza la sesión activa; si expiró y API-029 dejó `pago.estado=cancelado`, crea bajo bloqueo como máximo una sustituta y cambia el Pago a `pendiente` antes de exponer la URL.
 - Errores: 400 request; 401 sesión; 404 Pedido inexistente/ajeno; 409 Pedido no pendiente, total/moneda o relación incoherentes; 502 respuesta inválida de Stripe; 503 timeout/indisponibilidad.
 - No existe 402. El retorno del navegador no confirma y los resultados económicos entran por API-029.
 
