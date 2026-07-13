@@ -190,6 +190,34 @@ describe('API-003 — POST /auth/recuperar-password', () => {
     expect(solicitudes.rows.map((row) => row.estado)).toEqual(['cancelada', 'pendiente']);
   });
 
+  it('serializa dos recuperaciones concurrentes y deja un único token pendiente', async () => {
+    const usuario = await crearUsuario();
+
+    const [first, second] = await Promise.all([
+      request(app.getHttpServer())
+        .post('/auth/recuperar-password')
+        .send({ email: usuario.email }),
+      request(app.getHttpServer())
+        .post('/auth/recuperar-password')
+        .send({ email: usuario.email }),
+    ]);
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+
+    const solicitudes = await pool.query<{ estado: string }>(
+      `SELECT estado
+         FROM solicitud_recuperacion_password
+        WHERE usuario_id = $1
+        ORDER BY created_at ASC`,
+      [usuario.id],
+    );
+
+    expect(solicitudes.rows).toHaveLength(2);
+    expect(solicitudes.rows.filter((row) => row.estado === 'pendiente')).toHaveLength(1);
+    expect(solicitudes.rows.filter((row) => row.estado === 'cancelada')).toHaveLength(1);
+  });
+
   it('rechaza campos desconocidos, null y emails inválidos con 400', async () => {
     for (const body of [
       { email: 'no-es-email' },
