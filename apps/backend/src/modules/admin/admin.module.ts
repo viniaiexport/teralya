@@ -5,9 +5,19 @@ import { AdminBodegasService } from './admin-bodegas.service.js';
 import { AdminVinosController } from './admin-vinos.controller.js';
 import { AdminVinosRepository } from './admin-vinos.repository.js';
 import { AdminVinosService } from './admin-vinos.service.js';
+import { AdminIncidenciasController } from './admin-incidencias.controller.js';
+import { AdminIncidenciasRepository } from './admin-incidencias.repository.js';
+import { AdminIncidenciasService } from './admin-incidencias.service.js';
 
 @Module({
-  controllers: [AdminBodegasController,AdminVinosController],
-  providers: [AdminBodegasRepository, AdminBodegasService,AdminVinosRepository,AdminVinosService],
+  controllers: [AdminBodegasController, AdminVinosController, AdminIncidenciasController],
+  providers: [
+    AdminBodegasRepository,
+    AdminBodegasService,
+    AdminVinosRepository,
+    AdminVinosService,
+    AdminIncidenciasRepository,
+    AdminIncidenciasService,
+  ],
 })
 export class AdminModule {}
