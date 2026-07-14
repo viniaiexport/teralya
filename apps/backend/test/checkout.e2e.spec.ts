@@ -176,7 +176,10 @@ describe("API016 checkout E2E", () => {
         .send(body);
     const responses = await Promise.all([call(), call()]);
     expect(responses.map((r) => r.status)).toEqual([200, 200]);
-    expect(responses[0].body).toEqual(responses[1].body);
+    const [{ reused: firstReused, ...first }, { reused: secondReused, ...second }] =
+      responses.map((response) => response.body as Record<string, unknown>);
+    expect(first).toEqual(second);
+    expect([firstReused, secondReused].sort()).toEqual([false, true]);
     expect(responses[0].body).toMatchObject({
       estado: "pendiente_pago",
       totales: {
