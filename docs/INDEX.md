@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 6.0 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 6.1 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -102,7 +102,7 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - Base funcional y contractual aprobada: CAP-01 a CAP-08, INF-05 a INF-10, INF-10-A y ADR-001 a ADR-004.
 - OpenAPI 3.1 aprobado: 50 operaciones, 41 paths, 11 módulos y 74 schemas.
 - Backend NestJS contract-first completo: API-001 a API-050 implementadas e integradas en main.
-- Frontend FE-001 a FE-006 integrados en main: cimentación Next.js, experiencia pública, catálogo/ficha, autenticación, carrito visitante/autenticado con fusión idempotente, direcciones, checkout, Stripe y confirmación autoritativa.
+- Frontend FE-001 a FE-007 integrados en main: experiencia pública, autenticación, carrito, checkout y áreas privadas completas de comprador, bodega y administrador.
 - Cobertura backend cerrada para autenticación, bodegas, catálogo, carrito, checkout, Stripe, pedidos, SubPedidos, administración, direcciones, imágenes e incidencias.
 - Último cierre backend: webhook Stripe API-029 integrado mediante el commit 2af9368.
 - Validación final: 41 archivos de prueba y 201 pruebas en verde; lint, build, esquema PostgreSQL, OpenAPI y Redocly correctos.
@@ -110,11 +110,11 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 
 ### Actualmente en desarrollo
 
-No hay APIs backend pendientes dentro del contrato aprobado. El frontend está en desarrollo; FE-001 a FE-006 están cerrados y comienza FE-007.
+No hay APIs backend pendientes dentro del contrato aprobado. FE-001 a FE-007 están cerrados; comienza la estabilización FE-008.
 
 ### Siguiente paso propuesto
 
-Implementar FE-007 conforme a CAP-04, CAP-05, CAP-06, INF-09 y el contrato aprobado: áreas privadas de comprador, bodega y administrador, sin ampliar el alcance del MVP.
+Ejecutar FE-008: pruebas E2E, rendimiento, seguridad, staging y preparación de lanzamiento, sin ampliar el alcance del MVP.
 
 ### Orden de ejecución frontend
 
@@ -124,8 +124,8 @@ Implementar FE-007 conforme a CAP-04, CAP-05, CAP-06, INF-09 y el contrato aprob
 4. ✅ FE-004 — registro, login y recuperación de contraseña.
 5. ✅ FE-005 — carrito de visitante/autenticado y fusión idempotente.
 6. ✅ FE-006 — direcciones, checkout, Stripe y confirmación.
-7. ▶ FE-007 — áreas privadas de comprador, bodega y administrador.
-8. FE-008 — pruebas E2E, rendimiento, seguridad, staging y preparación de lanzamiento.
+7. ✅ FE-007 — áreas privadas de comprador, bodega y administrador.
+8. ▶ FE-008 — pruebas E2E, rendimiento, seguridad, staging y preparación de lanzamiento.
 
 ### Bloqueos abiertos
 
