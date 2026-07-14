@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Pool } from 'pg';
@@ -7,10 +8,11 @@ import { AppModule } from '../src/app.module.js';
 import { configureApplication } from '../src/bootstrap.js';
 
 const PASSWORD = 'Password-segura-005!';
+const RUN_ID = randomUUID().slice(0, 8);
 const EMAILS = [
-  'api005-success@teralya.test',
-  'api005-rollback@teralya.test',
-  'api005-race@teralya.test',
+  `api005-success-${RUN_ID}@teralya.test`,
+  `api005-rollback-${RUN_ID}@teralya.test`,
+  `api005-race-${RUN_ID}@teralya.test`,
 ];
 
 function payload(email: string): Record<string, unknown> {
@@ -35,7 +37,6 @@ describe('API-005 — POST /bodegas', () => {
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    await cleanup(pool);
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();
     configureApplication(app as Parameters<typeof configureApplication>[0]);
@@ -43,7 +44,6 @@ describe('API-005 — POST /bodegas', () => {
   });
 
   afterAll(async () => {
-    await cleanup(pool);
     await app.close();
     await pool.end();
   });
@@ -151,15 +151,3 @@ describe('API-005 — POST /bodegas', () => {
     expect(bodegas.rowCount).toBe(1);
   });
 });
-
-async function cleanup(pool: Pool): Promise<void> {
-  await pool.query(
-    `DELETE FROM auditoria
-      WHERE entidad_id IN (
-        SELECT id FROM bodega WHERE lower(email_principal) = ANY($1::text[])
-      )`,
-    [EMAILS],
-  );
-  await pool.query('DELETE FROM usuario WHERE lower(email) = ANY($1::text[])', [EMAILS]);
-  await pool.query('DELETE FROM bodega WHERE lower(email_principal) = ANY($1::text[])', [EMAILS]);
-}
