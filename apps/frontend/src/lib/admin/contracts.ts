@@ -12,3 +12,14 @@ export interface AdminWineSummary { id:string;nombre_comercial:string;estado:Win
 export interface AdminWineDetail extends Omit<WineOwnDetail,'bodega'> { bodega:AdminWinerySummary }
 export type AdminWineryPage=Page<AdminWinerySummary>;
 export type AdminWinePage=Page<AdminWineSummary>;
+export type IncidentState='abierta'|'en_revision'|'resuelta'|'cerrada';
+export type RelatedResourceType='pedido'|'subpedido'|'bodega'|'vino';
+export interface RelatedResource{tipo:RelatedResourceType;id:string}
+export interface IncidentSummary{id:string;tipo:string;estado:IncidentState;fecha:string;recurso_relacionado:RelatedResource}
+export interface IncidentDetail extends IncidentSummary{descripcion:string;updated_at:string}
+export type IncidentPage=Page<IncidentSummary>;
+const incidentLabels:Record<IncidentState,string>={abierta:'Abierta',en_revision:'En revisión',resuelta:'Resuelta',cerrada:'Cerrada'};
+const incidentNext:Partial<Record<IncidentState,IncidentState>>={abierta:'en_revision',en_revision:'resuelta',resuelta:'cerrada'};
+export function incidentStateLabel(state:IncidentState):string{return incidentLabels[state]}
+export function nextIncidentState(state:IncidentState):IncidentState|undefined{return incidentNext[state]}
+export function isIncidentState(value:string):value is IncidentState{return Object.hasOwn(incidentLabels,value)}

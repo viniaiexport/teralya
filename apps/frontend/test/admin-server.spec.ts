@@ -2,7 +2,7 @@ import {beforeEach,describe,expect,it,vi} from 'vitest';
 vi.mock('server-only',()=>({}));
 const {apiRequest,readAccessToken,readSessionIdentity}=vi.hoisted(()=>({apiRequest:vi.fn(),readAccessToken:vi.fn(),readSessionIdentity:vi.fn()}));
 vi.mock('../src/lib/api/client',()=>({apiRequest}));vi.mock('../src/lib/session/session',()=>({readAccessToken,readSessionIdentity}));
-import {getAdminDashboard,getAdminOrder,getAdminWine,getAdminWinery,listAdminOrders,listPendingWines,listPendingWineries,publishAdminWine,unpublishAdminWine,validateAdminWinery} from '../src/lib/admin/server';
+import {getAdminDashboard,getAdminIncident,getAdminOrder,getAdminWine,getAdminWinery,listAdminIncidents,listAdminOrders,listPendingWines,listPendingWineries,publishAdminWine,transitionAdminIncident,unpublishAdminWine,validateAdminWinery} from '../src/lib/admin/server';
 const id='55555555-5555-4555-8555-555555555555';
 beforeEach(()=>{vi.clearAllMocks();readSessionIdentity.mockResolvedValue({usuario_id:'u',rol:'administrador'});readAccessToken.mockResolvedValue('token')});
 describe('operación administrativa FE-007',()=>{
@@ -16,4 +16,7 @@ describe('operación administrativa FE-007',()=>{
  it('lista cola de vinos exactamente pendiente_revision por API-037',async()=>{apiRequest.mockResolvedValue({items:[]});await listPendingWines(4);expect(apiRequest).toHaveBeenCalledWith('/admin/vinos?estado=pendiente_revision&page=4&page_size=20',{method:'GET',token:'token'})});
  it('consulta, publica y despublica vino por API-038/API-025/API-026',async()=>{apiRequest.mockResolvedValue({id});await getAdminWine(id);expect(apiRequest).toHaveBeenLastCalledWith(`/admin/vinos/${id}`,{method:'GET',token:'token'});await publishAdminWine(id);expect(apiRequest).toHaveBeenLastCalledWith(`/admin/vinos/${id}/publicar`,{method:'POST',token:'token'});await unpublishAdminWine(id);expect(apiRequest).toHaveBeenLastCalledWith(`/admin/vinos/${id}/despublicar`,{method:'POST',token:'token'})});
  it('rechaza recursos de moderación manipulados',async()=>{await expect(getAdminWinery('../bodega')).rejects.toThrow('Bodega inválida');await expect(publishAdminWine('../vino')).rejects.toThrow('Vino inválido')});
+ it('lista y filtra incidencias por API-040',async()=>{apiRequest.mockResolvedValue({items:[]});await listAdminIncidents(2,'en_revision');expect(apiRequest).toHaveBeenCalledWith('/admin/incidencias?page=2&page_size=20&estado=en_revision',{method:'GET',token:'token'})});
+ it('consulta y avanza incidencia por API-041/API-042',async()=>{apiRequest.mockResolvedValue({id});await getAdminIncident(id);expect(apiRequest).toHaveBeenLastCalledWith(`/admin/incidencias/${id}`,{method:'GET',token:'token'});await transitionAdminIncident(id,'resuelta');expect(apiRequest).toHaveBeenLastCalledWith(`/admin/incidencias/${id}`,{method:'PATCH',token:'token',body:{estado_destino:'resuelta'}})});
+ it('rechaza incidencia o estado manipulados',async()=>{await expect(getAdminIncident('../incidencia')).rejects.toThrow('Incidencia inválida');await expect(transitionAdminIncident(id,'reabierta' as never)).rejects.toThrow('Transición de incidencia inválida')});
 });
