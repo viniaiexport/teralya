@@ -16,7 +16,7 @@ export class DireccionesRepository {
     return this.database.withTransaction(async client=>{
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))',[id]);
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))',[`${owner.tipo}:${owner.id}`]);
-      const audits=await client.query<{valor_nuevo:unknown;identical:boolean}>(`SELECT valor_nuevo,(valor_nuevo->'request')=$3::jsonb AS identical FROM auditoria WHERE usuario_id=$1 AND tipo_entidad='direccion' AND entidad_id=$2 AND accion='crear_direccion' ORDER BY created_at ASC LIMIT 1`,[owner.usuarioId,id,JSON.stringify(request)]);
+      const audits=await client.query<{valor_nuevo:unknown;identical:boolean}>(`SELECT valor_nuevo,(valor_nuevo->'request')=$3::jsonb AS identical FROM auditoria WHERE usuario_id=$1 AND tipo_entidad='direccion' AND entidad_id=$2 AND accion='crear_direccion' ORDER BY fecha_hora ASC LIMIT 1`,[owner.usuarioId,id,JSON.stringify(request)]);
       const audit=audits.rows[0];
       if(audit!==undefined){ const saved=audit.valor_nuevo as {response?:AddressDto}; return audit.identical&&saved.response!==undefined?{kind:'replayed',response:saved.response}:{kind:'conflict'}; }
       const occupied=await client.query('SELECT 1 FROM direccion WHERE id=$1',[id]); if(occupied.rows[0]!==undefined)return {kind:'conflict'};
