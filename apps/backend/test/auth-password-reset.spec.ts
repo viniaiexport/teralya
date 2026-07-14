@@ -4,7 +4,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import request from 'supertest';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { GenericAck } from '../src/modules/auth/dto/generic-ack.dto.js';
 import { hashPassword, verifyPassword } from '../src/common/security/password.util.js';
 
@@ -252,6 +252,65 @@ describe('API-004 — POST /auth/restablecer-password', () => {
     await redis.del(`session:${hashOtroUsuario}`);
     redisService.onModuleDestroy();
   });
+
+
+  it('serializa login con contraseña antigua y reset sin dejar una sesión válida', async () => {
+    const usuario = await crearUsuarioActivo();
+    const { token } = await crearSolicitud(usuario.id, 'pendiente');
+
+    const [login, reset] = await Promise.all([
+      request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: usuario.email, password: PASSWORD_ORIGINAL }),
+      request(app.getHttpServer())
+        .post('/auth/restablecer-password')
+        .send(cuerpoValido(token)),
+    ]);
+
+    expect(reset.status).toBe(200);
+    expect([200, 401]).toContain(login.status);
+
+    if (login.status === 200) {
+      const accessToken = (login.body as { access_token: string }).access_token;
+      const tokenHash = createHash('sha256').update(accessToken, 'utf8').digest('hex');
+      expect(await redis.get(`session:${tokenHash}`)).toBeNull();
+    }
+
+    await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: usuario.email, password: PASSWORD_ORIGINAL })
+      .expect(401);
+  });
+
+  it('revierte PostgreSQL si Redis falla antes del commit', async () => {
+    const { RedisService } = await import('../src/common/cache/redis.service.js');
+    const redisService = app.get(RedisService);
+    const usuario = await crearUsuarioActivo();
+    const { token, solicitudId } = await crearSolicitud(usuario.id, 'pendiente');
+    const failure = vi
+      .spyOn(redisService.client, 'smembers')
+      .mockRejectedValueOnce(new Error('fallo Redis simulado'));
+
+    await request(app.getHttpServer())
+      .post('/auth/restablecer-password')
+      .send(cuerpoValido(token))
+      .expect(500);
+
+    failure.mockRestore();
+
+    const usuarioRows = await pool.query<{ password_hash: string }>(
+      'SELECT password_hash FROM usuario WHERE id = $1',
+      [usuario.id],
+    );
+    expect(await verifyPassword(PASSWORD_ORIGINAL, usuarioRows.rows[0]?.password_hash ?? '')).toBe(true);
+
+    const solicitudRows = await pool.query<{ estado: string }>(
+      'SELECT estado FROM solicitud_recuperacion_password WHERE id = $1',
+      [solicitudId],
+    );
+    expect(solicitudRows.rows[0]?.estado).toBe('pendiente');
+  });
+
 
   it('nunca expone el token ni la contraseña en las respuestas de error', async () => {
     const usuario = await crearUsuarioActivo();
