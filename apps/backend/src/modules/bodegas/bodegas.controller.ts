@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { BodegaAuthenticated, CurrentActor, Roles } from '../../common/security/auth.decorators.js';
 import { BearerAuthGuard } from '../../common/security/bearer-auth.guard.js';
 import type { SessionActor } from '../../common/security/session.service.js';
@@ -6,6 +6,7 @@ import { BodegasService } from './bodegas.service.js';
 import { BodegaRegistrationRequestDto } from './dto/bodega-registration-request.dto.js';
 import type { BodegaSelf } from './dto/bodega-self.dto.js';
 import { BodegaProfilePatchDto } from './dto/bodega-profile-patch.dto.js';
+import type { BodegaPublic } from './dto/bodega-public.dto.js';
 
 @Controller('bodegas')
 export class BodegasController {
@@ -37,5 +38,11 @@ export class BodegasController {
   @BodegaAuthenticated()
   async obtenerPerfil(@CurrentActor() actor: SessionActor): Promise<BodegaSelf> {
     return this.bodegasService.obtenerPerfilPropio(actor.bodegaId as string);
+  }
+
+  /** API-030 — GET /bodegas/{id}. */
+  @Get(':id')
+  async obtenerPublica(@Param('id') id: string): Promise<BodegaPublic> {
+    return this.bodegasService.obtenerPublica(id);
   }
 }
