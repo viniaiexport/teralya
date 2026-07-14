@@ -14,3 +14,4 @@ describe('API-029 Stripe webhook',()=>{
   it('rechaza firma incorrecta o con más de 300 segundos',()=>{const{service}=setup();const body=payload();expect(()=>service.procesar(body,'t=1,v1='+'0'.repeat(64))).toThrow(BadRequestException);expect(()=>service.procesar(body,header(body,Math.floor(Date.now()/1000)-301))).toThrow(BadRequestException);});
   it('rechaza eventos fuera de allowlist y metadata manipulada',async()=>{const{service}=setup();const unsupported=payload('payment_intent.succeeded');expect(()=>service.procesar(unsupported,header(unsupported))).toThrow(UnprocessableEntityException);const tampered=payload('checkout.session.completed',false);await expect(service.procesar(tampered,header(tampered))).rejects.toBeInstanceOf(ConflictException);});
 });
+
