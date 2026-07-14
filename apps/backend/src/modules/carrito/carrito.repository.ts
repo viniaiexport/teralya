@@ -183,7 +183,7 @@ export class CarritoRepository {
           );
         else
           await c.query(
-            "UPDATE carrito_item SET cantidad=$3::integer,importe_total=precio_unitario*$3::integer,estado=CASE WHEN precio_unitario=$4 THEN 'disponible' ELSE 'precio_modificado' END WHERE carrito_id=$1 AND vino_id=$2",
+            "UPDATE carrito_item SET cantidad=$3::integer,importe_total=precio_unitario*$3::integer,estado=(CASE WHEN precio_unitario=$4 THEN 'disponible' ELSE 'precio_modificado' END)::estado_carrito_item WHERE carrito_id=$1 AND vino_id=$2",
             [cart.id, local.vino_id, quantity, wine.precio],
           );
         lines.push({
