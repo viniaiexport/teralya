@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 5.7 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 5.8 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -101,40 +101,39 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 
 - Base funcional y contractual aprobada: CAP-01 a CAP-08, INF-05 a INF-10, INF-10-A y ADR-001 a ADR-004.
 - OpenAPI 3.1 aprobado: 50 operaciones, 41 paths, 11 módulos y 74 schemas.
-- Cimentación backend NestJS contract-first integrada en `main`.
-- API-001 — `POST /auth/registro/comprador` implementada e integrada en `main` mediante el commit `d59b19a`.
-- API-001 incluye PostgreSQL, sesión opaca Redis, edad mínima configurable, versión de condiciones y pruebas de integración.
-- API-002 — `POST /auth/login` implementada e integrada en `main` mediante el commit `423c3f6`.
-- API-002 incluye acceso por rol y estado, sesión opaca, rate limit Redis, contadores de seguridad, auditoría inmutable y pruebas E2E.
-- API-003 — `POST /auth/recuperar-password` implementada e integrada en `main` mediante el commit `47697f9`.
-- API-003 incluye respuesta anti-enumeración, token de 256 bits almacenado solo como hash, rate limit, notificación SMTP, serialización transaccional por usuario y pruebas E2E concurrentes.
-- API-004 — `POST /auth/restablecer-password` implementada e integrada en `main` mediante el commit `8602c74`.
-- API-004 incluye consumo único concurrente del token, cambio seguro de contraseña, revocación de sesiones, serialización frente a login y pruebas E2E.
-- API-005 — `POST /bodegas` implementada e integrada en `main` mediante el commit `6f35534`.
-- API-005 incluye alta atómica de bodega, usuario y auditoría en `pendiente_revision`, tipo inicial `estandar`, contraseña scrypt y pruebas E2E.
-- API-006 y API-031 — perfil propio de bodega implementado e integrado en `main` mediante el commit `beb2c11`.
-- API-006/API-031 incluyen autenticación BearerOpaque común, autorización por rol y pertenencia, lectura y actualización segura de `BodegaSelf`, y pruebas focalizadas.
-- API-024, API-035 y API-036 — administración de bodegas implementada e integrada en `main` mediante el commit `13e198e`.
-- API-024/API-035/API-036 incluyen listado y detalle administrativo, validación transaccional, comisión estándar del 10 %, activación de usuarios, auditoría y concurrencia serializada.
-- DLOG 0022 fija API-005: cada solicitud se crea en `pendiente_revision` y con tipo `estandar`; la condición `fundadora` no es automática.
-- GitHub Actions valida esquema INF-05 v1.4, lint, pruebas, build, contrato OpenAPI y Redocly.
+- Backend NestJS contract-first completo: API-001 a API-050 implementadas e integradas en main.
+- Cobertura backend cerrada para autenticación, bodegas, catálogo, carrito, checkout, Stripe, pedidos, SubPedidos, administración, direcciones, imágenes e incidencias.
+- Último cierre backend: webhook Stripe API-029 integrado mediante el commit 2af9368.
+- Validación final: 41 archivos de prueba y 201 pruebas en verde; lint, build, esquema PostgreSQL, OpenAPI y Redocly correctos.
+- Stripe Checkout usa REST/fetch inyectable, sin SDK adicional; el webhook usa firma sobre body crudo, ledger idempotente, locks y control anti-oversell.
 
 ### Actualmente en desarrollo
 
-La implementación del backend está en curso. El siguiente incremento propuesto es API-030, sin reabrir el contrato aprobado.
+No hay APIs backend pendientes dentro del contrato aprobado. Comienza la fase frontend del MVP.
 
 ### Siguiente paso propuesto
 
-Preparar e implementar API-030 como siguiente rebanada vertical, conforme al contrato OpenAPI aprobado.
+Crear la cimentación frontend única del MVP conforme a INF-09, ADR-003 y ADR-004: Next.js App Router, TypeScript, cliente contract-first, gestión de sesión opaca, diseño base accesible y primera rebanada vertical pública catálogo → ficha de vino.
+
+### Orden de ejecución frontend
+
+1. FE-001 — workspace Next.js, calidad, variables de entorno y cliente HTTP tipado.
+2. FE-002 — layout público responsive, navegación, estados de carga/error y accesibilidad base.
+3. FE-003 — catálogo y ficha de vino conectados a API-009/API-010.
+4. FE-004 — registro, login y recuperación de contraseña.
+5. FE-005 — carrito de visitante/autenticado y fusión.
+6. FE-006 — checkout, Stripe y confirmación.
+7. FE-007 — áreas privadas de comprador, bodega y administrador.
+8. FE-008 — pruebas E2E, rendimiento, seguridad, staging y preparación de lanzamiento.
 
 ### Bloqueos abiertos
 
-- No existen bloqueos funcionales ni contractuales identificados para iniciar API-030.
-- Antes de producción, Legal debe fijar los valores de `MINIMUM_PURCHASE_AGE` y `ALCOHOL_TERMS_VERSION`.
-- Antes de producción, Seguridad debe aprobar los valores de `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` y `LOGIN_RATE_LIMIT_WINDOW_SECONDS`.
-- Antes de producción, Seguridad e Infraestructura deben fijar TTL, límites, ventana, SMTP, remitente y URL pública de recuperación.
-- LEGAL y UX siguen sin contenido oficial; su planificación requiere una instrucción independiente.
+- Antes de producción, Legal debe fijar MINIMUM_PURCHASE_AGE y ALCOHOL_TERMS_VERSION.
+- Antes de producción, Seguridad debe aprobar los límites y ventanas de autenticación y recuperación.
+- Antes de producción, Infraestructura debe fijar secretos, SMTP, URLs públicas, almacenamiento de objetos y configuración Stripe definitiva.
+- El modelo actual no reserva stock antes del cobro; el webhook impide stock negativo y revierte atómicamente, pero la política operativa ante un cobro confirmado sin stock debe cerrarse antes de producción.
+- LEGAL y UX siguen sin contenido oficial; deben cerrarse durante la construcción frontend, sin ampliar el alcance del MVP.
 
 ### Regla de continuidad
 
-La revisión de INF-08 v2.4 no reabre INF-09. Cualquier cambio futuro de framework, App Router o topología requiere un nuevo ADR. Cualquier cambio de fórmula de fusión o matriz logística requiere una nueva decisión registrada.
+El alcance del MVP permanece congelado. CAP manda sobre INF. Cualquier cambio de framework, App Router o topología requiere un nuevo ADR; cualquier cambio económico, de fusión de carrito o matriz logística requiere una decisión registrada.
