@@ -69,9 +69,21 @@ Ninguna de estas ayudas es automática ni segura — todas requieren cumplir req
 
 ---
 
-## 5. Ayudas autonómicas y locales — pendiente de concretar
+## 5. Ayudas de la Comunidad de Madrid (confirmado: Teralya domiciliada en Madrid)
 
-Existen programas adicionales de Cámaras de Comercio (España Emprende, PIP, TICCámaras), Diputaciones y Comunidades Autónomas que varían según dónde esté domiciliada la empresa. **No se ha podido concretar esta sección porque depende de la ubicación fiscal exacta de Teralya** (Comunidad Autónoma, provincia) — necesito saber dónde está domiciliada la empresa para investigar las ayudas autonómicas/locales específicas aplicables.
+**5.1 Ayudas a Startups y Pymes de Alta Intensidad Innovadora — la más relevante**
+Programa de la Comunidad de Madrid (Consejería de Educación, Ciencia y Universidades) dentro de la Estrategia de Especialización Inteligente (S3) y el FEDER 2021-2027, específicamente para **jóvenes empresas innovadoras de base tecnológica**.
+- Subvención de **hasta el 100% de los gastos elegibles**, hasta **150.000 € por proyecto**.
+- Inversión mínima exigida: 75.000 €.
+- Convocatoria 2026 ya publicada (Orden 2331/2026, de 11 de junio de 2026, BOCM 26/06/2026) — para pymes innovadoras de más de 5 años; existe una línea paralela específica para startups más jóvenes (verificar en la convocatoria exacta cuál aplica según la antigüedad real de Teralya).
+- **Probable requisito previo:** acreditar la condición de "empresa innovadora de base tecnológica" (habitualmente vía sello PYME Innovadora del Ministerio o certificación equivalente) — a confirmar antes de solicitar.
+- Es la ayuda con mayor cuantía potencial de todas las investigadas en este documento.
+
+**5.2 Ayudas a la digitalización de pymes comerciales, de servicios y artesanas — probablemente NO aplica**
+Subvención del 50% de la inversión, hasta 10.000 €, gestionada por la Comunidad de Madrid. **Aviso importante:** este programa exige que la empresa desarrolle su actividad en un **establecimiento físico abierto al público destinado a venta minorista** — un requisito pensado para comercio de calle, no para un marketplace online sin tienda física. Es dudoso que Teralya cumpla este requisito; no descartarla del todo pero verificarlo directamente con la Comunidad de Madrid antes de invertir tiempo en la solicitud.
+
+**5.3 Programas municipales y de la Cámara de Comercio de Madrid**
+Existen convocatorias más pequeñas y variables por ayuntamiento (p. ej. "Ayuntamiento de Madrid — fomento de la digitalización", premios a emprendedores por distrito/municipio) y de la Cámara de Comercio de Madrid (programa "Reactívate", asesoramiento e incentivos a la contratación). Cuantías menores pero también menor competencia — conviene revisar la convocatoria vigente de la Cámara de Madrid y del Ayuntamiento en el momento de solicitar, ya que cambian con frecuencia.
 
 ---
 
@@ -89,11 +101,15 @@ El sector vitivinícola español tiene programas propios de apoyo a la exportaci
 | ICEX Next | Alta | Encaja exactamente con el modelo (ecommerce + internacionalización de vino), incluye asesoría experta |
 | CDTI Neotec | Media | Requiere verificar elegibilidad por componente de I+D |
 | ENISA | Media | Es deuda, no subvención — valorar como complemento |
-| Autonómica/local | Pendiente | Necesito la ubicación fiscal de la empresa para investigar |
+| CAM Startups Alta Intensidad Innovadora | **Alta** | Hasta 150.000 €, 100% subvencionable — la mayor cuantía potencial de todas |
+| CAM digitalización comercio/artesanía | Baja | Probablemente excluida por exigir local físico de venta minorista |
+| Cámara de Comercio / Ayuntamiento Madrid | Media | Cuantías menores, pero menos competencia — revisar convocatoria vigente |
 | Promoción vitivinícola (PAC/ICEX) | Baja para Teralya, alta para bodegas | Dirigida a bodegas, no al marketplace directamente |
 
-## 8. Próximo paso
+## 8. Resumen ejecutivo — las 3 ayudas a priorizar
 
-Dime en qué Comunidad Autónoma/provincia está o estará domiciliada Teralya y completo la sección de ayudas autonómicas y locales, que suelen ser las más rápidas de conseguir y menos competidas.
+1. **Ayudas CAM a Startups de Alta Intensidad Innovadora** (hasta 150.000 €) — la de mayor impacto, verificar primero si Teralya puede acreditarse como empresa innovadora de base tecnológica.
+2. **ICEX Next** (hasta 24.000 € + asesoría) — encaja exactamente con "internacionalizar vino español vía ecommerce".
+3. **Kit Digital** (hasta 12.000-29.000 € según segmento) — el más simple y rápido de tramitar, ya cubre "marketplace" en su catálogo.
 
 *Este documento queda en `docs/LEGAL/` junto a LEGAL-01, como punto de partida para la gestión de subvenciones — no sustituye la validación de una gestoría especializada antes de presentar cualquier solicitud real.*
