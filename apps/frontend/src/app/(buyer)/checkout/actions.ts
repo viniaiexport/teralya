@@ -1,6 +1,7 @@
 'use server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import type { Route } from 'next';
 import { createAddress, createPaymentSession, deleteAddress, prepareOrder, safeCheckoutError, updateAddress, validatedStripeUrl } from '@/lib/checkout/server';
 import { writePendingOrder } from '@/lib/checkout/pending-order';
 import type { AddressInput, AddressUse, CheckoutActionState } from '@/lib/checkout/contracts';
@@ -104,5 +105,5 @@ export async function startPaymentAction(form: FormData): Promise<never> {
     const safe = safeCheckoutError(error, 'No se ha podido iniciar el pago.');
     redirect(`/checkout/pago?pedido_id=${encodeURIComponent(orderId)}&error=pago${safe.requestId === undefined ? '' : `&request_id=${encodeURIComponent(safe.requestId)}`}`);
   }
-  redirect(checkoutUrl);
+  redirect(checkoutUrl as Route);
 }
