@@ -122,7 +122,7 @@ Se configuran alertas para errores 5xx sostenidos, fallos de pago, colas bloquea
 
 ## 7. Modelo de datos — resumen
 
-El modelo vigente consta de 17 tablas en PostgreSQL 16:
+El modelo vigente consta de 19 tablas en PostgreSQL 16:
 
 | # | Tabla | Propósito |
 |---|---|---|
@@ -135,14 +135,16 @@ El modelo vigente consta de 17 tablas en PostgreSQL 16:
 | 7 | `direccion` | Direcciones de comprador o bodega |
 | 8 | `carrito` | Selección temporal autenticada |
 | 9 | `carrito_item` | Línea de carrito |
-| 10 | `pedido` | Compra global multi-bodega |
-| 11 | `pago` | Registro económico de la compra |
-| 12 | `subpedido` | Parte del pedido por bodega y fuente logística |
-| 13 | `pedido_item` | Línea congelada del pedido |
-| 14 | `notificacion` | Comunicación automática |
-| 15 | `auditoria` | Registro inmutable de eventos |
+| 10 | `carrito_fusion` | Ledger idempotente de fusión de carrito |
+| 11 | `pedido` | Compra global multi-bodega |
+| 12 | `pago` | Registro económico de la compra |
+| 13 | `evento_webhook_stripe` | Ledger idempotente de webhooks Stripe |
+| 14 | `subpedido` | Parte del pedido por bodega y fuente logística |
+| 15 | `pedido_item` | Línea congelada del pedido |
 | 16 | `incidencia` | Problema operativo básico |
-| 17 | `solicitud_recuperacion_password` | Recuperación segura de acceso |
+| 17 | `notificacion` | Comunicación automática |
+| 18 | `auditoria` | Registro inmutable de eventos |
+| 19 | `solicitud_recuperacion_password` | Recuperación segura de acceso |
 
 El detalle ejecutable permanece en INF-05 y el detalle campo a campo en INF-06.
 

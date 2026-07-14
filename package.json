@@ -1,0 +1,17 @@
+{
+  "name": "teralya",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "backend:build": "npm run build --workspace @teralya/backend",
+    "backend:lint": "npm run lint --workspace @teralya/backend",
+    "backend:test": "npm run test --workspace @teralya/backend",
+    "backend:check": "npm run lint --workspace @teralya/backend && npm run test --workspace @teralya/backend && npm run build --workspace @teralya/backend"
+  }
+}
