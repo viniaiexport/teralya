@@ -33,6 +33,12 @@ return 0
 export interface SessionSubject {
   usuarioId: string;
   rol: 'comprador' | 'bodega' | 'administrador';
+  bodegaId?: string;
+}
+
+export interface SessionActor extends SessionSubject {
+  issuedAt: Date;
+  expiresAt: Date;
 }
 
 export interface IssuedSession {
@@ -73,6 +79,7 @@ export class SessionService {
     const payload = JSON.stringify({
       usuario_id: subject.usuarioId,
       rol: subject.rol,
+      ...(subject.bodegaId === undefined ? {} : { bodega_id: subject.bodegaId }),
       issued_at: issuedAt.toISOString(),
       expires_at: expiresAt.toISOString(),
     });
@@ -99,6 +106,27 @@ export class SessionService {
     }
 
     return { accessToken: token, expiresIn: SESSION_TTL_SECONDS, expiresAt };
+  }
+
+  async resolve(accessToken: string): Promise<SessionActor | null> {
+    if (!/^[A-Za-z0-9_-]{43}$/.test(accessToken)) {
+      return null;
+    }
+
+    const tokenHash = hashToken(accessToken);
+    const key = `${SESSION_KEY_PREFIX}${tokenHash}`;
+    const raw = await this.redisService.client.get(key);
+    if (raw === null) {
+      return null;
+    }
+
+    const actor = this.parseActor(raw);
+    if (actor === null || actor.expiresAt.getTime() <= Date.now()) {
+      await this.redisService.client.del(key);
+      return null;
+    }
+
+    return actor;
   }
 
   async withIssuanceBlocked<T>(usuarioId: string, operation: (blockOwner: string) => Promise<T>): Promise<T> {
@@ -151,6 +179,42 @@ export class SessionService {
         code: 'SERVICE_UNAVAILABLE',
         message: 'No se pudieron revocar las sesiones activas.',
       });
+    }
+  }
+
+  private parseActor(raw: string): SessionActor | null {
+    try {
+      const value: unknown = JSON.parse(raw);
+      if (typeof value !== 'object' || value === null) {
+        return null;
+      }
+      const record = value as Record<string, unknown>;
+      const rol = record.rol;
+      const bodegaId = record.bodega_id;
+      const issuedAt = new Date(String(record.issued_at));
+      const expiresAt = new Date(String(record.expires_at));
+      if (
+        typeof record.usuario_id !== 'string' ||
+        !['comprador', 'bodega', 'administrador'].includes(String(rol)) ||
+        (bodegaId !== undefined && typeof bodegaId !== 'string') ||
+        Number.isNaN(issuedAt.getTime()) ||
+        Number.isNaN(expiresAt.getTime())
+      ) {
+        return null;
+      }
+      if (rol === 'bodega' && typeof bodegaId !== 'string') {
+        return null;
+      }
+
+      return {
+        usuarioId: record.usuario_id,
+        rol: rol as SessionActor['rol'],
+        ...(typeof bodegaId === 'string' ? { bodegaId } : {}),
+        issuedAt,
+        expiresAt,
+      };
+    } catch {
+      return null;
     }
   }
 }
