@@ -16,7 +16,7 @@ on:
       - ".github/workflows/frontend.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
@@ -36,3 +36,27 @@ jobs:
       - run: npm run frontend:check
       - run: npx playwright install --with-deps chromium
       - run: npm run frontend:e2e
+      - name: Publish visual previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: teralya-visual-previews
+          path: apps/frontend/visual-previews
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Publish visual preview branch
+        if: success() && github.event_name == 'pull_request'
+        env:
+          PREVIEW_BRANCH: visual/teralya-previews
+        run: |
+          mkdir -p /tmp/teralya-visual-previews
+          cp apps/frontend/visual-previews/*.png /tmp/teralya-visual-previews/
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git stash push --include-untracked
+          git switch --orphan visual-preview-publish
+          mkdir visual-previews
+          cp /tmp/teralya-visual-previews/*.png visual-previews/
+          git add visual-previews
+          git commit -m "chore: publish Teralya visual previews"
+          git push --force origin HEAD:${PREVIEW_BRANCH}
