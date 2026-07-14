@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiProblem } from '../src/lib/api/problem';
 vi.mock('server-only',()=>({}));
 const {apiRequest,readAccessToken,readSessionIdentity}=vi.hoisted(()=>({apiRequest:vi.fn(),readAccessToken:vi.fn(),readSessionIdentity:vi.fn()}));
@@ -10,7 +10,7 @@ const addressId='11111111-1111-4111-8111-111111111111';
 const orderId='22222222-2222-4222-8222-222222222222';
 const input={uso:'ambos' as const,nombre_destinatario:'Ana',direccion:'Calle Mayor 1',codigo_postal:'28001',ciudad:'Madrid',pais:'España'};
 
-afterEach(()=>{vi.clearAllMocks();readSessionIdentity.mockResolvedValue({usuario_id:'user',rol:'comprador'});readAccessToken.mockResolvedValue('opaque-token')});
+beforeEach(()=>{vi.clearAllMocks();readSessionIdentity.mockResolvedValue({usuario_id:'user',rol:'comprador'});readAccessToken.mockResolvedValue('opaque-token')});
 
 describe('contrato FE-006',()=>{
   it('crea direcciones con Idempotency-Key UUID y token solo en servidor',async()=>{apiRequest.mockResolvedValue({id:addressId,...input});await createAddress(addressId,input);expect(apiRequest).toHaveBeenCalledWith('/direcciones',{method:'POST',token:'opaque-token',headers:{'Idempotency-Key':addressId},body:input})});
