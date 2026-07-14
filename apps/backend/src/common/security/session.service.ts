@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { ConflictException, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { RedisService } from '../cache/redis.service.js';
 
 /** TAPI-01: sesión Bearer opaca de 256 bits, TTL absoluto de 8 horas, sin refresh ni sliding expiration. */
@@ -9,6 +9,8 @@ const SESSION_KEY_PREFIX = 'session:';
 const SESSION_INDEX_PREFIX = 'session-index:';
 const SESSION_BLOCK_PREFIX = 'session-block:';
 const SESSION_BLOCK_TTL_SECONDS = 30;
+const SESSION_BLOCK_WAIT_MILLISECONDS = 30_000;
+const SESSION_BLOCK_RETRY_MILLISECONDS = 25;
 
 const ISSUE_SCRIPT = `
 if redis.call('EXISTS', KEYS[3]) == 1 then
@@ -54,6 +56,10 @@ function sessionBlockKey(usuarioId: string): string {
   return `${SESSION_BLOCK_PREFIX}${usuarioId}`;
 }
 
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 @Injectable()
 export class SessionService {
   constructor(private readonly redisService: RedisService) {}
@@ -96,18 +102,27 @@ export class SessionService {
   async withIssuanceBlocked<T>(usuarioId: string, operation: () => Promise<T>): Promise<T> {
     const key = sessionBlockKey(usuarioId);
     const owner = randomUUID();
-    const acquired = await this.redisService.client.set(
-      key,
-      owner,
-      'EX',
-      SESSION_BLOCK_TTL_SECONDS,
-      'NX',
-    );
+    const deadline = Date.now() + SESSION_BLOCK_WAIT_MILLISECONDS;
+    let acquired: string | null = null;
+
+    do {
+      acquired = await this.redisService.client.set(
+        key,
+        owner,
+        'EX',
+        SESSION_BLOCK_TTL_SECONDS,
+        'NX',
+      );
+      if (acquired === 'OK') {
+        break;
+      }
+      await delay(SESSION_BLOCK_RETRY_MILLISECONDS);
+    } while (Date.now() < deadline);
 
     if (acquired !== 'OK') {
-      throw new ConflictException({
-        code: 'CONFLICT',
-        message: 'Existe otra operación de seguridad en curso.',
+      throw new ServiceUnavailableException({
+        code: 'SERVICE_UNAVAILABLE',
+        message: 'No se pudo completar la operación de seguridad.',
       });
     }
 
