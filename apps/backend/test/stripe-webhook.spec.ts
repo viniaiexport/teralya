@@ -15,3 +15,4 @@ describe('API-029 Stripe webhook',()=>{
   it('rechaza eventos fuera de allowlist y metadata manipulada',async()=>{const{service}=setup();const unsupported=payload('payment_intent.succeeded');expect(()=>service.procesar(unsupported,header(unsupported))).toThrow(UnprocessableEntityException);const tampered=payload('checkout.session.completed',false);await expect(service.procesar(tampered,header(tampered))).rejects.toBeInstanceOf(ConflictException);});
 });
 
+
