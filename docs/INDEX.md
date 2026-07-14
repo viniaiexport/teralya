@@ -59,6 +59,7 @@
 |---|---|---|---|
 | LEGAL-01 | Marco legal y fiscal UE | ⚠️ PRELIMINAR — pendiente de abogado y asesor fiscal | docs/LEGAL/LEGAL-01_Marco_Legal_Fiscal_UE.md |
 | LEGAL-02 | Ayudas y subvenciones | ⚠️ PRELIMINAR — pendiente de gestoría especializada | docs/LEGAL/LEGAL-02_Ayudas_y_Subvenciones.md |
+| LEGAL-PACKAGE-01 | Paquete LEGAL-01 a LEGAL-09 recibido de Claude | 📥 RECIBIDO — no normativo, pendiente de reconciliación | docs/LEGAL/INCOMING/Teralya-Paquete-Legal-Claude-2026-07-14.pdf |
 
 Estos documentos no autorizan decisiones de producción ni sustituyen asesoramiento profesional. `docs/UX/` continúa sin contenido oficial.
 
