@@ -53,6 +53,7 @@ jobs:
           cp apps/frontend/visual-previews/*.png /tmp/teralya-visual-previews/
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git stash push --include-untracked
           git switch --orphan visual-preview-publish
           git rm -rf .
           mkdir visual-previews
