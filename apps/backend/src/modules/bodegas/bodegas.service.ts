@@ -1,10 +1,12 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { hashPassword } from '../../common/security/password.util.js';
 import {
   BodegasRepository,
   EmailBodegaYaRegistradoError,
   type BodegaRegistrada,
+  type BodegaPerfil,
 } from './bodegas.repository.js';
+import type { BodegaProfilePatchDto } from './dto/bodega-profile-patch.dto.js';
 import type { BodegaRegistrationRequestDto } from './dto/bodega-registration-request.dto.js';
 import type { BodegaSelf } from './dto/bodega-self.dto.js';
 
@@ -49,6 +51,68 @@ export class BodegasService {
       ...(bodega.pais_contacto === null ? {} : { pais_contacto: bodega.pais_contacto }),
       ...(bodega.ciudad === null ? {} : { ciudad: bodega.ciudad }),
       ...(bodega.codigo_postal === null ? {} : { codigo_postal: bodega.codigo_postal }),
+    };
+  }
+
+  async obtenerPerfilPropio(bodegaId: string): Promise<BodegaSelf> {
+    const bodega = await this.bodegasRepository.obtenerPerfil(bodegaId);
+    if (bodega === null) {
+      throw new NotFoundException({ code: 'RESOURCE_NOT_FOUND', message: 'La bodega no existe.' });
+    }
+    this.assertPuedeOperar(bodega);
+    return this.mapPerfil(bodega);
+  }
+
+  async actualizarPerfilPropio(bodegaId: string, request: BodegaProfilePatchDto): Promise<BodegaSelf> {
+    if (Object.keys(request).length === 0) {
+      throw new BadRequestException({ code: 'VALIDATION_ERROR', message: 'Debe enviarse al menos un campo.' });
+    }
+
+    const actual = await this.bodegasRepository.obtenerPerfil(bodegaId);
+    if (actual === null || !this.puedeOperar(actual)) {
+      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'La bodega no está habilitada para operar.' });
+    }
+
+    try {
+      const actualizada = await this.bodegasRepository.actualizarPerfil(bodegaId, request);
+      if (actualizada === null) {
+        throw new ForbiddenException({ code: 'FORBIDDEN', message: 'La bodega no está habilitada para operar.' });
+      }
+      return this.mapPerfil(actualizada);
+    } catch (error) {
+      if (error instanceof EmailBodegaYaRegistradoError) {
+        throw new ConflictException({ code: 'CONFLICT', message: 'El email ya está registrado.' });
+      }
+      throw error;
+    }
+  }
+
+  private assertPuedeOperar(bodega: BodegaPerfil): void {
+    if (!this.puedeOperar(bodega)) {
+      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'La bodega no está habilitada para operar.' });
+    }
+  }
+
+  private puedeOperar(bodega: BodegaPerfil): boolean {
+    return bodega.estado === 'aprobada' || bodega.estado === 'activa';
+  }
+
+  private mapPerfil(bodega: BodegaPerfil): BodegaSelf {
+    const optional = <K extends keyof BodegaPerfil>(key: K): Partial<Record<K, NonNullable<BodegaPerfil[K]>>> =>
+      bodega[key] === null ? {} : { [key]: bodega[key] } as Partial<Record<K, NonNullable<BodegaPerfil[K]>>>;
+    return {
+      id: bodega.id,
+      nombre_comercial: bodega.nombre_comercial,
+      estado: bodega.estado,
+      created_at: this.toIsoString(bodega.created_at),
+      updated_at: this.toIsoString(bodega.updated_at),
+      ...optional('slug'), ...optional('logo_url'), ...optional('imagen_principal_url'),
+      ...optional('historia'), ...optional('filosofia'), ...optional('region'), ...optional('pais'),
+      ...optional('denominacion_origen'), ...optional('anio_fundacion'), ...optional('web'),
+      ...optional('video_url'), ...optional('razon_social'), ...optional('cif_vat'),
+      ...optional('email_principal'), ...optional('telefono'), ...optional('persona_contacto'),
+      ...optional('direccion_fisica'), ...optional('codigo_postal'), ...optional('ciudad'),
+      ...optional('provincia'), ...optional('pais_contacto'),
     };
   }
 

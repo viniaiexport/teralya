@@ -140,7 +140,11 @@ export class AuthService {
 
       await this.authRepository.registrarAccesoCorrecto(usuario.id);
       const session = await this.sessionService.issue(
-        { usuarioId: usuario.id, rol: usuario.rol },
+        {
+          usuarioId: usuario.id,
+          rol: usuario.rol,
+          ...(usuario.bodegaId === null ? {} : { bodegaId: usuario.bodegaId }),
+        },
         blockOwner,
       );
       await this.loginRateLimitService.reset(request.email);

@@ -35,6 +35,48 @@ export interface BodegaRegistrada {
 
 export class EmailBodegaYaRegistradoError extends Error {}
 
+export type EstadoBodega = 'borrador' | 'pendiente_revision' | 'aprobada' | 'activa' | 'suspendida' | 'archivada';
+
+export interface BodegaPerfil {
+  id: string;
+  nombre_comercial: string;
+  slug: string | null;
+  logo_url: string | null;
+  imagen_principal_url: string | null;
+  historia: string | null;
+  filosofia: string | null;
+  region: string | null;
+  pais: string | null;
+  denominacion_origen: string | null;
+  anio_fundacion: number | null;
+  web: string | null;
+  video_url: string | null;
+  estado: EstadoBodega;
+  created_at: Date | string;
+  updated_at: Date | string;
+  razon_social: string | null;
+  cif_vat: string | null;
+  email_principal: string | null;
+  telefono: string | null;
+  persona_contacto: string | null;
+  direccion_fisica: string | null;
+  codigo_postal: string | null;
+  ciudad: string | null;
+  provincia: string | null;
+  pais_contacto: string | null;
+}
+
+export type ActualizarPerfilBodegaInput = Partial<Pick<BodegaPerfil,
+  | 'nombre_comercial' | 'historia' | 'filosofia' | 'region' | 'pais'
+  | 'denominacion_origen' | 'anio_fundacion' | 'web' | 'video_url'
+  | 'email_principal' | 'telefono' | 'persona_contacto' | 'logo_url'
+  | 'imagen_principal_url'>>;
+
+const PERFIL_COLUMNS = `id, nombre_comercial, slug, logo_url, imagen_principal_url,
+  historia, filosofia, region, pais, denominacion_origen, anio_fundacion, web, video_url,
+  estado, created_at, updated_at, razon_social, cif_vat, email_principal, telefono,
+  persona_contacto, direccion_fisica, codigo_postal, ciudad, provincia, pais_contacto`;
+
 @Injectable()
 export class BodegasRepository {
   constructor(private readonly databaseService: DatabaseService) {}
@@ -90,6 +132,33 @@ export class BodegasRepository {
 
         return bodega;
       });
+    } catch (error) {
+      if (this.isUniqueViolation(error)) {
+        throw new EmailBodegaYaRegistradoError('El email ya está registrado.');
+      }
+      throw error;
+    }
+  }
+
+  async obtenerPerfil(id: string): Promise<BodegaPerfil | null> {
+    const result = await this.databaseService.query<BodegaPerfil>(
+      `SELECT ${PERFIL_COLUMNS} FROM bodega WHERE id = $1`,
+      [id],
+    );
+    return result[0] ?? null;
+  }
+
+  async actualizarPerfil(id: string, input: ActualizarPerfilBodegaInput): Promise<BodegaPerfil | null> {
+    const entries = Object.entries(input);
+    const assignments = entries.map(([column], index) => `${column} = $${String(index + 2)}`);
+    try {
+      const result = await this.databaseService.query<BodegaPerfil>(
+        `UPDATE bodega SET ${assignments.join(', ')}, updated_at = now()
+          WHERE id = $1 AND estado IN ('aprobada', 'activa')
+          RETURNING ${PERFIL_COLUMNS}`,
+        [id, ...entries.map(([, value]) => value)],
+      );
+      return result[0] ?? null;
     } catch (error) {
       if (this.isUniqueViolation(error)) {
         throw new EmailBodegaYaRegistradoError('El email ya está registrado.');
