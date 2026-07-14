@@ -1,14 +1,17 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { isUUID } from 'class-validator';
 import { hashPassword } from '../../common/security/password.util.js';
 import {
   BodegasRepository,
   EmailBodegaYaRegistradoError,
   type BodegaRegistrada,
   type BodegaPerfil,
+  type BodegaPublicaRecord,
 } from './bodegas.repository.js';
 import type { BodegaProfilePatchDto } from './dto/bodega-profile-patch.dto.js';
 import type { BodegaRegistrationRequestDto } from './dto/bodega-registration-request.dto.js';
 import type { BodegaSelf } from './dto/bodega-self.dto.js';
+import type { BodegaPublic, BodegaSummaryPublic } from './dto/bodega-public.dto.js';
 
 @Injectable()
 export class BodegasService {
@@ -63,6 +66,18 @@ export class BodegasService {
     return this.mapPerfil(bodega);
   }
 
+  async obtenerPublica(id: string): Promise<BodegaPublic> {
+    if (!isUUID(id)) {
+      throw new NotFoundException({ code: 'RESOURCE_NOT_FOUND', message: 'La bodega no existe.' });
+    }
+    const bodega = await this.bodegasRepository.obtenerPublica(id);
+    if (bodega === null) {
+      // No revelamos si existe una bodega que todavía no es pública.
+      throw new NotFoundException({ code: 'RESOURCE_NOT_FOUND', message: 'La bodega no existe.' });
+    }
+    return this.mapPublica(bodega);
+  }
+
   async actualizarPerfilPropio(bodegaId: string, request: BodegaProfilePatchDto): Promise<BodegaSelf> {
     if (Object.keys(request).length === 0) {
       throw new BadRequestException({ code: 'VALIDATION_ERROR', message: 'Debe enviarse al menos un campo.' });
@@ -113,6 +128,38 @@ export class BodegasService {
       ...optional('email_principal'), ...optional('telefono'), ...optional('persona_contacto'),
       ...optional('direccion_fisica'), ...optional('codigo_postal'), ...optional('ciudad'),
       ...optional('provincia'), ...optional('pais_contacto'),
+    };
+  }
+
+  private mapPublica(bodega: BodegaPublicaRecord): BodegaPublic {
+    const optional = <K extends keyof BodegaPublicaRecord>(key: K): Partial<Record<K, NonNullable<BodegaPublicaRecord[K]>>> =>
+      bodega[key] === null ? {} : { [key]: bodega[key] } as Partial<Record<K, NonNullable<BodegaPublicaRecord[K]>>>;
+    const summary: BodegaSummaryPublic = {
+      id: bodega.id,
+      nombre_comercial: bodega.nombre_comercial,
+      ...optional('slug'), ...optional('logo_url'), ...optional('region'), ...optional('pais'),
+      ...optional('denominacion_origen'),
+    };
+    return {
+      id: bodega.id,
+      nombre_comercial: bodega.nombre_comercial,
+      ...optional('slug'), ...optional('logo_url'), ...optional('imagen_principal_url'),
+      ...optional('historia'), ...optional('filosofia'), ...optional('region'), ...optional('pais'),
+      ...optional('denominacion_origen'), ...optional('anio_fundacion'), ...optional('web'),
+      ...optional('video_url'),
+      vinos: bodega.vinos.map((vino) => ({
+        id: vino.id,
+        nombre_comercial: vino.nombre_comercial,
+        precio: vino.precio,
+        moneda: vino.moneda,
+        disponible_venta: vino.disponible_venta,
+        bodega: summary,
+        ...(vino.slug === null ? {} : { slug: vino.slug }),
+        ...(vino.tipo_vino === null ? {} : { tipo_vino: vino.tipo_vino }),
+        ...(vino.anada === null ? {} : { anada: vino.anada }),
+        ...(vino.region === null ? {} : { region: vino.region }),
+        ...(vino.denominacion_origen === null ? {} : { denominacion_origen: vino.denominacion_origen }),
+      })),
     };
   }
 
