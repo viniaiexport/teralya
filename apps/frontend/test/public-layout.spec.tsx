@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only',()=>({}));
 vi.mock('../src/lib/session/session',()=>({readSessionIdentity:vi.fn(async()=>undefined)}));
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}));
@@ -7,8 +7,11 @@ import { LanguageSelector } from '@/components/language-selector';
 import { PublicFooter } from '@/components/public-footer';
 import { PublicHeader } from '@/components/public-header';
 import { ScreenState } from '@/components/screen-state';
+import { readSessionIdentity } from '@/lib/session/session';
 
 describe('public layout components', () => {
+  beforeEach(() => vi.mocked(readSessionIdentity).mockResolvedValue(undefined));
+
   it('exposes the public navigation for desktop and mobile', async () => {
     const html = renderToStaticMarkup(await PublicHeader());
 
@@ -18,6 +21,26 @@ describe('public layout components', () => {
     expect(html).toContain('href="/bodegas"');
     expect(html).toContain('href="/acceso"');
     expect(html).toContain('href="/carrito"');
+  });
+
+  it('replaces access with the destination for the authenticated role', async () => {
+    vi.mocked(readSessionIdentity).mockResolvedValue({ usuario_id: 'buyer-id', rol: 'comprador' });
+    const buyerHtml = renderToStaticMarkup(await PublicHeader());
+    expect(buyerHtml).toContain('href="/cuenta"');
+    expect(buyerHtml).toContain('Mi cuenta');
+    expect(buyerHtml).not.toContain('href="/acceso"');
+
+    vi.mocked(readSessionIdentity).mockResolvedValue({ usuario_id: 'winery-id', rol: 'bodega', bodega_id: 'winery-id' });
+    const wineryHtml = renderToStaticMarkup(await PublicHeader());
+    expect(wineryHtml).toContain('href="/bodega"');
+    expect(wineryHtml).toContain('Panel de bodega');
+    expect(wineryHtml).not.toContain('href="/carrito"');
+
+    vi.mocked(readSessionIdentity).mockResolvedValue({ usuario_id: 'admin-id', rol: 'administrador' });
+    const adminHtml = renderToStaticMarkup(await PublicHeader());
+    expect(adminHtml).toContain('href="/admin"');
+    expect(adminHtml).toContain('Administración');
+    expect(adminHtml).not.toContain('href="/carrito"');
   });
 
   it('offers all five approved interface languages', () => {
