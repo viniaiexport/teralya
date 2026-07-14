@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 5.5 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 5.6 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -26,14 +26,14 @@
 | INF-08-AUD-IDEM | Auditoría limitada de Idempotencia | 1.0 | ✅ Cerrada (incorporada en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
 | INF-08-AUD-COV | Auditoría de cobertura de Pantallas y Casos de Uso | 1.0 | ✅ Cerrada (13 brechas resueltas en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Cobertura_Pantallas_v1.0.md | CAP-05, CAP-06, CAP-07, INF-08 v2.1 | — |
 | INF-09 | Arquitectura Frontend | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-09_v1.0_Arquitectura_Frontend_EN_REVISION.md | CAP-05, CAP-06, INF-05 a INF-08, INF-07 v1.3, ADR-001 a ADR-004 | — |
-| INF-10 | Contrato Técnico de APIs | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-10_v1.0_Contrato_Tecnico_APIs_APROBADO.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, CAP-08 v1.4, INF-10-A v1.0, ADR-001/002, DLOG 0014–0021 | — |
+| INF-10 | Contrato Técnico de APIs | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-10_v1.0_Contrato_Tecnico_APIs_APROBADO.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, CAP-08 v1.4, INF-10-A v1.0, ADR-001/002, DLOG 0014–0022 | — |
 | INF-10-A | Catálogo Normativo de DTO | 1.0 | ✅ APROBADO POR CTO | docs/INF/INF-10-A_v1.0_Catalogo_Normativo_DTO_APROBADO.md | INF-10 v1.0, INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, DLOG 0020 | — |
 
 ## DECISION_LOG
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log — Teralya | 1.7 | ✅ OFICIAL, incluye 0001–0021 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-004 |
+| DLOG | Decision Log — Teralya | 1.8 | ✅ OFICIAL, incluye 0001–0022 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-004 |
 
 ### Decisiones de negocio vigentes
 
@@ -110,6 +110,7 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - API-003 incluye respuesta anti-enumeración, token de 256 bits almacenado solo como hash, rate limit, notificación SMTP, serialización transaccional por usuario y pruebas E2E concurrentes.
 - API-004 — `POST /auth/restablecer-password` implementada e integrada en `main` mediante el commit `8602c74`.
 - API-004 incluye consumo único concurrente del token, cambio seguro de contraseña, revocación de sesiones, serialización frente a login y pruebas E2E.
+- DLOG 0022 fija API-005: cada solicitud se crea en `pendiente_revision` y con tipo `estandar`; la condición `fundadora` no es automática.
 - GitHub Actions valida esquema INF-05 v1.4, lint, pruebas, build, contrato OpenAPI y Redocly.
 
 ### Actualmente en desarrollo

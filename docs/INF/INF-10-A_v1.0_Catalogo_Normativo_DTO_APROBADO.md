@@ -85,7 +85,7 @@ Arrays admiten como máximo 20 elementos salvo `items` de una página. Los eleme
 
 | Schema | Campos requeridos | Campos opcionales | Flags y reglas |
 |---|---|---|---|
-| BodegaRegistrationRequest | `nombre_comercial:Text160`, `razon_social:Text200`, `cif_vat:Text32`, `email:Email`, `password:Password`, `persona_contacto:Text100`, `telefono:Text32`, `aceptacion_condiciones:true` | `pais_contacto:Text100`, `ciudad:Text100`, `codigo_postal:string(1..20)` | WO |
+| BodegaRegistrationRequest | `nombre_comercial:Text160`, `razon_social:Text200`, `cif_vat:Text32`, `email:Email`, `password:Password`, `persona_contacto:Text100`, `telefono:Text32`, `aceptacion_condiciones:true` | `pais_contacto:Text100`, `ciudad:Text100`, `codigo_postal:string(1..20)` | WO; API-005 crea la bodega con `estado=pendiente_revision` y `tipo=estandar`; `fundadora` nunca se asigna automáticamente (DLOG 0022) |
 | BodegaProfilePatch | al menos uno de los campos opcionales | `nombre_comercial:Text160`, `historia:Text5000`, `filosofia:Text5000`, `region:Text160`, `pais:Text100`, `denominacion_origen:Text160`, `anio_fundacion:Year`, `web:URI`, `video_url:URI`, `email_principal:Email`, `telefono:Text32`, `persona_contacto:Text100`, `logo_url:URI`, `imagen_principal_url:URI` | WO |
 | BodegaSummary | `id:UUID`, `nombre_comercial:Text160` | `slug:Text160`, `logo_url:URI`, `region:Text160`, `pais:Text100`, `denominacion_origen:Text160` | RO |
 | BodegaPublic | `id:UUID`, `nombre_comercial:Text160`, `vinos:WineSummary[]` | `slug:Text160`, `logo_url:URI`, `imagen_principal_url:URI`, `historia:Text5000`, `filosofia:Text5000`, `region:Text160`, `pais:Text100`, `denominacion_origen:Text160`, `anio_fundacion:Year`, `web:URI`, `video_url:URI` | RO; solo vinos publicados/disponibles |
