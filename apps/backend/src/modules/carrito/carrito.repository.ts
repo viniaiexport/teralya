@@ -93,7 +93,7 @@ export class CarritoRepository {
         );
       else
         await c.query(
-          "UPDATE carrito_item SET cantidad=$3,importe_total=precio_unitario*$3,estado='disponible' WHERE carrito_id=$1 AND vino_id=$2",
+          "UPDATE carrito_item SET cantidad=$3::integer,importe_total=precio_unitario*$3::integer,estado='disponible' WHERE carrito_id=$1 AND vino_id=$2",
           [cart.id, vinoId, quantity],
         );
       await this.totals(c, cart.id);
@@ -183,7 +183,7 @@ export class CarritoRepository {
           );
         else
           await c.query(
-            "UPDATE carrito_item SET cantidad=$3,importe_total=precio_unitario*$3,estado=CASE WHEN precio_unitario=$4 THEN 'disponible' ELSE 'precio_modificado' END WHERE carrito_id=$1 AND vino_id=$2",
+            "UPDATE carrito_item SET cantidad=$3::integer,importe_total=precio_unitario*$3::integer,estado=CASE WHEN precio_unitario=$4 THEN 'disponible' ELSE 'precio_modificado' END WHERE carrito_id=$1 AND vino_id=$2",
             [cart.id, local.vino_id, quantity, wine.precio],
           );
         lines.push({
@@ -241,7 +241,7 @@ export class CarritoRepository {
           message: "El vino o su precio ya no son elegibles.",
         };
       await c.query(
-        "UPDATE carrito_item SET cantidad=$2,importe_total=precio_unitario*$2,estado='disponible' WHERE id=$1",
+        "UPDATE carrito_item SET cantidad=$2::integer,importe_total=precio_unitario*$2::integer,estado='disponible' WHERE id=$1",
         [itemId, quantity],
       );
       await this.totals(c, cart.id);
