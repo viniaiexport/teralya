@@ -530,7 +530,9 @@ default_cache_behavior {
   query_string = false
   cookies {
   forward = "none"
-}}}
+}
+}
+}
 restrictions {
   geo_restriction { restriction_type = "none" }
 }
