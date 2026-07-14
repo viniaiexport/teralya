@@ -101,7 +101,7 @@ export class AuthService {
       this.lanzarCredencialesIncorrectas();
     }
 
-    return this.sessionService.withIssuanceBlocked(usuarioInicial.id, async () => {
+    return this.sessionService.withIssuanceBlocked(usuarioInicial.id, async (blockOwner) => {
       // El usuario se vuelve a leer dentro de la exclusión mutua. Así, si un
       // restablecimiento terminó mientras el login esperaba, nunca se valida
       // contra el hash antiguo capturado antes del cambio.
@@ -139,7 +139,10 @@ export class AuthService {
       }
 
       await this.authRepository.registrarAccesoCorrecto(usuario.id);
-      const session = await this.sessionService.issue({ usuarioId: usuario.id, rol: usuario.rol });
+      const session = await this.sessionService.issue(
+        { usuarioId: usuario.id, rol: usuario.rol },
+        blockOwner,
+      );
       await this.loginRateLimitService.reset(request.email);
 
       return {
