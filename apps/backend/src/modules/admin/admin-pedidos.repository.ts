@@ -58,7 +58,7 @@ export class AdminPedidosRepository {
   async listar(page: number, pageSize: number): Promise<AdminOrderPage> {
     const [items, count] = await Promise.all([
       this.database.query<AdminOrderPage['items'][number]>(
-        `SELECT id,numero_pedido,estado,total::text,moneda,created_at FROM pedido ORDER BY created_at DESC,id DESC LIMIT $1 OFFSET $2`,
+        `SELECT id,numero_pedido,estado,total::text,'EUR' AS moneda,created_at FROM pedido ORDER BY created_at DESC,id DESC LIMIT $1 OFFSET $2`,
         [pageSize, (page - 1) * pageSize],
       ),
       this.database.query<{ total: number }>('SELECT count(*)::int AS total FROM pedido'),
@@ -68,7 +68,7 @@ export class AdminPedidosRepository {
 
   async obtener(id: string): Promise<AdminOrderRecord | null> {
     const rows = await this.database.query<Omit<AdminOrderRecord, 'lineas' | 'subpedidos'>>(
-      `SELECT id,numero_pedido,comprador_id,estado,subtotal::text,gastos_envio::text,impuestos::text,descuentos::text,total::text,moneda,created_at,direccion_envio_snapshot,direccion_facturacion_snapshot FROM pedido WHERE id=$1`,
+      `SELECT id,numero_pedido,comprador_id,estado,subtotal::text,gastos_envio::text,impuestos::text,descuentos::text,total::text,'EUR' AS moneda,created_at,direccion_envio_snapshot,direccion_facturacion_snapshot FROM pedido WHERE id=$1`,
       [id],
     );
     const order = rows[0];
