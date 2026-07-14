@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 vi.mock('server-only',()=>({}));
 vi.mock('../src/lib/session/session',()=>({readSessionIdentity:vi.fn(async()=>undefined)}));
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}));
 import { LanguageSelector } from '@/components/language-selector';
 import { PublicFooter } from '@/components/public-footer';
 import { PublicHeader } from '@/components/public-header';
