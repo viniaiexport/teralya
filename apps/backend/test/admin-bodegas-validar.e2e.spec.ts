@@ -21,8 +21,6 @@ describe('API-024 — POST /admin/bodegas/:id/validar', () => {
   let pool: Pool;
   let adminId: string;
   let token: string;
-  const bodegaIds: string[] = [];
-  const usuarioIds: string[] = [];
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -40,9 +38,6 @@ describe('API-024 — POST /admin/bodegas/:id/validar', () => {
   });
 
   afterAll(async () => {
-    await pool.query(`DELETE FROM auditoria WHERE entidad_id = ANY($1::uuid[])`, [bodegaIds]);
-    await pool.query(`DELETE FROM usuario WHERE id = ANY($1::uuid[]) OR id = $2`, [usuarioIds, adminId]);
-    await pool.query(`DELETE FROM bodega WHERE id = ANY($1::uuid[])`, [bodegaIds]);
     await pool.end();
     await app.close();
   });
@@ -70,9 +65,7 @@ describe('API-024 — POST /admin/bodegas/:id/validar', () => {
        VALUES ($1, $2, 'bodega', 'pendiente_verificacion', $3) RETURNING id`,
       [`api024-user-${randomUUID()}@teralya.test`, HASH, bodegaId],
     );
-    bodegaIds.push(bodegaId);
     const usuarioId = required(user.rows[0]).id;
-    usuarioIds.push(usuarioId);
     return { bodegaId, usuarioId, createdAt: bodegaRow.created_at };
   }
 
