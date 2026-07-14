@@ -6,6 +6,7 @@ export interface ImageSummary { id:string;url:string;es_principal:boolean;orden:
 export interface BodegaSummary { id:string;nombre_comercial:string;slug?:string;logo_url?:string;region?:string;pais?:string;denominacion_origen?:string }
 export interface WineSummary { id:string;nombre_comercial:string;precio:string;moneda:'EUR';disponible_venta:boolean;bodega:BodegaSummary;slug?:string;tipo_vino?:string;anada?:number;region?:string;denominacion_origen?:string;imagen_principal?:ImageSummary }
 export interface WinePublicDetail extends WineSummary { imagenes:ImageSummary[];pais?:string;variedades_uva?:string[];crianza?:string;meses_crianza?:number;graduacion_alcoholica?:string;volumen_ml?:number;descripcion_corta?:string;descripcion_completa?:string;nota_cata?:string;maridaje?:string;temperatura_servicio?:string;certificaciones?:string[];premios?:string[];produccion_limitada?:boolean }
+export interface BodegaPublic extends BodegaSummary { vinos:WineSummary[];imagen_principal_url?:string;historia?:string;filosofia?:string;anio_fundacion?:number;web?:string;video_url?:string }
 export interface PageWineSummary { items:WineSummary[];page:number;page_size:number;total_items:number;total_pages:number }
 export interface CatalogFilters { q?:string;tipo_vino?:string;region?:string;denominacion_origen?:string;precio_min?:string;precio_max?:string;page?:number;page_size?:number }
 type SearchValues=Record<string,string|string[]|undefined>;
@@ -18,6 +19,8 @@ export function catalogFiltersFromSearch(values:SearchValues):CatalogFilters{con
 export function buildCatalogPath(filters:CatalogFilters):`/vinos${string}`{const query=new URLSearchParams();for(const key of ['q','tipo_vino','region','denominacion_origen','precio_min','precio_max'] as const){const value=filters[key]?.trim();if(value!==undefined&&value!=='')query.set(key,value)}if(filters.page!==undefined&&filters.page!==1)query.set('page',String(filters.page));if(filters.page_size!==undefined&&filters.page_size!==20)query.set('page_size',String(filters.page_size));const serialized=query.toString();return serialized===''?'/vinos':`/vinos?${serialized}`}
 export function catalogHref(filters:CatalogFilters,page:number):Route{return buildCatalogPath({...filters,page}) as Route}
 export function wineHref(id:string):Route{return `/vinos/${encodeURIComponent(id)}` as Route}
+export function wineryHref(id:string):Route{return `/bodegas/${encodeURIComponent(id)}` as Route}
 export function formatEuro(value:string):string{const amount=Number(value);return Number.isFinite(amount)?new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(amount):value}
 export function getCatalog(filters:CatalogFilters):Promise<PageWineSummary>{return apiRequest<PageWineSummary>(buildCatalogPath(filters),{method:'GET',cache:'no-store'})}
 export function getPublicWine(id:string):Promise<WinePublicDetail>{return apiRequest<WinePublicDetail>(`/vinos/${encodeURIComponent(id)}`,{method:'GET',cache:'no-store'})}
+export function getPublicWinery(id:string):Promise<BodegaPublic>{return apiRequest<BodegaPublic>(`/bodegas/${encodeURIComponent(id)}`,{method:'GET',cache:'no-store'})}

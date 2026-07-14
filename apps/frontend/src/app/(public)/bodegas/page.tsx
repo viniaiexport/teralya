@@ -1,3 +1,7 @@
-export default function WineriesPage() {
-  return <section className="screen-state"><h1>Bodegas</h1><p>Descubre próximamente las bodegas de Teralya.</p></section>;
-}
+import Link from 'next/link';
+import { getCatalog,wineryHref,type BodegaSummary } from '@/lib/api/catalog';
+import { ApiProblem } from '@/lib/api/problem';
+
+function WineryCard({winery}:{winery:BodegaSummary}){const origin=[winery.region,winery.denominacion_origen,winery.pais].filter(Boolean).join(' · ');return <article className="wine-card"><div className="wine-card-body"><p className="card-kicker">Bodega Teralya</p><h2><Link href={wineryHref(winery.id)}>{winery.nombre_comercial}</Link></h2>{origin!==''&&<p className="card-meta">{origin}</p>}<div className="wine-card-footer"><Link className="detail-link" href={wineryHref(winery.id)}>Conocer bodega <span aria-hidden="true">→</span></Link></div></div></article>}
+
+export default async function WineriesPage(){let wineries:BodegaSummary[];try{const catalog=await getCatalog({page_size:100});const unique=new Map<string,BodegaSummary>();for(const wine of catalog.items)unique.set(wine.bodega.id,wine.bodega);wineries=[...unique.values()].sort((a,b)=>a.nombre_comercial.localeCompare(b.nombre_comercial,'es'))}catch(error){return <section className="screen-state" role="alert"><h1>No hemos podido cargar las bodegas</h1><p>Inténtalo de nuevo dentro de unos instantes.</p>{error instanceof ApiProblem&&<p className="request-reference">Referencia: {error.problem.request_id}</p>}</section>}return <div className="catalog-page"><header className="catalog-heading"><p className="eyebrow">Productores con origen</p><h1>Bodegas de Teralya</h1><p>Conoce a las bodegas con vinos disponibles actualmente en el marketplace.</p></header>{wineries.length===0?<section className="catalog-message"><h2>Próximamente nuevas bodegas</h2><p>Estamos preparando la primera selección de productores.</p></section>:<section aria-label="Bodegas con vinos disponibles" className="wine-grid">{wineries.map(winery=><WineryCard key={winery.id} winery={winery}/>)}</section>}</div>}
