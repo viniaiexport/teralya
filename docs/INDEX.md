@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 5.6 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 5.7 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -110,20 +110,26 @@ Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
 - API-003 incluye respuesta anti-enumeración, token de 256 bits almacenado solo como hash, rate limit, notificación SMTP, serialización transaccional por usuario y pruebas E2E concurrentes.
 - API-004 — `POST /auth/restablecer-password` implementada e integrada en `main` mediante el commit `8602c74`.
 - API-004 incluye consumo único concurrente del token, cambio seguro de contraseña, revocación de sesiones, serialización frente a login y pruebas E2E.
+- API-005 — `POST /bodegas` implementada e integrada en `main` mediante el commit `6f35534`.
+- API-005 incluye alta atómica de bodega, usuario y auditoría en `pendiente_revision`, tipo inicial `estandar`, contraseña scrypt y pruebas E2E.
+- API-006 y API-031 — perfil propio de bodega implementado e integrado en `main` mediante el commit `beb2c11`.
+- API-006/API-031 incluyen autenticación BearerOpaque común, autorización por rol y pertenencia, lectura y actualización segura de `BodegaSelf`, y pruebas focalizadas.
+- API-024, API-035 y API-036 — administración de bodegas implementada e integrada en `main` mediante el commit `13e198e`.
+- API-024/API-035/API-036 incluyen listado y detalle administrativo, validación transaccional, comisión estándar del 10 %, activación de usuarios, auditoría y concurrencia serializada.
 - DLOG 0022 fija API-005: cada solicitud se crea en `pendiente_revision` y con tipo `estandar`; la condición `fundadora` no es automática.
 - GitHub Actions valida esquema INF-05 v1.4, lint, pruebas, build, contrato OpenAPI y Redocly.
 
 ### Actualmente en desarrollo
 
-La implementación del backend está en curso. El siguiente incremento propuesto es API-005, sin reabrir el contrato aprobado.
+La implementación del backend está en curso. El siguiente incremento propuesto es API-030, sin reabrir el contrato aprobado.
 
 ### Siguiente paso propuesto
 
-Preparar e implementar API-005 como quinta rebanada vertical, conforme al contrato OpenAPI aprobado.
+Preparar e implementar API-030 como siguiente rebanada vertical, conforme al contrato OpenAPI aprobado.
 
 ### Bloqueos abiertos
 
-- No existen bloqueos funcionales ni contractuales identificados para iniciar API-005.
+- No existen bloqueos funcionales ni contractuales identificados para iniciar API-030.
 - Antes de producción, Legal debe fijar los valores de `MINIMUM_PURCHASE_AGE` y `ALCOHOL_TERMS_VERSION`.
 - Antes de producción, Seguridad debe aprobar los valores de `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` y `LOGIN_RATE_LIMIT_WINDOW_SECONDS`.
 - Antes de producción, Seguridad e Infraestructura deben fijar TTL, límites, ventana, SMTP, remitente y URL pública de recuperación.
