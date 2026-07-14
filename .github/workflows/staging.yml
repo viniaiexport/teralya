@@ -1,0 +1,45 @@
+name: Staging images
+
+on:
+  pull_request:
+    paths:
+      - "apps/backend/**"
+      - "apps/frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".dockerignore"
+      - ".env.staging.example"
+      - "compose.staging.yaml"
+      - ".github/workflows/staging.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/backend/**"
+      - "apps/frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".dockerignore"
+      - ".env.staging.example"
+      - "compose.staging.yaml"
+      - ".github/workflows/staging.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        image:
+          - name: backend
+            dockerfile: apps/backend/Dockerfile
+          - name: frontend
+            dockerfile: apps/frontend/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ${{ matrix.image.name }} image
+        run: docker build --file "${{ matrix.image.dockerfile }}" --tag "teralya-${{ matrix.image.name }}:${{ github.sha }}" .
+      - name: Validate staging manifest
+        run: cp .env.staging.example .env.staging && docker compose --env-file .env.staging -f compose.staging.yaml config --quiet
