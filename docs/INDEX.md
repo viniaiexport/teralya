@@ -53,7 +53,14 @@
 
 ## LEGAL, UX
 
-Carpetas creadas y sin contenido oficial todavía: `docs/LEGAL/` y `docs/UX/`.
+`docs/LEGAL/` contiene investigación preliminar para revisión profesional:
+
+| Código | Nombre | Estado | Ubicación |
+|---|---|---|---|
+| LEGAL-01 | Marco legal y fiscal UE | ⚠️ PRELIMINAR — pendiente de abogado y asesor fiscal | docs/LEGAL/LEGAL-01_Marco_Legal_Fiscal_UE.md |
+| LEGAL-02 | Ayudas y subvenciones | ⚠️ PRELIMINAR — pendiente de gestoría especializada | docs/LEGAL/LEGAL-02_Ayudas_y_Subvenciones.md |
+
+Estos documentos no autorizan decisiones de producción ni sustituyen asesoramiento profesional. `docs/UX/` continúa sin contenido oficial.
 
 ## ARCHIVE
 
