@@ -21,7 +21,16 @@ export class PasswordResetService {
     // ninguna contraseña ni token en claro se registra en ningún punto de este flujo.
     const nuevoPasswordHash = await hashPassword(request.password_nueva);
 
-    const resultado = await this.repository.consumirSolicitud(tokenHash, nuevoPasswordHash);
+    const usuarioId = await this.repository.buscarUsuarioIdPorTokenHash(tokenHash);
+    if (usuarioId === null) {
+      throw new NotFoundException({ code: 'RESOURCE_NOT_FOUND', message: 'El token indicado no existe.' });
+    }
+
+    const resultado = await this.sessionService.withIssuanceBlocked(usuarioId, () =>
+      this.repository.consumirSolicitud(tokenHash, nuevoPasswordHash, (id) =>
+        this.sessionService.revokeAllForUser(id),
+      ),
+    );
 
     switch (resultado.resultado) {
       case 'no_encontrada':
@@ -32,7 +41,6 @@ export class PasswordResetService {
           message: 'El token no es válido, ya fue utilizado o ha expirado.',
         });
       case 'restablecida':
-        await this.sessionService.revokeAllForUser(resultado.usuarioId);
         return { message: MENSAJE_EXITO, request_id: requestId };
     }
   }
