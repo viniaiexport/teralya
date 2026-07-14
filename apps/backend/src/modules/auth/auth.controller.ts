@@ -6,14 +6,17 @@ import type { AuthSession } from './dto/auth-session.dto.js';
 import type { GenericAck } from './dto/generic-ack.dto.js';
 import { LoginRequestDto } from './dto/login-request.dto.js';
 import { PasswordRecoveryRequestDto } from './dto/password-recovery-request.dto.js';
+import { PasswordResetRequestDto } from './dto/password-reset-request.dto.js';
 import { RegisterBuyerRequestDto } from './dto/register-buyer-request.dto.js';
 import { PasswordRecoveryService } from './password-recovery.service.js';
+import { PasswordResetService } from './password-reset.service.js';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly passwordRecoveryService: PasswordRecoveryService,
+    private readonly passwordResetService: PasswordResetService,
   ) {}
 
   /** API-001 — POST /auth/registro/comprador (contrato: teralya-openapi-v1.0.yaml). */
@@ -41,5 +44,15 @@ export class AuthController {
       body,
       String(response.getHeader(REQUEST_ID_HEADER)),
     );
+  }
+
+  /** API-004 — POST /auth/restablecer-password (contrato: teralya-openapi-v1.0.yaml). */
+  @Post('restablecer-password')
+  @HttpCode(HttpStatus.OK)
+  async restablecerPassword(
+    @Body() body: PasswordResetRequestDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<GenericAck> {
+    return this.passwordResetService.reset(body, String(response.getHeader(REQUEST_ID_HEADER)));
   }
 }
