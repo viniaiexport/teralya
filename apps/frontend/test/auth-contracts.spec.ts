@@ -1,0 +1,17 @@
+import { afterEach,describe,expect,it,vi } from 'vitest';
+import { destinationForRole,loginPayload,parseAuthSession,recoveryPayload,registerPayload,resetPayload } from '../src/lib/auth/contracts';
+const NOW=new Date('2026-07-14T10:00:00.000Z');
+function form(values:Record<string,string>):FormData{const result=new FormData();for(const[key,value]of Object.entries(values))result.set(key,value);return result}
+function session(overrides:Record<string,unknown>={}){return{access_token:'A'.repeat(43),token_type:'Bearer',expires_in:28800,expires_at:'2026-07-14T18:00:00.000Z',usuario:{id:'11111111-1111-4111-8111-111111111111',email:'buyer@example.com',rol:'comprador',idioma:'es',estado:'activo'},...overrides}}
+afterEach(()=>vi.useRealTimers());
+describe('contratos FE-004',()=>{
+  it('normaliza el correo sin modificar la contraseña',()=>{const parsed=loginPayload(form({email:' Buyer@Example.COM ',password:'  secreto largo  '}));expect(parsed.value).toEqual({email:'buyer@example.com',password:'  secreto largo  '})});
+  it('rechaza login inválido antes de llamar a la API',()=>{const parsed=loginPayload(form({email:'no-email',password:'corta'}));expect(parsed.value).toBeUndefined();expect(parsed.errors).toHaveProperty('email');expect(parsed.errors).toHaveProperty('password')});
+  it('mantiene la respuesta de recuperación limitada al correo',()=>{expect(recoveryPayload(form({email:' User@Example.com '})).value).toEqual({email:'user@example.com'})});
+  it('rechaza token corto y contraseñas diferentes',()=>{const parsed=resetPayload(form({token:'short',password_nueva:'password-larga',confirmacion_password:'password-otra'}));expect(parsed.errors).toHaveProperty('token');expect(parsed.errors).toHaveProperty('confirmacion_password')});
+  it('rechaza fechas calendario imposibles y consentimientos ausentes',()=>{const parsed=registerPayload(form({email:'buyer@example.com',password:'password-larga',nombre:'Ana',apellidos:'Roca',fecha_nacimiento:'2026-02-31'}));expect(parsed.errors).toHaveProperty('fecha_nacimiento');expect(parsed.errors).toHaveProperty('declaracion_mayoria_edad');expect(parsed.errors).toHaveProperty('aceptacion_condiciones_alcohol')});
+  it('acepta el registro completo y fija idioma español',()=>{const parsed=registerPayload(form({email:'buyer@example.com',password:'password-larga',nombre:' Ana ',apellidos:' Roca ',fecha_nacimiento:'1990-02-28',declaracion_mayoria_edad:'on',aceptacion_condiciones_alcohol:'on'}));expect(parsed.value).toMatchObject({nombre:'Ana',apellidos:'Roca',idioma:'es',declaracion_mayoria_edad:true})});
+  it('valida en runtime una sesión antes de aceptar su token',()=>{vi.useFakeTimers();vi.setSystemTime(NOW);expect(parseAuthSession(session()).usuario.rol).toBe('comprador');expect(()=>parseAuthSession(session({access_token:'token'}))).toThrow('sesión inválida');expect(()=>parseAuthSession(session({expires_at:'2026-07-16T18:00:00.000Z'}))).toThrow('Caducidad')});
+  it('rechaza roles desconocidos en vez de tratarlos como administradores',()=>{vi.useFakeTimers();vi.setSystemTime(NOW);expect(()=>parseAuthSession(session({usuario:{id:'id',email:'x@y.es',rol:'superuser',idioma:'es',estado:'activo'}}))).toThrow('Identidad')});
+  it('redirige cada rol exclusivamente a su espacio',()=>{expect(destinationForRole('comprador')).toBe('/cuenta');expect(destinationForRole('bodega')).toBe('/bodega');expect(destinationForRole('administrador')).toBe('/admin')});
+});
