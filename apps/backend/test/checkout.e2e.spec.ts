@@ -8,11 +8,44 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { AppModule } from "../src/app.module.js";
 import { configureApplication } from "../src/bootstrap.js";
 import { SessionService } from "../src/common/security/session.service.js";
+import {
+  STRIPE_GATEWAY,
+  type StripeGateway,
+  type StripeSessionInput,
+} from "../src/modules/checkout/stripe.gateway.js";
 const HASH =
   "scrypt$16384$8$1$00000000000000000000000000000000$00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 function req<T>(v: T | undefined): T {
   if (v === undefined) throw new Error("fixture");
   return v;
+}
+class FakeStripe implements StripeGateway {
+  calls = 0;
+  readonly sessions = new Map<
+    string,
+    { id: string; url: string; expiresAt: number }
+  >();
+  createCheckoutSession(
+    input: StripeSessionInput,
+  ): Promise<{ id: string; url: string; expiresAt: number }> {
+    this.calls += 1;
+    const id = `cs_test_${String(this.calls)}`;
+    const session = {
+      id,
+      url: `https://checkout.test/${id}`,
+      expiresAt: input.expiresAt,
+    };
+    this.sessions.set(id, session);
+    return Promise.resolve(session);
+  }
+  retrieveCheckoutSession(
+    id: string,
+  ): Promise<{ id: string; url: string; expiresAt: number }> {
+    const session = this.sessions.get(id);
+    return session === undefined
+      ? Promise.reject(new Error("missing"))
+      : Promise.resolve(session);
+  }
 }
 describe("API016 checkout E2E", () => {
   let app: INestApplication;
@@ -25,11 +58,16 @@ describe("API016 checkout E2E", () => {
   let billing: string;
   let alternate: string;
   let foreign: string;
+  let orderId: string;
+  const stripe = new FakeStripe();
   beforeAll(async () => {
     pool = new Pool({ connectionString: process.env.DATABASE_URL });
     const m = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(STRIPE_GATEWAY)
+      .useValue(stripe)
+      .compile();
     app = m.createNestApplication();
     configureApplication(app as Parameters<typeof configureApplication>[0]);
     await app.init();
@@ -151,6 +189,7 @@ describe("API016 checkout E2E", () => {
       },
       direccion_envio_snapshot: { nombre_destinatario: "Envío" },
     });
+    orderId = (responses[0].body as { id: string }).id;
     const persisted = await pool.query<{
       orders: string;
       payments: string;
@@ -164,6 +203,27 @@ describe("API016 checkout E2E", () => {
       payments: "1",
       audits: "1",
     });
+  });
+  it("crea una sola sesión Stripe y reutiliza la vigente bajo concurrencia", async () => {
+    const call = () =>
+      request(app.getHttpServer() as Server)
+        .post("/checkout/pago")
+        .set(auth())
+        .send({ pedido_id: orderId });
+    const responses = await Promise.all([call(), call()]);
+    expect(responses.map((r) => r.status)).toEqual([200, 200]);
+    const [firstBody, secondBody] = responses.map(
+      (response) => response.body as Record<string, unknown>,
+    );
+    const { reused: firstReused, ...first } = firstBody;
+    const { reused: secondReused, ...second } = secondBody;
+    expect(first).toEqual(second);
+    expect([firstReused, secondReused].sort()).toEqual([false, true]);
+    expect(responses[0].body).toMatchObject({
+      pedido_id: orderId,
+      checkout_url: "https://checkout.test/cs_test_1",
+    });
+    expect(stripe.calls).toBe(1);
   });
   it("replay ignora cambios del body y devuelve snapshots originales", async () => {
     const response = await request(app.getHttpServer() as Server)
