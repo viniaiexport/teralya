@@ -53,6 +53,8 @@ describe('APIs 027/039 — pedidos administrativos E2E', () => {
       `INSERT INTO comprador(usuario_id,fecha_nacimiento,declaracion_mayoria_edad,aceptacion_condiciones_alcohol) VALUES($1,'1980-01-01',true,true)`,
       [buyerId],
     );
+    const addressId = required((await pool.query<{id:string}>(`INSERT INTO direccion(propietario_tipo,propietario_id,nombre_identificativo,destinatario,direccion,codigo_postal,ciudad,pais,es_envio,es_facturacion,activa) VALUES('comprador',$1,'Admin','Comprador Admin','Calle Mayor 1','28001','Madrid','ES',true,true,true) RETURNING id`,[buyerId])).rows[0]).id;
+    const cartId = required((await pool.query<{id:string}>(`INSERT INTO carrito(comprador_id,estado) VALUES($1,'convertido') RETURNING id`,[buyerId])).rows[0]).id;
     const bodega = required(
       (
         await pool.query<{ id: string }>(
@@ -64,8 +66,8 @@ describe('APIs 027/039 — pedidos administrativos E2E', () => {
     orderId = required(
       (
         await pool.query<{ id: string }>(
-          `INSERT INTO pedido(numero_pedido,comprador_id,subtotal,gastos_envio,impuestos,descuentos,total,direccion_envio_snapshot,direccion_facturacion_snapshot,estado) VALUES($1,$2,20,2,0,1,21,$3::jsonb,$3::jsonb,'pagado') RETURNING id`,
-          [`TER-${randomUUID()}`, buyerId, JSON.stringify(ADDRESS)],
+          `INSERT INTO pedido(numero_pedido,comprador_id,carrito_id,subtotal,gastos_envio,impuestos,descuentos,total,direccion_envio_id,direccion_envio_snapshot,direccion_facturacion_id,direccion_facturacion_snapshot,estado) VALUES($1,$2,$3,20,2,0,1,21,$4,$5::jsonb,$4,$5::jsonb,'pagado') RETURNING id`,
+          [`TER-${randomUUID()}`, buyerId, cartId, addressId, JSON.stringify(ADDRESS)],
         )
       ).rows[0],
     ).id;
