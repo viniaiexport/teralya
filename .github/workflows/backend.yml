@@ -43,6 +43,10 @@ jobs:
       OBJECT_STORAGE_CDN_BASE_URL: https://cdn.teralya.test
       IMAGE_CONFIRMATION_HMAC_SECRET: ci-image-confirmation-secret-at-least-32-bytes
       STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder_0000000000
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_CHECKOUT_SUCCESS_URL: https://teralya.test/checkout/success
+      STRIPE_CHECKOUT_CANCEL_URL: https://teralya.test/checkout/cancel
+      STRIPE_CHECKOUT_TTL_SECONDS: 1800
       MINIMUM_PURCHASE_AGE: 18
       ALCOHOL_TERMS_VERSION: ci-test-v1
       LOGIN_RATE_LIMIT_MAX_ATTEMPTS: 5
