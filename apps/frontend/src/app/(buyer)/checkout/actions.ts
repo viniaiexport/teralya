@@ -82,24 +82,27 @@ export async function prepareCheckoutAction(form: FormData): Promise<never> {
   const shipping = String(form.get('direccion_envio_id') ?? '');
   const billing = String(form.get('direccion_facturacion_id') ?? '');
   if (!isUuid(shipping) || !isUuid(billing)) redirect('/checkout?error=direcciones');
+  let order;
   try {
-    const order = await prepareOrder(shipping, billing);
+    order = await prepareOrder(shipping, billing);
     await writePendingOrder(order.id);
-    redirect(`/checkout/pago?pedido_id=${encodeURIComponent(order.id)}`);
   } catch (error) {
     const safe = safeCheckoutError(error, 'No se ha podido preparar el pedido.');
     redirect(`/checkout?error=preparacion${safe.requestId === undefined ? '' : `&request_id=${encodeURIComponent(safe.requestId)}`}`);
   }
+  redirect(`/checkout/pago?pedido_id=${encodeURIComponent(order.id)}`);
 }
 
 export async function startPaymentAction(form: FormData): Promise<never> {
   const orderId = String(form.get('pedido_id') ?? '');
+  let checkoutUrl: string;
   try {
     const session = await createPaymentSession(orderId);
     await writePendingOrder(session.pedido_id);
-    redirect(validatedStripeUrl(session.checkout_url));
+    checkoutUrl = validatedStripeUrl(session.checkout_url);
   } catch (error) {
     const safe = safeCheckoutError(error, 'No se ha podido iniciar el pago.');
     redirect(`/checkout/pago?pedido_id=${encodeURIComponent(orderId)}&error=pago${safe.requestId === undefined ? '' : `&request_id=${encodeURIComponent(safe.requestId)}`}`);
   }
+  redirect(checkoutUrl);
 }
