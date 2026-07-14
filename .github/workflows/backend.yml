@@ -34,6 +34,14 @@ jobs:
       DATABASE_URL: postgresql://teralya:teralya_ci@localhost:5432/teralya
       REDIS_URL: redis://localhost:6379
       PUBLIC_BASE_URL: http://localhost:3001
+      OBJECT_STORAGE_REGION: eu-west-1
+      OBJECT_STORAGE_BUCKET: teralya-ci
+      OBJECT_STORAGE_ENDPOINT: http://localhost:9000
+      OBJECT_STORAGE_FORCE_PATH_STYLE: "true"
+      OBJECT_STORAGE_ACCESS_KEY_ID: teralya-ci
+      OBJECT_STORAGE_SECRET_ACCESS_KEY: teralya-ci-secret
+      OBJECT_STORAGE_CDN_BASE_URL: https://cdn.teralya.test
+      IMAGE_CONFIRMATION_HMAC_SECRET: ci-image-confirmation-secret-at-least-32-bytes
       STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder_0000000000
       MINIMUM_PURCHASE_AGE: 18
       ALCOHOL_TERMS_VERSION: ci-test-v1
