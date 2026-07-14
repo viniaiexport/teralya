@@ -239,6 +239,49 @@ describe("API016 checkout E2E", () => {
       direccion_facturacion_snapshot: { nombre_destinatario: "Factura" },
     });
   });
+  it("expone confirmación pagada y listado/detalle propios", async () => {
+    await pool.query(
+      "UPDATE pedido SET estado='pagado',fecha_cierre=now() WHERE id=$1",
+      [orderId],
+    );
+    await pool.query(
+      "UPDATE pago SET estado='pagado',fecha_captura=now() WHERE pedido_id=$1",
+      [orderId],
+    );
+    await request(app.getHttpServer() as Server)
+      .get(`/checkout/confirmacion/${orderId}`)
+      .set(auth())
+      .expect(200)
+      .expect(({ body }) =>
+        expect(body).toMatchObject({
+          pedido_id: orderId,
+          pago_estado: "pagado",
+          pedido_estado: "pagado",
+        }),
+      );
+    await request(app.getHttpServer() as Server)
+      .get("/pedidos?page=1&page_size=20")
+      .set(auth())
+      .expect(200)
+      .expect(({ body }) =>
+        expect(
+          (body as { items: { id: string }[] }).items.some(
+            (item) => item.id === orderId,
+          ),
+        ).toBe(true),
+      );
+    await request(app.getHttpServer() as Server)
+      .get(`/pedidos/${orderId}`)
+      .set(auth())
+      .expect(200)
+      .expect(({ body }) =>
+        expect(body).toMatchObject({
+          id: orderId,
+          estado: "pagado",
+          lineas: [],
+        }),
+      );
+  });
   it("rechaza como conflicto el pedido previo que ya no está pendiente", async () => {
     await pool.query(
       "UPDATE pedido SET estado='cancelado' WHERE carrito_id=$1",

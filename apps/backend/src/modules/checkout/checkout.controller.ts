@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Param,
   UseGuards,
 } from "@nestjs/common";
 import { CurrentActor, Roles } from "../../common/security/auth.decorators.js";
@@ -16,6 +18,10 @@ import {
   type CheckoutSessionDto,
 } from "./dto/payment-session.dto.js";
 import { CheckoutRequestDto, type OrderPrepared } from "./dto/checkout.dto.js";
+import {
+  CheckoutConfirmationService,
+  type OrderConfirmationDto,
+} from "./checkout-confirmation.service.js";
 @Controller("checkout")
 @UseGuards(BearerAuthGuard)
 @Roles("comprador")
@@ -23,6 +29,7 @@ export class CheckoutController {
   constructor(
     private readonly service: CheckoutService,
     private readonly payment: CheckoutPaymentService,
+    private readonly confirmation: CheckoutConfirmationService,
   ) {}
   @Post()
   @HttpCode(HttpStatus.OK)
@@ -39,5 +46,12 @@ export class CheckoutController {
     @Body() body: CheckoutSessionRequestDto,
   ): Promise<CheckoutSessionDto> {
     return this.payment.crear(actor.usuarioId, body.pedido_id);
+  }
+  @Get("confirmacion/:pedido_id")
+  confirmar(
+    @CurrentActor() actor: SessionActor,
+    @Param("pedido_id") pedidoId: string,
+  ): Promise<OrderConfirmationDto> {
+    return this.confirmation.obtener(actor.usuarioId, pedidoId);
   }
 }

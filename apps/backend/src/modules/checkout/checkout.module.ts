@@ -5,6 +5,8 @@ import { CheckoutService } from "./checkout.service.js";
 import { CheckoutPaymentRepository } from "./checkout-payment.repository.js";
 import { CheckoutPaymentService } from "./checkout-payment.service.js";
 import { FetchStripeGateway, STRIPE_GATEWAY } from "./stripe.gateway.js";
+import { CheckoutConfirmationRepository } from "./checkout-confirmation.repository.js";
+import { CheckoutConfirmationService } from "./checkout-confirmation.service.js";
 
 @Module({
   controllers: [CheckoutController],
@@ -13,6 +15,8 @@ import { FetchStripeGateway, STRIPE_GATEWAY } from "./stripe.gateway.js";
     CheckoutService,
     CheckoutPaymentRepository,
     CheckoutPaymentService,
+    CheckoutConfirmationRepository,
+    CheckoutConfirmationService,
     FetchStripeGateway,
     { provide: STRIPE_GATEWAY, useExisting: FetchStripeGateway },
   ],
