@@ -93,52 +93,63 @@ export class AuthService {
 
   async login(request: LoginRequestDto): Promise<AuthSession> {
     await this.loginRateLimitService.consume(request.email);
-    const usuario = await this.authRepository.buscarUsuarioPorEmail(request.email);
+    const usuarioInicial = await this.authRepository.buscarUsuarioPorEmail(request.email);
 
-    if (usuario === null) {
+    if (usuarioInicial === null) {
       await hashPassword(request.password);
       await this.authRepository.registrarRechazoAutenticacion(null, false);
       this.lanzarCredencialesIncorrectas();
     }
 
-    let passwordValida = false;
-    try {
-      passwordValida = await verifyPassword(request.password, usuario.passwordHash);
-    } catch {
-      passwordValida = false;
-    }
+    return this.sessionService.withIssuanceBlocked(usuarioInicial.id, async () => {
+      // El usuario se vuelve a leer dentro de la exclusión mutua. Así, si un
+      // restablecimiento terminó mientras el login esperaba, nunca se valida
+      // contra el hash antiguo capturado antes del cambio.
+      const usuario = await this.authRepository.buscarUsuarioPorEmail(request.email);
+      if (usuario === null || usuario.id !== usuarioInicial.id) {
+        await this.authRepository.registrarRechazoAutenticacion(null, false);
+        this.lanzarCredencialesIncorrectas();
+      }
 
-    if (!passwordValida) {
-      await this.authRepository.registrarRechazoAutenticacion(usuario.id, true);
-      this.lanzarCredencialesIncorrectas();
-    }
+      let passwordValida = false;
+      try {
+        passwordValida = await verifyPassword(request.password, usuario.passwordHash);
+      } catch {
+        passwordValida = false;
+      }
 
-    if (usuario.estado !== 'activo' || usuario.cuentaBloqueada) {
-      await this.authRepository.registrarRechazoAutenticacion(usuario.id, false);
-      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'La cuenta no tiene acceso habilitado.' });
-    }
+      if (!passwordValida) {
+        await this.authRepository.registrarRechazoAutenticacion(usuario.id, true);
+        this.lanzarCredencialesIncorrectas();
+      }
 
-    if (
-      usuario.rol === 'bodega' &&
-      (usuario.bodegaId === null ||
-        usuario.bodegaEstado === null ||
-        !ESTADOS_BODEGA_CON_ACCESO.has(usuario.bodegaEstado))
-    ) {
-      await this.authRepository.registrarRechazoAutenticacion(usuario.id, false);
-      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'La bodega no está validada para operar.' });
-    }
+      if (usuario.estado !== 'activo' || usuario.cuentaBloqueada) {
+        await this.authRepository.registrarRechazoAutenticacion(usuario.id, false);
+        throw new ForbiddenException({ code: 'FORBIDDEN', message: 'La cuenta no tiene acceso habilitado.' });
+      }
 
-    await this.authRepository.registrarAccesoCorrecto(usuario.id);
-    const session = await this.sessionService.issue({ usuarioId: usuario.id, rol: usuario.rol });
-    await this.loginRateLimitService.reset(request.email);
+      if (
+        usuario.rol === 'bodega' &&
+        (usuario.bodegaId === null ||
+          usuario.bodegaEstado === null ||
+          !ESTADOS_BODEGA_CON_ACCESO.has(usuario.bodegaEstado))
+      ) {
+        await this.authRepository.registrarRechazoAutenticacion(usuario.id, false);
+        throw new ForbiddenException({ code: 'FORBIDDEN', message: 'La bodega no está validada para operar.' });
+      }
 
-    return {
-      access_token: session.accessToken,
-      token_type: 'Bearer',
-      expires_in: session.expiresIn,
-      expires_at: session.expiresAt.toISOString(),
-      usuario: this.usuarioSesion(usuario),
-    };
+      await this.authRepository.registrarAccesoCorrecto(usuario.id);
+      const session = await this.sessionService.issue({ usuarioId: usuario.id, rol: usuario.rol });
+      await this.loginRateLimitService.reset(request.email);
+
+      return {
+        access_token: session.accessToken,
+        token_type: 'Bearer',
+        expires_in: session.expiresIn,
+        expires_at: session.expiresAt.toISOString(),
+        usuario: this.usuarioSesion(usuario),
+      };
+    });
   }
 
   private usuarioSesion(usuario: UsuarioAutenticacion): UsuarioSesion {
