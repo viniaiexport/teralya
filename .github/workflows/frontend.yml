@@ -36,3 +36,11 @@ jobs:
       - run: npm run frontend:check
       - run: npx playwright install --with-deps chromium
       - run: npm run frontend:e2e
+      - name: Publish visual previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: teralya-visual-previews
+          path: apps/frontend/visual-previews
+          if-no-files-found: warn
+          retention-days: 14
