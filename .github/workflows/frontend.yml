@@ -21,7 +21,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       TERALYA_API_URL: http://localhost:3001
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -34,3 +34,5 @@ jobs:
       - run: npm ci
       - run: npm run frontend:audit
       - run: npm run frontend:check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run frontend:e2e
