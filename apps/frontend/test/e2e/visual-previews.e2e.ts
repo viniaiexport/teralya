@@ -13,6 +13,7 @@ test('genera las primeras vistas públicas de Teralya',async({page})=>{
   for(const preview of previews){
     await page.goto(preview.path);
     await expect(page.getByRole('heading',{name:preview.heading,exact:true})).toBeVisible();
+    await page.addStyleTag({content:'nextjs-portal{display:none!important}'});
     await page.screenshot({path:`visual-previews/${preview.file}`,fullPage:true});
   }
 });
