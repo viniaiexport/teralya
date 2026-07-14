@@ -66,6 +66,36 @@ export interface BodegaPerfil {
   pais_contacto: string | null;
 }
 
+export interface VinoResumenPublico {
+  id: string;
+  nombre_comercial: string;
+  precio: string;
+  moneda: 'EUR';
+  disponible_venta: boolean;
+  slug: string | null;
+  tipo_vino: string | null;
+  anada: number | null;
+  region: string | null;
+  denominacion_origen: string | null;
+}
+
+export interface BodegaPublicaRecord {
+  id: string;
+  nombre_comercial: string;
+  slug: string | null;
+  logo_url: string | null;
+  imagen_principal_url: string | null;
+  historia: string | null;
+  filosofia: string | null;
+  region: string | null;
+  pais: string | null;
+  denominacion_origen: string | null;
+  anio_fundacion: number | null;
+  web: string | null;
+  video_url: string | null;
+  vinos: VinoResumenPublico[];
+}
+
 export type ActualizarPerfilBodegaInput = Partial<Pick<BodegaPerfil,
   | 'nombre_comercial' | 'historia' | 'filosofia' | 'region' | 'pais'
   | 'denominacion_origen' | 'anio_fundacion' | 'web' | 'video_url'
@@ -146,6 +176,28 @@ export class BodegasRepository {
       [id],
     );
     return result[0] ?? null;
+  }
+
+  async obtenerPublica(id: string): Promise<BodegaPublicaRecord | null> {
+    const bodegas = await this.databaseService.query<Omit<BodegaPublicaRecord, 'vinos'>>(
+      `SELECT id, nombre_comercial, slug, logo_url, imagen_principal_url, historia, filosofia,
+              region, pais, denominacion_origen, anio_fundacion, web, video_url
+         FROM bodega
+        WHERE id = $1 AND estado IN ('aprobada', 'activa')`,
+      [id],
+    );
+    const bodega = bodegas[0];
+    if (bodega === undefined) return null;
+
+    const vinos = await this.databaseService.query<VinoResumenPublico>(
+      `SELECT id, nombre_comercial, precio::text AS precio, moneda, disponible_venta,
+              slug, tipo_vino, anada, region, denominacion_origen
+         FROM vino
+        WHERE bodega_id = $1 AND estado = 'publicado'
+        ORDER BY nombre_comercial ASC, id ASC`,
+      [id],
+    );
+    return { ...bodega, vinos };
   }
 
   async actualizarPerfil(id: string, input: ActualizarPerfilBodegaInput): Promise<BodegaPerfil | null> {
