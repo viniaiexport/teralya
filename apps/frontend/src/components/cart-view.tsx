@@ -11,10 +11,6 @@ function money(value: string): string {
   return Number.isFinite(amount) ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount) : value;
 }
 
-function uuid(): string {
-  return crypto.randomUUID();
-}
-
 function GuestLine({ item, update, remove }: { item: GuestCart['items'][number]; update: (id: string, quantity: number) => void; remove: (id: string) => void }) {
   return <article className="cart-line">
     <div className="cart-image">{item.vino.imagen_url === undefined ? <span aria-hidden="true">T</span> : <Image alt={item.vino.imagen_alt ?? item.vino.nombre} fill sizes="96px" src={item.vino.imagen_url} unoptimized />}</div>
