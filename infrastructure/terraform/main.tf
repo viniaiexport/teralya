@@ -1,5 +1,4 @@
 data "aws_caller_identity" "current" {}
-
 locals {
   name = "${var.project}-${var.environment}"
   azs  = slice(var.availability_zones, 0, 2)
@@ -114,13 +113,15 @@ resource "aws_security_group" "alb" {
   to_port = 443
   protocol = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
-}  ingress {
+}
+ingress {
   description = "HTTP redirect"
   from_port = 80
   to_port = 80
   protocol = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
-}  egress {
+}
+egress {
   from_port = 0
   to_port = 0
   protocol = "-1"
@@ -137,7 +138,8 @@ resource "aws_security_group" "frontend" {
   to_port = 3000
   protocol = "tcp"
   security_groups = [aws_security_group.alb.id]
-}  egress {
+}
+egress {
   from_port = 0
   to_port = 0
   protocol = "-1"
@@ -154,13 +156,15 @@ resource "aws_security_group" "backend" {
   to_port = 3001
   protocol = "tcp"
   security_groups = [aws_security_group.alb.id]
-}  ingress {
+}
+ingress {
   description = "Frontend SSR"
   from_port = 3001
   to_port = 3001
   protocol = "tcp"
   security_groups = [aws_security_group.frontend.id]
-}  egress {
+}
+egress {
   from_port = 0
   to_port = 0
   protocol = "-1"
@@ -177,13 +181,15 @@ resource "aws_security_group" "data" {
   to_port = 5432
   protocol = "tcp"
   security_groups = [aws_security_group.backend.id]
-}  ingress {
+}
+ingress {
   description = "Redis from backend"
   from_port = 6379
   to_port = 6379
   protocol = "tcp"
   security_groups = [aws_security_group.backend.id]
-}  egress {
+}
+egress {
   from_port = 0
   to_port = 0
   protocol = "-1"
@@ -261,7 +267,8 @@ resource "aws_lb_listener_rule" "api" {
   action {
   type = "forward"
   target_group_arn = aws_lb_target_group.backend.arn
-}  condition {
+}
+condition {
   host_header { values = [var.api_hostname] }
 
 }
@@ -272,7 +279,8 @@ resource "aws_ecr_repository" "app" {
   image_tag_mutability = "IMMUTABLE"
   image_scanning_configuration {
   scan_on_push = true
-}  encryption_configuration {
+}
+encryption_configuration {
   encryption_type = "AES256"
 
 }
@@ -370,11 +378,13 @@ resource "aws_ecs_service" "frontend" {
   deployment_circuit_breaker {
   enable = true
   rollback = true
-}  network_configuration {
+}
+network_configuration {
   subnets = values(aws_subnet.private)[*].id
   security_groups = [aws_security_group.frontend.id]
   assign_public_ip = false
-}  load_balancer {
+}
+load_balancer {
   target_group_arn = aws_lb_target_group.frontend.arn
   container_name = "frontend"
   container_port = 3000
@@ -394,11 +404,13 @@ resource "aws_ecs_service" "backend" {
   deployment_circuit_breaker {
   enable = true
   rollback = true
-}  network_configuration {
+}
+network_configuration {
   subnets = values(aws_subnet.private)[*].id
   security_groups = [aws_security_group.backend.id]
   assign_public_ip = false
-}  load_balancer {
+}
+load_balancer {
   target_group_arn = aws_lb_target_group.backend.arn
   container_name = "backend"
   container_port = 3001
@@ -507,7 +519,8 @@ resource "aws_cloudfront_distribution" "media" {
   domain_name = aws_s3_bucket.media.bucket_regional_domain_name
   origin_id = "media"
   origin_access_control_id = aws_cloudfront_origin_access_control.media.id
-}  default_cache_behavior {
+}
+default_cache_behavior {
   target_origin_id = "media"
   viewer_protocol_policy = "redirect-to-https"
   allowed_methods = ["GET", "HEAD", "OPTIONS"]
@@ -517,11 +530,11 @@ resource "aws_cloudfront_distribution" "media" {
   query_string = false
   cookies {
   forward = "none"
-}}}  restrictions {
-}
-}
+}}}
+restrictions {
   geo_restriction { restriction_type = "none" }
-}  viewer_certificate {
+}
+viewer_certificate {
   cloudfront_default_certificate = true
   minimum_protocol_version = "TLSv1.2_2021"
 
