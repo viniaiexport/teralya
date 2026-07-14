@@ -13,7 +13,8 @@ const SESSION_BLOCK_WAIT_MILLISECONDS = 30_000;
 const SESSION_BLOCK_RETRY_MILLISECONDS = 25;
 
 const ISSUE_SCRIPT = `
-if redis.call('EXISTS', KEYS[3]) == 1 then
+local block_owner = redis.call('GET', KEYS[3])
+if block_owner and block_owner ~= ARGV[4] then
   return 0
 end
 redis.call('SET', KEYS[1], ARGV[1], 'EX', ARGV[2])
@@ -64,7 +65,7 @@ function delay(milliseconds: number): Promise<void> {
 export class SessionService {
   constructor(private readonly redisService: RedisService) {}
 
-  async issue(subject: SessionSubject): Promise<IssuedSession> {
+  async issue(subject: SessionSubject, blockOwner = ''): Promise<IssuedSession> {
     const token = base64UrlNoPadding(randomBytes(SESSION_TOKEN_BYTES));
     const tokenHash = hashToken(token);
     const issuedAt = new Date();
@@ -86,6 +87,7 @@ export class SessionService {
         payload,
         SESSION_TTL_SECONDS.toString(),
         tokenHash,
+        blockOwner,
       ),
     );
 
@@ -99,7 +101,7 @@ export class SessionService {
     return { accessToken: token, expiresIn: SESSION_TTL_SECONDS, expiresAt };
   }
 
-  async withIssuanceBlocked<T>(usuarioId: string, operation: () => Promise<T>): Promise<T> {
+  async withIssuanceBlocked<T>(usuarioId: string, operation: (blockOwner: string) => Promise<T>): Promise<T> {
     const key = sessionBlockKey(usuarioId);
     const owner = randomUUID();
     const deadline = Date.now() + SESSION_BLOCK_WAIT_MILLISECONDS;
@@ -127,7 +129,7 @@ export class SessionService {
     }
 
     try {
-      return await operation();
+      return await operation(owner);
     } finally {
       await this.redisService.client.eval(RELEASE_BLOCK_SCRIPT, 1, key, owner);
     }
