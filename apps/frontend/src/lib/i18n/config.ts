@@ -1,6 +1,13 @@
 export const supportedLocales = ['es', 'en', 'fr', 'de', 'it'] as const;
 export type Locale = (typeof supportedLocales)[number];
 export const defaultLocale: Locale = 'es';
+export const localeNames: Readonly<Record<Locale, string>> = {
+  es: 'Español',
+  en: 'English',
+  fr: 'Français',
+  de: 'Deutsch',
+  it: 'Italiano',
+};
 
 export function isLocale(value: string): value is Locale {
   return supportedLocales.some((locale) => locale === value);
