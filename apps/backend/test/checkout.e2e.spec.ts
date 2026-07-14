@@ -176,10 +176,7 @@ describe("API016 checkout E2E", () => {
         .send(body);
     const responses = await Promise.all([call(), call()]);
     expect(responses.map((r) => r.status)).toEqual([200, 200]);
-    const [{ reused: firstReused, ...first }, { reused: secondReused, ...second }] =
-      responses.map((response) => response.body as Record<string, unknown>);
-    expect(first).toEqual(second);
-    expect([firstReused, secondReused].sort()).toEqual([false, true]);
+    expect(responses[0].body).toEqual(responses[1].body);
     expect(responses[0].body).toMatchObject({
       estado: "pendiente_pago",
       totales: {
@@ -215,7 +212,13 @@ describe("API016 checkout E2E", () => {
         .send({ pedido_id: orderId });
     const responses = await Promise.all([call(), call()]);
     expect(responses.map((r) => r.status)).toEqual([200, 200]);
-    expect(responses[0].body).toEqual(responses[1].body);
+    const [firstBody, secondBody] = responses.map(
+      (response) => response.body as Record<string, unknown>,
+    );
+    const { reused: firstReused, ...first } = firstBody;
+    const { reused: secondReused, ...second } = secondBody;
+    expect(first).toEqual(second);
+    expect([firstReused, secondReused].sort()).toEqual([false, true]);
     expect(responses[0].body).toMatchObject({
       pedido_id: orderId,
       checkout_url: "https://checkout.test/cs_test_1",
@@ -235,6 +238,49 @@ describe("API016 checkout E2E", () => {
       direccion_envio_snapshot: { nombre_destinatario: "Envío" },
       direccion_facturacion_snapshot: { nombre_destinatario: "Factura" },
     });
+  });
+  it("expone confirmación pagada y listado/detalle propios", async () => {
+    await pool.query(
+      "UPDATE pedido SET estado='pagado',fecha_cierre=now() WHERE id=$1",
+      [orderId],
+    );
+    await pool.query(
+      "UPDATE pago SET estado='pagado',fecha_captura=now() WHERE pedido_id=$1",
+      [orderId],
+    );
+    await request(app.getHttpServer() as Server)
+      .get(`/checkout/confirmacion/${orderId}`)
+      .set(auth())
+      .expect(200)
+      .expect(({ body }) =>
+        expect(body).toMatchObject({
+          pedido_id: orderId,
+          pago_estado: "pagado",
+          pedido_estado: "pagado",
+        }),
+      );
+    await request(app.getHttpServer() as Server)
+      .get("/pedidos?page=1&page_size=20")
+      .set(auth())
+      .expect(200)
+      .expect(({ body }) =>
+        expect(
+          (body as { items: { id: string }[] }).items.some(
+            (item) => item.id === orderId,
+          ),
+        ).toBe(true),
+      );
+    await request(app.getHttpServer() as Server)
+      .get(`/pedidos/${orderId}`)
+      .set(auth())
+      .expect(200)
+      .expect(({ body }) =>
+        expect(body).toMatchObject({
+          id: orderId,
+          estado: "pagado",
+          lineas: [],
+        }),
+      );
   });
   it("rechaza como conflicto el pedido previo que ya no está pendiente", async () => {
     await pool.query(
