@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import type { Server } from 'node:http';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Pool } from 'pg';
@@ -49,7 +50,7 @@ describe('API-005 — POST /bodegas', () => {
   });
 
   it('crea bodega, usuario y auditoría atómicamente sin emitir sesión', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(app.getHttpServer() as Server)
       .post('/bodegas')
       .send(payload(EMAILS[0] as string))
       .expect(201);
@@ -101,8 +102,8 @@ describe('API-005 — POST /bodegas', () => {
   it('responde 400 y no persiste ante un request inválido', async () => {
     const invalid = payload('api005-invalid@teralya.test');
     invalid.aceptacion_condiciones = false;
-    const response = await request(app.getHttpServer()).post('/bodegas').send(invalid).expect(400);
-    expect(response.body.code).toBe('VALIDATION_ERROR');
+    const response = await request(app.getHttpServer() as Server).post('/bodegas').send(invalid).expect(400);
+    expect((response.body as Record<string, unknown>).code).toBe('VALIDATION_ERROR');
     const rows = await pool.query('SELECT id FROM usuario WHERE lower(email) = lower($1)', [
       'api005-invalid@teralya.test',
     ]);
@@ -117,11 +118,11 @@ describe('API-005 — POST /bodegas', () => {
       [EMAILS[1]],
     );
 
-    const response = await request(app.getHttpServer())
+    const response = await request(app.getHttpServer() as Server)
       .post('/bodegas')
       .send(payload((EMAILS[1] as string).toUpperCase()))
       .expect(409);
-    expect(response.body.code).toBe('CONFLICT');
+    expect((response.body as Record<string, unknown>).code).toBe('CONFLICT');
 
     const bodegas = await pool.query(
       'SELECT id FROM bodega WHERE lower(email_principal) = lower($1)',
@@ -132,8 +133,8 @@ describe('API-005 — POST /bodegas', () => {
 
   it('serializa la carrera case-insensitive: una creación y un conflicto', async () => {
     const [first, second] = await Promise.all([
-      request(app.getHttpServer()).post('/bodegas').send(payload(EMAILS[2] as string)),
-      request(app.getHttpServer())
+      request(app.getHttpServer() as Server).post('/bodegas').send(payload(EMAILS[2] as string)),
+      request(app.getHttpServer() as Server)
         .post('/bodegas')
         .send(payload((EMAILS[2] as string).toUpperCase())),
     ]);
