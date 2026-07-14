@@ -13,12 +13,22 @@ export type ResultadoConsumoSolicitud =
 export class PasswordResetRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  /**
-   * Consume una solicitud de recuperación de forma atómica: bloquea la fila (y el
-   * usuario) dentro de la transacción, de modo que dos consumos concurrentes del
-   * mismo token solo puedan producir un único éxito.
-   */
-  async consumirSolicitud(tokenHash: string, nuevoPasswordHash: string): Promise<ResultadoConsumoSolicitud> {
+  async buscarUsuarioIdPorTokenHash(tokenHash: string): Promise<string | null> {
+    const rows = await this.databaseService.query<{ usuario_id: string }>(
+      `SELECT usuario_id
+         FROM solicitud_recuperacion_password
+        WHERE token_hash = $1
+        LIMIT 1`,
+      [tokenHash],
+    );
+    return rows[0]?.usuario_id ?? null;
+  }
+
+  async consumirSolicitud(
+    tokenHash: string,
+    nuevoPasswordHash: string,
+    beforeCommit: (usuarioId: string) => Promise<void>,
+  ): Promise<ResultadoConsumoSolicitud> {
     return this.databaseService.withTransaction(async (client: PoolClient) => {
       const solicitudRows = await client.query<{
         id: string;
@@ -38,14 +48,16 @@ export class PasswordResetRepository {
         return { resultado: 'no_encontrada' };
       }
 
-      const vigente = solicitud.estado === 'pendiente' && new Date(solicitud.expires_at).getTime() > Date.now();
+      const vigente =
+        solicitud.estado === 'pendiente' &&
+        new Date(solicitud.expires_at).getTime() > Date.now();
       if (!vigente) {
         return { resultado: 'no_disponible' };
       }
 
-      // Bloquea también la fila de usuario: evita carreras con otra solicitud de
-      // recuperación o inicio de sesión concurrente sobre la misma cuenta.
-      await client.query('SELECT id FROM usuario WHERE id = $1 FOR UPDATE', [solicitud.usuario_id]);
+      await client.query('SELECT id FROM usuario WHERE id = $1 FOR UPDATE', [
+        solicitud.usuario_id,
+      ]);
 
       await client.query(
         `UPDATE usuario
@@ -77,6 +89,10 @@ export class PasswordResetRepository {
          )`,
         [solicitud.usuario_id, solicitud.id],
       );
+
+      // La revocación externa debe completarse antes del COMMIT. Si Redis falla,
+      // la excepción revierte password, token y auditoría en PostgreSQL.
+      await beforeCommit(solicitud.usuario_id);
 
       return { resultado: 'restablecida', usuarioId: solicitud.usuario_id };
     });
