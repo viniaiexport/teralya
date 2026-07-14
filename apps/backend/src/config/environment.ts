@@ -29,8 +29,8 @@ const environmentSchema = z.object({
   OBJECT_STORAGE_BUCKET: z.string().trim().min(1),
   OBJECT_STORAGE_ENDPOINT: z.url().optional(),
   OBJECT_STORAGE_FORCE_PATH_STYLE: z.stringbool().default(false),
-  OBJECT_STORAGE_ACCESS_KEY_ID: z.string().min(1),
-  OBJECT_STORAGE_SECRET_ACCESS_KEY: z.string().min(1),
+  OBJECT_STORAGE_ACCESS_KEY_ID: z.string().min(1).optional(),
+  OBJECT_STORAGE_SECRET_ACCESS_KEY: z.string().min(1).optional(),
   OBJECT_STORAGE_CDN_BASE_URL: z.url(),
   IMAGE_CONFIRMATION_HMAC_SECRET: z.string().min(32),
 });
@@ -38,5 +38,9 @@ const environmentSchema = z.object({
 export type Environment = z.infer<typeof environmentSchema>;
 
 export function validateEnvironment(input: Record<string, unknown>): Environment {
-  return environmentSchema.parse(input);
+  const environment=environmentSchema.parse(input);
+  if((environment.OBJECT_STORAGE_ACCESS_KEY_ID===undefined)!==(environment.OBJECT_STORAGE_SECRET_ACCESS_KEY===undefined)){
+    throw new Error('Las credenciales de object storage deben configurarse juntas.');
+  }
+  return environment;
 }
