@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from './common/cache/redis.module.js';
 import { DatabaseModule } from './common/database/database.module.js';
+import { SecurityModule } from './common/security/security.module.js';
 import { validateEnvironment } from './config/environment.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
@@ -20,6 +21,7 @@ import { VinosModule } from './modules/vinos/vinos.module.js';
     ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateEnvironment }),
     DatabaseModule,
     RedisModule,
+    SecurityModule,
     AuthModule,
     BodegasModule,
     VinosModule,
