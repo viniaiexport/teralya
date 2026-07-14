@@ -10,6 +10,7 @@ import { BodegasModule } from './modules/bodegas/bodegas.module.js';
 import { CarritoModule } from './modules/carrito/carrito.module.js';
 import { CheckoutModule } from './modules/checkout/checkout.module.js';
 import { DireccionesModule } from './modules/direcciones/direcciones.module.js';
+import { HealthModule } from './modules/health/health.module.js';
 import { ImagenesModule } from './modules/imagenes/imagenes.module.js';
 import { PedidosModule } from './modules/pedidos/pedidos.module.js';
 import { SistemaModule } from './modules/sistema/sistema.module.js';
@@ -33,6 +34,7 @@ import { VinosModule } from './modules/vinos/vinos.module.js';
     SistemaModule,
     DireccionesModule,
     ImagenesModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

@@ -35,6 +35,10 @@ npm run backend:check
 python3 scripts/validate_openapi_contract.py docs/INF/openapi/teralya-openapi-v1.0.yaml
 ```
 
-La primera rebanada vertical implementa exclusivamente API-001,
-`POST /auth/registro/comprador`. Los módulos reflejan las once fronteras aprobadas.
-No se exponen rutas auxiliares como `/health`, `/metrics` o `/docs`.
+Las rutas operativas no forman parte del contrato de negocio OpenAPI:
+
+- `GET /health/live` confirma que el proceso HTTP responde, sin consultar dependencias.
+- `GET /health/ready` responde `200` únicamente cuando PostgreSQL y Redis están disponibles;
+  si alguna comprobación falla o supera 1,5 segundos, responde `503` sin exponer credenciales.
+
+No se exponen todavía rutas auxiliares de métricas o documentación interactiva.
