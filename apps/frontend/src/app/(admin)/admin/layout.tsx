@@ -1,2 +1,5 @@
 import type { ReactNode } from 'react';
-export default function AdminLayout({ children }: Readonly<{ children: ReactNode }>) { return <main>{children}</main>; }
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { readSessionIdentity } from '@/lib/session/session';
+export default async function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {const identity=await readSessionIdentity();if(identity?.rol!=='administrador')redirect('/acceso');return <main><header className="private-bar"><Link className="brand" href="/admin">Teralya Admin</Link><nav aria-label="Administración"><Link href="/admin">Dashboard</Link><Link href="/admin/pedidos">Pedidos</Link></nav></header>{children}</main>;}
