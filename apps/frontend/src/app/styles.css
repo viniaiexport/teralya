@@ -1,0 +1,23 @@
+:root { color-scheme: light; --ink:#231f1b; --wine:#6f1738; --cream:#f7f2e8; --paper:#fffdf8; --line:#d8cdbd; }
+* { box-sizing: border-box; }
+html { background: var(--cream); color: var(--ink); font-family: Georgia, 'Times New Roman', serif; }
+body { margin: 0; min-height: 100vh; }
+a { color: inherit; }
+.site-shell { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+.site-header { align-items: center; display: flex; justify-content: space-between; padding: 1.25rem clamp(1rem, 5vw, 5rem); border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 92%, transparent); }
+.brand { color: var(--wine); font-size: 1.65rem; font-weight: 700; text-decoration: none; }
+nav { display: flex; gap: clamp(.8rem, 3vw, 2rem); }
+nav a { text-decoration-thickness: 1px; text-underline-offset: .35rem; }
+.hero { margin: auto; max-width: 74rem; padding: clamp(4rem, 10vw, 9rem) clamp(1.25rem, 7vw, 6rem); }
+.eyebrow { color: var(--wine); font-family: system-ui, sans-serif; font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.hero h1 { font-size: clamp(2.6rem, 7vw, 5.8rem); letter-spacing: -.04em; line-height: .98; margin: 1rem 0 1.5rem; max-width: 15ch; }
+.hero-copy { font-family: system-ui, sans-serif; font-size: clamp(1rem, 2vw, 1.25rem); line-height: 1.65; max-width: 38rem; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2rem; }
+.button { border: 1px solid var(--wine); border-radius: 999px; display: inline-block; font-family: system-ui, sans-serif; font-weight: 650; padding: .8rem 1.2rem; text-decoration: none; }
+.button.primary { background: var(--wine); color: white; }
+.button.secondary { background: transparent; color: var(--wine); }
+.screen-state { margin: auto; max-width: 45rem; padding: 5rem 1.25rem; text-align: center; }
+.site-footer { border-top: 1px solid var(--line); font-family: system-ui, sans-serif; font-size: .85rem; padding: 1.5rem clamp(1rem, 5vw, 5rem); }
+button { cursor: pointer; font: inherit; }
+*:focus-visible { outline: 3px solid #b7791f; outline-offset: 3px; }
+@media (max-width: 38rem) { .site-header { align-items: flex-start; gap: 1rem; } nav { flex-wrap: wrap; justify-content: flex-end; } }
