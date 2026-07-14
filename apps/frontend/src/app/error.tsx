@@ -1,10 +1,12 @@
 'use client';
 
+import { ScreenState } from '@/components/screen-state';
+
 export default function ErrorPage({ reset }: Readonly<{ reset: () => void }>) {
   return (
-    <section className="screen-state" role="alert">
-      <h1>No hemos podido cargar esta pantalla.</h1>
+    <ScreenState kind="error" title="No hemos podido cargar esta pantalla">
+      <p>Comprueba tu conexión o inténtalo de nuevo.</p>
       <button className="button primary" type="button" onClick={reset}>Reintentar</button>
-    </section>
+    </ScreenState>
   );
 }

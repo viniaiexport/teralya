@@ -1,3 +1,5 @@
+import { ScreenState } from '@/components/screen-state';
+
 export default function Loading() {
-  return <p className="screen-state" role="status">Cargando Teralya…</p>;
+  return <ScreenState kind="loading">Cargando Teralya…</ScreenState>;
 }
