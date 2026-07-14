@@ -5,8 +5,11 @@ terraform {
   aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
-    }
-  }
+
+}
+
+}
+
 }
 
 provider "aws" {
@@ -14,5 +17,7 @@ provider "aws" {
 
   default_tags {
   tags = local.tags
-  }
+
+}
+
 }
