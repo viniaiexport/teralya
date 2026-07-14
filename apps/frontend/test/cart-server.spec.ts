@@ -1,9 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiProblem } from '../src/lib/api/problem';
 vi.mock('server-only',()=>({}));
-const apiRequest=vi.fn();
-const readAccessToken=vi.fn();
-const readSessionIdentity=vi.fn();
+const {apiRequest,readAccessToken,readSessionIdentity}=vi.hoisted(()=>({apiRequest:vi.fn(),readAccessToken:vi.fn(),readSessionIdentity:vi.fn()}));
 vi.mock('../src/lib/api/client',()=>({apiRequest}));
 vi.mock('../src/lib/session/session',()=>({readAccessToken,readSessionIdentity}));
 import { addBuyerItem, mergeGuestCart, updateBuyerItem } from '../src/lib/cart/server';
