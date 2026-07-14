@@ -1,6 +1,6 @@
 # Decision Log — Teralya
 
-**Versión 1.8 · Julio 2026 · Registro oficial de decisiones del proyecto.** Cada decisión relevante queda aquí con fecha y motivo, para no perder el razonamiento ni repetir discusiones ya cerradas.
+**Versión 1.9 · Julio 2026 · Registro oficial de decisiones del proyecto.** Cada decisión relevante queda aquí con fecha y motivo, para no perder el razonamiento ni repetir discusiones ya cerradas.
 
 | ID | Decisión | Motivo | Fecha | Estado |
 |---|---|---|---|---|
@@ -26,6 +26,7 @@
 | 0020 | Cerrar TAPI-01→06 y TAPI-08→09 sin añadir rutas: sesión HTTP Bearer opaca de 256 bits con TTL absoluto de 8 h y sin refresh; EUR como única moneda del MVP e importes decimales string; `application/problem+json` y paginación page/page_size 1/20/100; allowlist Stripe de cuatro eventos `checkout.session.*`; matriz exacta y terminal de SubPedido; retirada del 402 de API-017 y reactivación `cancelado→pendiente` del Pago al sustituir una sesión expirada; y DTO/proyecciones/límites cerrados. API-001→050 conservan código, método y ruta. | Hacer que INF-10 y el futuro OpenAPI 3.1 sean deterministas, verificables y compatibles con las fuentes funcionales, eliminando ambigüedades de sesión, pago, logística y exposición de datos | 13/07/2026 | Aprobada por el CEO; aplicada y aprobada por el CTO en CAP-08 v1.4, INF-08 v2.5 e INF-10-A v1.0 tras doble dictamen APROBABLE; INF-10 quedó aprobado tras validar OpenAPI |
 | 0021 | Aprobar INF-10 v1.0 y `teralya-openapi-v1.0.yaml` como contrato técnico normativo de API-001→050, tras validación OpenAPI 3.1/JSON Schema 2020-12, Redocly, Spectral, validador contractual y doble dictamen APROBABLE. Se publican generador y validador reproducibles; no cambian códigos, métodos, rutas ni alcance. | Cerrar el último gate técnico documental antes de iniciar implementación y conservar un contrato verificable y reproducible | 13/07/2026 | Aprobada por el CTO con autorización expresa del CEO; aplicada en INF-10 v1.0, OpenAPI e INDEX v5.1 |
 | 0022 | API-005 crea cada solicitud de bodega con `bodega.estado = pendiente_revision` y `bodega.tipo = estandar`. La condición `fundadora` no se concede automáticamente y requiere una decisión expresa posterior del CEO. | Distinguir una solicitud ya enviada de un borrador, hacerla visible para validación administrativa y evitar atribuir automáticamente una condición comercial reservada | 14/07/2026 | Aprobada por el CEO; precisión semántica de API-005 sin cambiar código, método, ruta ni alcance |
+| 0023 | AWS es el proveedor cloud único del MVP; Terraform define la infraestructura y ECS Fargate ejecuta Frontend y Backend privados, con RDS PostgreSQL 16, ElastiCache Redis, S3 privado, CloudFront, Secrets Manager y CI mediante GitHub OIDC. | Cerrar la alternativa histórica AWS/GCP, reutilizar el contrato S3 ya implementado y disponer de staging/producción reproducibles sin credenciales permanentes en GitHub | 15/07/2026 | Aprobada por el CTO con autorización expresa del CEO; ADR-005 |
 
 ---
 

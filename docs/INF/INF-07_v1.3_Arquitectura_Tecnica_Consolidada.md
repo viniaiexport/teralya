@@ -14,7 +14,7 @@ Consolida INF-01 (stack tecnológico), INF-02 (repositorios), INF-03 (entorno cl
 
 Este es el documento **índice y de consolidación**: reúne las decisiones aprobadas de INF-01 a INF-06 y los ADR técnicos vigentes en una narrativa coherente. No sustituye a los documentos fuente para el detalle exhaustivo:
 
-- El DDL ejecutable completo vive en `teralya_schema_v1.2_EN_REVISION.sql`.
+- El DDL ejecutable completo vive en `docs/INF/teralya_schema_v1.4_APROBADO.sql`.
 - La descripción campo a campo vive en INF-06.
 - El contrato funcional de APIs vive en INF-08.
 - La arquitectura detallada del Frontend vive en INF-09.
@@ -46,7 +46,7 @@ Cualquier cambio al modelo de datos se hace primero en INF-05/INF-06; cualquier 
 | Cola de trabajos | Redis + BullMQ o equivalente | Notificaciones, webhooks y reintentos |
 | Pagos | Stripe Connect | Reparto de pagos multi-bodega |
 | Imágenes | Object storage compatible con S3 + CDN | Coste bajo y escalado automático |
-| Infraestructura | Proveedor cloud único, AWS o GCP, con Terraform | Reproducibilidad de entornos |
+| Infraestructura | AWS con Terraform | Reproducibilidad de entornos y reutilización del contrato S3; ADR-005 |
 | CI/CD | GitHub Actions | Integración directa con el repositorio |
 | Observabilidad | Logging estructurado + APM | Detección rápida de incidencias críticas |
 
@@ -89,6 +89,8 @@ La estructura detallada de rutas y componentes se define en INF-09. La herramien
 El MVP tendrá un despliegue de backend y un despliegue de Frontend por entorno. Cada despliegue a producción requiere pipeline verde, revisión de código aprobada y ausencia de incidencias críticas relacionadas con el cambio.
 
 La infraestructura se gestiona como código para evitar configuraciones divergentes entre staging y producción.
+
+AWS es el proveedor único del MVP conforme a ADR-005. La referencia de despliegue utiliza ECS Fargate para Frontend y Backend, RDS PostgreSQL 16, ElastiCache Redis, S3 privado con CloudFront y secretos gestionados. Staging puede reducir capacidad para controlar coste; producción conserva alta disponibilidad y requiere aprobación manual.
 
 ---
 

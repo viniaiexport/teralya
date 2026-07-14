@@ -12,3 +12,7 @@ El repositorio incluye imágenes de producción para Frontend y Backend y un ent
 El esquema aprobado se aplica únicamente al crear por primera vez el volumen de PostgreSQL. Las variables legales y de seguridad del ejemplo son válidas solo para staging y no autorizan un despliegue de producción.
 
 Los contenedores se ejecutan como usuarios sin privilegios, exponen comprobaciones de salud y reinician salvo parada explícita.
+
+## AWS
+
+La base Terraform para staging y producción se encuentra en [`terraform/`](terraform/README.md). No contiene secretos ni aplica infraestructura automáticamente.

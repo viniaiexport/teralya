@@ -33,7 +33,7 @@
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log — Teralya | 1.8 | ✅ OFICIAL, incluye 0001–0022 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-004 |
+| DLOG | Decision Log — Teralya | 1.9 | ✅ OFICIAL, incluye 0001–0023 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-005 |
 
 ### Decisiones de negocio vigentes
 
@@ -49,6 +49,7 @@
 | ADR-002 | Proveedor de identidad | ✅ Aceptado | docs/ADR/ADR-002-Proveedor-de-identidad.md | CEO, Decisión 0011 |
 | ADR-003 | Next.js App Router | ✅ Aceptado | docs/ADR/ADR-003-Nextjs-App-Router.md | CTO, Decisión 0012 |
 | ADR-004 | Topología del Frontend del MVP | ✅ Aceptado | docs/ADR/ADR-004-Topologia-Frontend-MVP.md | CTO con autorización CEO, Decisión 0013 |
+| ADR-005 | Proveedor cloud e infraestructura del MVP | ✅ Aceptado | docs/ADR/ADR-005-AWS-Terraform.md | CTO con autorización CEO, Decisión 0023 |
 
 ## LEGAL, UX
 
