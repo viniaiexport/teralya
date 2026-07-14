@@ -21,6 +21,14 @@ const environmentSchema = z.object({
   SMTP_SECURE: z.stringbool(),
   SMTP_USER: z.string().min(1),
   SMTP_PASSWORD: z.string().min(1),
+  OBJECT_STORAGE_REGION: z.string().trim().min(1),
+  OBJECT_STORAGE_BUCKET: z.string().trim().min(1),
+  OBJECT_STORAGE_ENDPOINT: z.url().optional(),
+  OBJECT_STORAGE_FORCE_PATH_STYLE: z.stringbool().default(false),
+  OBJECT_STORAGE_ACCESS_KEY_ID: z.string().min(1),
+  OBJECT_STORAGE_SECRET_ACCESS_KEY: z.string().min(1),
+  OBJECT_STORAGE_CDN_BASE_URL: z.url(),
+  IMAGE_CONFIRMATION_HMAC_SECRET: z.string().min(32),
 });
 
 export type Environment = z.infer<typeof environmentSchema>;

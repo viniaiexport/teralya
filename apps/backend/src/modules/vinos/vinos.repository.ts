@@ -46,6 +46,7 @@ export class VinosRepository {
   }
   async solicitarPublicacion(id:string,bodegaId:string,usuarioId:string):Promise<PublicationResult>{
     return this.database.withTransaction(async client=>{
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[id]);
       const locked=await client.query<{estado:WineState;nombre_comercial:string;precio:string;moneda:string;stock_disponible:number;disponible_venta:boolean;bodega_estado:string}>(`SELECT v.estado,v.nombre_comercial,v.precio::text,v.moneda,v.stock_disponible,v.disponible_venta,b.estado AS bodega_estado FROM vino v JOIN bodega b ON b.id=v.bodega_id WHERE v.id=$1 AND v.bodega_id=$2 FOR UPDATE OF v`,[id,bodegaId]);
       const current=locked.rows[0];if(current===undefined)return{kind:'missing'};
       if(current.estado!=='borrador')return{kind:'conflict'};
