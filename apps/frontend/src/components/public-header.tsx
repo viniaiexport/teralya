@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { CartLink } from '@/components/cart-link';
 import { LanguageSelector } from '@/components/language-selector';
 import { readSessionIdentity, type SessionIdentity } from '@/lib/session/session';
@@ -20,7 +21,7 @@ function NavigationLinks({ identity }: { identity?: SessionIdentity }) {
   const destination = identity === undefined ? accessDestination : privateDestinations[identity.rol];
   return <>
     {navigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
-    {identity === undefined && <Link className="professional-link" href="/acceso">Soy bodega</Link>}
+    {identity === undefined && <Link className="professional-link" href={'/registro/bodega' as Route}>Soy bodega</Link>}
     {(identity === undefined || buyerAuthenticated) && <CartLink buyerAuthenticated={buyerAuthenticated} />}
     <Link href={destination.href}>{destination.label}</Link>
   </>;
