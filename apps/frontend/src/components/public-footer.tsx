@@ -3,7 +3,7 @@ import Link from 'next/link';
 export function PublicFooter() {
   return (
     <footer className="site-footer">
-      <p>Teralya · Marketplace europeo de bodegas fundadoras</p>
+      <div><Link className="footer-brand" href="/">Teralya</Link><p>Vinos europeos, directamente desde su origen.</p></div>
       <nav aria-label="Navegación del pie">
         <Link href="/vinos">Explorar vinos</Link>
         <Link href="/bodegas">Conocer bodegas</Link>
