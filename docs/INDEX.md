@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 6.1 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 6.3 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -33,7 +33,7 @@
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log — Teralya | 1.9 | ✅ OFICIAL, incluye 0001–0023 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-005 |
+| DLOG | Decision Log — Teralya | 2.1 | ✅ OFICIAL, incluye 0001–0025 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-005 |
 
 ### Decisiones de negocio vigentes
 
@@ -51,17 +51,25 @@
 | ADR-004 | Topología del Frontend del MVP | ✅ Aceptado | docs/ADR/ADR-004-Topologia-Frontend-MVP.md | CTO con autorización CEO, Decisión 0013 |
 | ADR-005 | Proveedor cloud e infraestructura del MVP | ✅ Aceptado | docs/ADR/ADR-005-AWS-Terraform.md | CTO con autorización CEO, Decisión 0023 |
 
-## LEGAL, UX
+## LEGAL
 
-`docs/LEGAL/` contiene investigación preliminar para revisión profesional:
+| Código | Nombre | Versión | Estado | Ubicación | Dependencias |
+|---|---|---|---|---|---|
+| LEGAL-01 | Marco Legal y Fiscal para la Venta de Vino en la UE | 1.0 | ✅ APROBADO PARA LA VERSIÓN ACTUAL — edad mínima fijada (DLOG 0024) | docs/LEGAL/LEGAL-01_Marco_Legal_Fiscal_UE.md | — |
+| LEGAL-02 | Ayudas y Subvenciones | 1.0 | 🟡 BORRADOR | docs/LEGAL/LEGAL-02_Ayudas_y_Subvenciones.md | — |
+| LEGAL-03 | Términos y Condiciones de Uso | 1.1 | ✅ APROBADO PARA LA VERSIÓN ACTUAL — comprador compra a la bodega, no a Teralya (DLOG 0025) | docs/LEGAL/LEGAL-03_Terminos_y_Condiciones.md | CAP-02, DLOG 0024, DLOG 0025 |
+| LEGAL-04 | Política de Privacidad (RGPD) | 1.0 | ✅ APROBADO PARA LA VERSIÓN ACTUAL | docs/LEGAL/LEGAL-04_Politica_de_Privacidad_RGPD.md | INF-05, INF-06, DLOG 0024 |
+| LEGAL-05 | Política de Cookies | 1.0 | ✅ APROBADO PARA LA VERSIÓN ACTUAL | docs/LEGAL/LEGAL-05_Politica_de_Cookies.md | DLOG 0024 |
+| LEGAL-06 | Aviso de Mayoría de Edad y Condiciones de Alcohol | 1.0 (`LEGAL-06-v1.0`) | ✅ APROBADO PARA LA VERSIÓN ACTUAL — fuente de `ALCOHOL_TERMS_VERSION` | docs/LEGAL/LEGAL-06_Aviso_Mayoria_Edad_y_Condiciones_Alcohol.md | LEGAL-01, DLOG 0006, DLOG 0024 |
+| LEGAL-07 | Derecho de Desistimiento y Cancelación de Contrato | 1.0 | ✅ APROBADO PARA LA VERSIÓN ACTUAL — botón de cancelación pendiente de implementar | docs/LEGAL/LEGAL-07_Derecho_de_Desistimiento_y_Cancelacion.md | LEGAL-03, DLOG 0024 |
+| LEGAL-08 | Política de Reembolsos e Incidencias | 1.0 | ✅ APROBADO PARA LA VERSIÓN ACTUAL | docs/LEGAL/LEGAL-08_Politica_de_Reembolsos_e_Incidencias.md | LEGAL-07, DLOG 0015, DLOG 0024 |
+| LEGAL-09 | Plantilla de Condiciones de Envío por Bodega | 1.1 | ✅ APROBADO PARA LA VERSIÓN ACTUAL — lista orientativa de documentación por país (DLOG 0025); campo pendiente en panel de Bodega | docs/LEGAL/LEGAL-09_Condiciones_Envio_por_Bodega_Plantilla.md | LEGAL-01, LEGAL-03, DLOG 0024, DLOG 0025 |
 
-| Código | Nombre | Estado | Ubicación |
-|---|---|---|---|
-| LEGAL-01 | Marco legal y fiscal UE | ⚠️ PRELIMINAR — pendiente de abogado y asesor fiscal | docs/LEGAL/LEGAL-01_Marco_Legal_Fiscal_UE.md |
-| LEGAL-02 | Ayudas y subvenciones | ⚠️ PRELIMINAR — pendiente de gestoría especializada | docs/LEGAL/LEGAL-02_Ayudas_y_Subvenciones.md |
-| LEGAL-PACKAGE-01 | Paquete LEGAL-01 a LEGAL-09 recibido de Claude | 📥 RECIBIDO — no normativo, pendiente de reconciliación | docs/LEGAL/INCOMING/Teralya-Paquete-Legal-Claude-2026-07-14.pdf |
+El contenido LEGAL-03 a LEGAL-09 está aprobado para la versión actual por el CEO, que declara actuar como abogado responsable de esta aprobación (DLOG 0024–0025). Teralya no es la vendedora: el contrato se celebra entre comprador y bodega, y cada bodega asume la responsabilidad fiscal y legal de sus destinos. Los documentos permanecen versionados para actualizarse cuando cambien la normativa o el modelo operativo.
 
-Estos documentos no autorizan decisiones de producción ni sustituyen asesoramiento profesional. `docs/UX/` continúa sin contenido oficial.
+## UX
+
+Carpeta creada y sin contenido oficial todavía: `docs/UX/`.
 
 ## ARCHIVE
 
@@ -138,11 +146,14 @@ Ejecutar FE-008: pruebas E2E, rendimiento, seguridad, staging y preparación de 
 
 ### Bloqueos abiertos
 
-- Antes de producción, Legal debe fijar MINIMUM_PURCHASE_AGE y ALCOHOL_TERMS_VERSION.
+- ✅ MINIMUM_PURCHASE_AGE (18) y ALCOHOL_TERMS_VERSION (`LEGAL-06-v1.0`) fijados por decisión del CEO (DLOG 0024); LEGAL-03 a LEGAL-09 aprobados y publicados para la versión actual.
+- ✅ Modelo de responsabilidad fiscal/legal por país cerrado (DLOG 0025): Teralya no compra ni vende vino ni actúa como representante fiscal; cada bodega responde del país al que vende y desde el que envía; Teralya solo sugiere documentación orientativa (LEGAL-09 §2.1). Pendiente de asesoría fiscal externa confirmar que esto no genera deemed supplier por aplicación directa de la ley antes de envíos multi-país a gran escala.
 - Antes de producción, Seguridad debe aprobar los límites y ventanas de autenticación y recuperación.
 - Antes de producción, Infraestructura debe fijar secretos, SMTP, URLs públicas, almacenamiento de objetos y configuración Stripe definitiva.
 - El modelo actual no reserva stock antes del cobro; el webhook impide stock negativo y revierte atómicamente, pero la política operativa ante un cobro confirmado sin stock debe cerrarse antes de producción.
-- LEGAL y UX siguen sin contenido oficial; deben cerrarse durante la construcción frontend, sin ampliar el alcance del MVP.
+- El botón de cancelación de contrato (Directiva (UE) 2023/2673, ya exigible desde el 19/06/2026) está redactado en LEGAL-07 §3 pero no implementado en Checkout/Pedidos; priorizarlo en el próximo ciclo.
+- La plantilla de condiciones de envío por bodega (LEGAL-09) no tiene todavía campo en el panel de Bodega ni en el modelo de datos; falta la funcionalidad para que cada bodega la complete.
+- UX sigue sin contenido oficial; debe cerrarse durante la construcción frontend, sin ampliar el alcance del MVP.
 
 ### Regla de continuidad
 

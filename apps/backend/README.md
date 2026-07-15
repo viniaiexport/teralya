@@ -23,10 +23,10 @@ npm run start:dev --workspace @teralya/backend
 
 Antes de arrancar, cada entorno debe fijar explícitamente:
 
-- `MINIMUM_PURCHASE_AGE`: edad mínima aplicable, validada por Legal.
-- `ALCOHOL_TERMS_VERSION`: versión vigente y publicada de las condiciones de alcohol.
+- `MINIMUM_PURCHASE_AGE`: edad mínima aplicable. Fijada en 18 por decisión del CEO (Decision Log 0023, docs/LEGAL/LEGAL-01 §1); válida para todos los entornos.
+- `ALCOHOL_TERMS_VERSION`: versión vigente y publicada de las condiciones de alcohol (docs/LEGAL/LEGAL-06). Cambiarla solo junto con una nueva versión de ese documento.
 
-Los valores de `.env.example` son únicamente locales y no autorizan una configuración de producción.
+Los valores de `.env.example` reflejan la decisión vigente y son válidos también en producción para estas dos variables; el resto (secretos, SMTP, Stripe, almacenamiento) sigue siendo únicamente local y no autoriza una configuración de producción.
 
 ## Comprobaciones
 
