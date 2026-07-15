@@ -4,12 +4,16 @@ on:
   pull_request:
     paths:
       - "infrastructure/**"
+      - "deploy/production/**"
       - ".github/workflows/infrastructure.yml"
+      - ".github/workflows/deploy-production.yml"
   push:
     branches: [main]
     paths:
       - "infrastructure/**"
+      - "deploy/production/**"
       - ".github/workflows/infrastructure.yml"
+      - ".github/workflows/deploy-production.yml"
 
 permissions:
   contents: read
@@ -18,14 +22,39 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - infrastructure/hetzner
+          - infrastructure/aws
     defaults:
       run:
-        working-directory: infrastructure/terraform
+        working-directory: ${{ matrix.module }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.5
-      - run: terraform fmt -recursive
+      - name: Check formatting of active infrastructure
+        if: matrix.module == 'infrastructure/hetzner'
+        run: terraform fmt -check -recursive
+      - name: Normalize preserved AWS reference before validation
+        if: matrix.module == 'infrastructure/aws'
+        run: terraform fmt -recursive
       - run: terraform init -backend=false
       - run: terraform validate
+
+  scripts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shell syntax
+        run: |
+          bash -n infrastructure/cloudflare/provision-r2-eu.sh
+          bash -n infrastructure/cloudflare/configure-dns.sh
+          bash -n deploy/production/scripts/deploy.sh
+          bash -n deploy/production/scripts/backup-postgres.sh
+          bash -n deploy/production/scripts/verify-latest-backup.sh
+          bash -n deploy/production/scripts/install-systemd.sh
