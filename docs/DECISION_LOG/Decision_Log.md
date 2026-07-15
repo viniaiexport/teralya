@@ -11,7 +11,7 @@
 | 0005 | `subpedido.estado` como única fuente de verdad del flujo logístico; `pedido_item.estado` reducido a `normal / cancelado / devuelto` | Resolver estados logísticos duplicados | 09/07/2026 | Aprobada por el CTO |
 | 0006 | Verificación de mayoría de edad obligatoria en el registro de comprador, sin verificación documental en el MVP | Cumplimiento en venta de alcohol con fricción proporcionada | 09/07/2026 | Aprobada por el CTO |
 | 0007 | Interfaz multilingüe desde el MVP: español, inglés, francés, alemán e italiano | Teralya nace como marketplace europeo | 09/07/2026 | Aprobada por el CTO |
-| 0008 | Comisión objetivo estándar: **10%**, con reducciones temporales únicamente aprobadas por el CEO | Sostenibilidad y competitividad | 12/07/2026 | Aprobada por el CEO |
+| 0008 | Comisión estándar: **15%**, con excepciones temporales únicamente aprobadas por el CEO | Sostenibilidad, soporte operativo y crecimiento del marketplace. Sustituye expresamente el 10% anterior desde el 15/07/2026 | 15/07/2026 | Aprobada por el CEO y ejecutada en el backend |
 | 0009 | Fecha objetivo de lanzamiento del MVP: **octubre de 2026** | Llegar antes de Navidad sin ampliar alcance | 12/07/2026 | Aprobada por el CEO |
 | 0010 | Carrito de visitante local en navegador; persistencia y fusión solo tras autenticación; checkout autenticado | Resolver contradicción entre pantalla de visitante y esquema con `comprador_id NOT NULL` | 12/07/2026 | Aprobada por el CEO (ADR-001) |
 | 0011 | Autenticación autogestionada por el backend de Teralya; sin proveedor de identidad externo en el MVP | Mantener coherencia entre esquema, API y Frontend | 12/07/2026 | Aprobada por el CEO (ADR-002) |

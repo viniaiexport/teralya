@@ -111,7 +111,7 @@ export class AdminBodegasRepository {
 
       const updated = await client.query<BodegaAdminRecord>(
         `UPDATE bodega
-            SET comision = 10.00,
+            SET comision = 15.00,
                 estado = 'aprobada',
                 fecha_alta = COALESCE(fecha_alta, created_at),
                 fecha_aprobacion = now(),
@@ -141,7 +141,7 @@ export class AdminBodegasRepository {
           administradorId,
           id,
           JSON.stringify({ estado: 'pendiente_revision' }),
-          JSON.stringify({ estado: 'aprobada', comision: '10.00' }),
+          JSON.stringify({ estado: 'aprobada', comision: '15.00' }),
         ],
       );
       return { kind: 'ok', bodega };
