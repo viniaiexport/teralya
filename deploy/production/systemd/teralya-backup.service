@@ -1,0 +1,17 @@
+[Unit]
+Description=Teralya PostgreSQL backup to R2 EU
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+User=deployer
+Group=deployer
+Environment=TERALYA_ROOT=/srv/teralya
+ExecStart=/srv/teralya/scripts/backup-postgres.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+
+[Install]
+WantedBy=multi-user.target

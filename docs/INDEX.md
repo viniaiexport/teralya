@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 6.3 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 6.4 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -21,7 +21,7 @@
 |---|---|---|---|---|---|---|
 | INF-05 | Esquema de Base de Datos | 1.4 | ✅ APROBADO POR CTO | docs/INF/teralya_schema_v1.4_APROBADO.sql | CAP-01, ADR-001, DLOG 0014–0017 | v1.3 aprobada |
 | INF-06 | Diccionario de Datos | 1.3 | ✅ APROBADO POR CTO | docs/INF/INF-06_v1.3_Diccionario_de_Datos_APROBADO.md | INF-05 v1.4, DLOG 0017 | v1.2 aprobada |
-| INF-07 | Arquitectura Técnica Consolidada | 1.3 | ✅ APROBADO POR CTO | docs/INF/INF-07_v1.3_Arquitectura_Tecnica_Consolidada.md | INF-05, INF-06, ADR-002, ADR-003, ADR-004 | v1.2 |
+| INF-07 | Arquitectura Técnica Consolidada | 1.4 | ✅ APROBADO POR CTO Y CEO | docs/INF/INF-07_v1.4_Arquitectura_Tecnica_Consolidada.md | INF-05, INF-06, ADR-002, ADR-003, ADR-004, ADR-006 | v1.3 |
 | INF-08 | Especificación de APIs | 2.5 | ✅ APROBADO POR CTO | docs/INF/INF-08_v2.5_Especificacion_de_APIs.md | CAP-02 v1.3, CAP-05, CAP-06, CAP-07 v1.3, INF-05 v1.4, INF-06 v1.3, ADR-001/002, DLOG 0014–0020 | v2.4 aprobada |
 | INF-08-AUD-IDEM | Auditoría limitada de Idempotencia | 1.0 | ✅ Cerrada (incorporada en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Limitada_Idempotencia.md | INF-08 v2.1 | — |
 | INF-08-AUD-COV | Auditoría de cobertura de Pantallas y Casos de Uso | 1.0 | ✅ Cerrada (13 brechas resueltas en v2.2) | docs/INF/INF-08_v2.1_Auditoria_Cobertura_Pantallas_v1.0.md | CAP-05, CAP-06, CAP-07, INF-08 v2.1 | — |
@@ -33,7 +33,7 @@
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| DLOG | Decision Log — Teralya | 2.1 | ✅ OFICIAL, incluye 0001–0025 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-005 |
+| DLOG | Decision Log — Teralya | 2.2 | ✅ OFICIAL, incluye 0001–0026 | docs/DECISION_LOG/Decision_Log.md | INF-05 v1.4, INF-06 v1.3, INF-08 v2.5, INF-10 v1.0, CAP-02 v1.3, CAP-08 v1.4, ADR-001 a ADR-006 |
 
 ### Decisiones de negocio vigentes
 
@@ -49,7 +49,8 @@
 | ADR-002 | Proveedor de identidad | ✅ Aceptado | docs/ADR/ADR-002-Proveedor-de-identidad.md | CEO, Decisión 0011 |
 | ADR-003 | Next.js App Router | ✅ Aceptado | docs/ADR/ADR-003-Nextjs-App-Router.md | CTO, Decisión 0012 |
 | ADR-004 | Topología del Frontend del MVP | ✅ Aceptado | docs/ADR/ADR-004-Topologia-Frontend-MVP.md | CTO con autorización CEO, Decisión 0013 |
-| ADR-005 | Proveedor cloud e infraestructura del MVP | ✅ Aceptado | docs/ADR/ADR-005-AWS-Terraform.md | CTO con autorización CEO, Decisión 0023 |
+| ADR-005 | AWS y Terraform | ⚪ Sustituido por ADR-006 | docs/ADR/ADR-005-AWS-Terraform.md | CTO con autorización CEO, Decisión histórica 0023 |
+| ADR-006 | Hetzner, Cloudflare y R2 | ✅ Aceptado | docs/ADR/ADR-006-Hetzner-Cloudflare-R2.md | CEO con recomendación CTO, Decisión 0026 |
 
 ## LEGAL
 
@@ -78,6 +79,7 @@ Carpeta creada y sin contenido oficial todavía: `docs/UX/`.
 | `INF-07_v1.0_OBSOLETO_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.1 |
 | `docs/INF/INF-07_v1.1_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.2 |
 | `docs/INF/INF-07_v1.2_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.3; contenía topología histórica de dos frontends incompatible con ADR-004 |
+| `docs/INF/INF-07_v1.3_Arquitectura_Tecnica_Consolidada.md` | Reemplazado por INF-07 v1.4 para incorporar ADR-006 |
 | `docs/INF/teralya_schema_v1.1_APROBADO.sql` | Sustituido por INF-05 v1.2 en revisión |
 | `docs/INF/teralya_schema_v1.2_EN_REVISION.sql` | Sustituido por INF-05 v1.3 en revisión |
 | `docs/INF/teralya_schema_v1.3_EN_REVISION.sql` | Sustituido por INF-05 v1.3 aprobada |

@@ -13,6 +13,14 @@ El esquema aprobado se aplica únicamente al crear por primera vez el volumen de
 
 Los contenedores se ejecutan como usuarios sin privilegios, exponen comprobaciones de salud y reinician salvo parada explícita.
 
-## AWS
+## Plataforma activa: Hetzner + Cloudflare + R2
 
-La base Terraform para staging y producción se encuentra en [`terraform/`](terraform/README.md). No contiene secretos ni aplica infraestructura automáticamente.
+La decisión vigente está documentada en ADR-006:
+
+- [`hetzner/`](hetzner/README.md): Terraform del nodo piloto, red privada y firewall.
+- [`cloudflare/`](cloudflare/README.md): R2 bajo jurisdicción UE y DNS proxied.
+- [`../deploy/production/`](../deploy/production/README.md): Compose, proxy TLS, backups y despliegue.
+
+## AWS futuro
+
+La base Terraform AWS anterior se conserva en [`aws/`](aws/README.md) como destino futuro de migración. No es la plataforma activa ni debe aplicarse en el MVP salvo una nueva decisión basada en métricas o subvención CAM.

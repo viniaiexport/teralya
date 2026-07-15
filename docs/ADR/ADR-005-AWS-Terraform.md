@@ -1,9 +1,11 @@
 # ADR-005 — AWS y Terraform para la infraestructura del MVP
 
-**Estado:** Aceptado  
-**Fecha:** 15/07/2026  
-**Decide:** CTO con autorización expresa del CEO  
+**Estado:** Sustituido por ADR-006 para el MVP activo
+**Fecha:** 15/07/2026
+**Decide:** CTO con autorización expresa del CEO
 **Decisión relacionada:** DLOG 0023
+
+> Nota del 15/07/2026: ADR-006 y DLOG 0026 sustituyen esta decisión para la plataforma activa. La implementación AWS se conserva únicamente como destino futuro de migración.
 
 ## Contexto
 

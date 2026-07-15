@@ -1,4 +1,6 @@
-# Terraform AWS — Teralya
+# Terraform AWS - referencia futura de Teralya
+
+> Estado: no activo. ADR-006 sustituyó ADR-005 para el MVP. Este módulo se conserva como referencia de migración cuando las métricas o la subvención CAM justifiquen AWS.
 
 Base común para `staging` y `production`: VPC en dos AZ, dos NAT Gateway, ALB HTTPS, ECS Fargate privado, ECR inmutable, RDS PostgreSQL 16, Redis Multi-AZ cifrado, S3 privado y CloudFront con OAC.
 
