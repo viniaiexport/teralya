@@ -94,7 +94,7 @@ describe('API-024 — POST /admin/bodegas/:id/validar', () => {
       [fixture.bodegaId],
     );
     expect(persisted.rows[0]).toMatchObject({
-      estado: 'aprobada', comision: '10.00', aprobada_por: adminId,
+      estado: 'aprobada', comision: '15.00', aprobada_por: adminId,
       updated_by: adminId, usuario_estado: 'activo', auditorias: '1',
     });
     const persistedRow = required(persisted.rows[0]);

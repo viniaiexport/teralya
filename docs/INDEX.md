@@ -37,7 +37,7 @@
 
 ### Decisiones de negocio vigentes
 
-- Comisión objetivo estándar: **10%**. Las reducciones temporales requieren aprobación del CEO.
+- Comisión estándar: **15%**. Las excepciones temporales requieren aprobación del CEO.
 - Fecha objetivo de lanzamiento del MVP: **octubre de 2026**.
 - Fuente normativa: Decisiones 0008 y 0009.
 
