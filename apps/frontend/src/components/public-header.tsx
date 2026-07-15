@@ -20,6 +20,7 @@ function NavigationLinks({ identity }: { identity?: SessionIdentity }) {
   const destination = identity === undefined ? accessDestination : privateDestinations[identity.rol];
   return <>
     {navigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+    {identity === undefined && <Link className="professional-link" href="/acceso">Soy bodega</Link>}
     {(identity === undefined || buyerAuthenticated) && <CartLink buyerAuthenticated={buyerAuthenticated} />}
     <Link href={destination.href}>{destination.label}</Link>
   </>;
