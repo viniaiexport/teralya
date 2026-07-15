@@ -22,7 +22,7 @@ Este documento es investigación preliminar recopilada de fuentes públicas (leg
 | Dinamarca | 16 (bebidas ≤6% vol.) / 18 (>6%) | Cambió en abril de 2025: la mayoría de vinos (>6% vol.) ya requieren 18 años |
 | Resto de la UE (21 países) | 18 | Sin excepción por tipo de bebida |
 
-**Recomendación para el MVP:** fijar **18 años como edad mínima única para toda la plataforma**, independientemente del país de envío. Es más estricto de lo legalmente exigido en Alemania, Bélgica y Austria para el vino, pero evita el riesgo y la complejidad de mantener una edad mínima distinta por país — y es coherente con la Decisión CTO ya aprobada (ADR/Decision Log) de mayoría de edad en el registro. **No cambiar esta recomendación sin validación legal.**
+**Decisión tomada:** el CEO fijó **18 años como edad mínima única para toda la plataforma**, independientemente del país de envío (Decision Log 0024, 14/07/2026), siguiendo esta recomendación. Es más estricto de lo legalmente exigido en Alemania, Bélgica y Austria para el vino, pero evita el riesgo y la complejidad de mantener una edad mínima distinta por país — y es coherente con la Decisión CTO ya aprobada (ADR/Decision Log) de mayoría de edad en el registro. `MINIMUM_PURCHASE_AGE=18` queda fijado en la configuración del backend. **No cambiar sin una nueva decisión registrada.**
 
 **Novedad a vigilar:** la Comisión Europea recomendó en abril de 2026 que todos los Estados miembros ofrezcan una European Digital Identity Wallet antes de fin de 2026, con la verificación de edad (incluida la compra de alcohol) como caso de uso previsto. Todavía no es una obligación operativa, pero puede convertirse en el estándar de verificación de edad online en los próximos años — a vigilar para no quedar por detrás cuando sea exigible.
 
@@ -48,12 +48,9 @@ Fuente principal: Directiva (UE) 2020/262 (sustituye a la Directiva 2008/118/CE)
 
 Dado que el modelo de negocio es **venta directa de la bodega al comprador** (Teralya no compra ni almacena stock, Decision Log), la obligación de registro/representación fiscal en el país de destino recae, en principio, **sobre cada bodega individualmente como vendedora**, no sobre Teralya como plataforma. Esto significa que, sin una solución centralizada, **cada bodega pequeña tendría que registrarse y mantener un representante fiscal en cada país al que quiera enviar** — una carga totalmente inviable para bodegas fundadoras pequeñas.
 
-**Esto requiere una decisión estratégica del CEO antes de habilitar envíos multi-país**, con al menos tres caminos posibles a evaluar con un asesor fiscal:
-- Limitar el envío inicial a un número reducido de países donde el trámite sea manejable.
-- Contratar un servicio de representación fiscal centralizado (existen empresas especializadas: ASD Group, Eurotax y similares) que actúe en nombre de todas las bodegas de la plataforma.
-- Estudiar si el modelo de Teralya podría calificar como "vendedor considerado" (deemed supplier) y asumir la plataforma parte de esta responsabilidad — esto depende de cómo se estructure jurídicamente la relación entre Teralya y las bodegas, y requiere asesoría legal específica.
+**Decisión tomada (Decision Log 0025):** el CEO fija que **Teralya no compra ni vende vino en ningún momento y no actúa como representante fiscal de ninguna bodega**. Cada bodega es la única responsable de la legalidad y fiscalidad (incluido el impuesto especial de alcohol) del país al que vende y del país desde el que envía; el contrato de compraventa se forma exclusivamente entre el Comprador y la Bodega (LEGAL-03). Se descarta explícitamente contratar representación fiscal centralizada a nombre de las bodegas y se descarta buscar activamente la calificación de "vendedor considerado" (deemed supplier). El papel de Teralya se limita a **sugerir a cada bodega, a título orientativo, qué documentos suele exigir cada país de destino** (LEGAL-09); la bodega es quien debe obtenerlos y aportarlos si decide vender allí, y quien decide a qué países envía.
 
-**No se ha tomado ninguna decisión todavía sobre esto — queda explícitamente pendiente de decisión del CEO con asesoría profesional.**
+**Único punto que sigue pendiente de asesoría profesional externa:** confirmar que esta estructura contractual es suficiente y que Teralya no adquiere la condición de "vendedor considerado" **por aplicación directa de la ley**, con independencia de lo que digan los Términos — en determinadas plataformas esa calificación no depende de la voluntad contractual de las partes. Antes de habilitar envíos a gran escala en varios países, un asesor fiscal especializado en impuestos especiales sobre alcohol debe validar que el modelo puramente de intermediación (sin representación fiscal ni deemed supplier buscado) es sostenible tal como está planteado.
 
 ---
 
@@ -99,10 +96,10 @@ Para incorporar progresivamente, en este orden de prioridad:
 
 ## 5. Próximos pasos para la parte Legal
 
-1. Confirmar con un abogado la edad mínima de 18 años recomendada en la §1.
-2. Encargar a un asesor fiscal especializado en impuestos especiales sobre alcohol la decisión de la §2 (representación fiscal centralizada vs. por bodega vs. lanzamiento acotado a pocos países).
-3. Completar la tabla de IVA de los 27 países (§3) contra la base de datos oficial TEDB antes de codificarla.
-4. Redactar los 8 documentos de la §4, empezando por Términos y Condiciones y RGPD (son los que bloquean el registro de cualquier usuario).
-5. Verificar el botón de cancelación de contrato (§4.6) cuanto antes — ya es exigible.
+1. ✅ Edad mínima de 18 años (§1): decidida por el CEO, Decision Log 0024. Aprobada para la versión actual por el CEO, que declara actuar como abogado responsable.
+2. ✅ Decisión de modelo tomada por el CEO (§2, Decision Log 0025): responsabilidad individual de cada bodega, sin representación fiscal centralizada ni deemed supplier buscado por Teralya. **Sigue pendiente** encargar a un asesor fiscal especializado en impuestos especiales sobre alcohol la confirmación de que esta estructura no genera deemed supplier por aplicación directa de la ley — es la única pieza de este documento que bloquea habilitar envíos multi-país a gran escala en producción, no el desarrollo.
+3. Completar la tabla de IVA de los 27 países (§3) contra la base de datos oficial TEDB antes de codificarla. **Sigue pendiente.**
+4. ✅ Redactados y aprobados para la versión actual los 8 documentos de la §4 (LEGAL-03 a LEGAL-09, Decision Log 0024), publicados en `docs/LEGAL/` y enlazados desde el frontend.
+5. El botón de cancelación de contrato (§4.6) queda cubierto en LEGAL-07; su implementación en el flujo de Pedidos/Checkout queda como tarea de ingeniería pendiente — ya es legalmente exigible, priorizarla en el siguiente ciclo de FE-008/FE-009.
 
-*Este documento queda en `docs/LEGAL/` como punto de partida. Se irá completando documento a documento según se vaya avanzando con asesoría profesional real.*
+*Este documento queda en `docs/LEGAL/` como punto de partida. El contenido operativo (LEGAL-03 a LEGAL-09) ya está publicado; lo que sigue pendiente (§2 fiscal multi-país y §3 tabla de IVA) requiere asesoría profesional externa y una decisión del CEO antes de habilitar envíos a producción en varios países.*
