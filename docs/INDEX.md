@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 6.4 · Julio 2026 · Puerta de entrada a la documentación oficial**
+**Versión 6.5 · Julio 2026 · Puerta de entrada a la documentación oficial**
 
 ## CAP — Documentación funcional
 
@@ -129,11 +129,11 @@ Carpeta creada y sin contenido oficial todavía: `docs/UX/`.
 
 ### Actualmente en desarrollo
 
-No hay APIs backend pendientes dentro del contrato aprobado. FE-001 a FE-007 están cerrados; comienza la estabilización FE-008.
+No hay APIs backend pendientes dentro del contrato aprobado. FE-001 a FE-007 están cerrados. FE-008 está en ejecución: la base de staging segura y el flujo de construcción/despliegue quedaron integrados en `main` mediante PR #63 (`ee001ac`), pero el entorno aún no se considera operativo hasta activar secretos, R2, SMTP, Stripe de pruebas y las reglas web del firewall.
 
 ### Siguiente paso propuesto
 
-Ejecutar FE-008: pruebas E2E, rendimiento, seguridad, staging y preparación de lanzamiento, sin ampliar el alcance del MVP.
+Completar la activación operativa de staging: incorporar secretos mediante el environment `staging` de GitHub, provisionar R2 UE, configurar SMTP y Stripe en modo prueba, aplicar el firewall web limitado a Cloudflare y ejecutar la primera validación E2E sobre `https://staging.teralya.eu`.
 
 ### Orden de ejecución frontend
 
@@ -144,7 +144,7 @@ Ejecutar FE-008: pruebas E2E, rendimiento, seguridad, staging y preparación de 
 5. ✅ FE-005 — carrito de visitante/autenticado y fusión idempotente.
 6. ✅ FE-006 — direcciones, checkout, Stripe y confirmación.
 7. ✅ FE-007 — áreas privadas de comprador, bodega y administrador.
-8. ▶ FE-008 — pruebas E2E, rendimiento, seguridad, staging y preparación de lanzamiento.
+8. ▶ FE-008 — base de staging y CI/CD integradas; pendientes secretos, servicios externos, despliegue real y validaciones E2E/rendimiento/seguridad.
 
 ### Bloqueos abiertos
 
@@ -152,6 +152,9 @@ Ejecutar FE-008: pruebas E2E, rendimiento, seguridad, staging y preparación de 
 - ✅ Modelo de responsabilidad fiscal/legal por país cerrado (DLOG 0025): Teralya no compra ni vende vino ni actúa como representante fiscal; cada bodega responde del país al que vende y desde el que envía; Teralya solo sugiere documentación orientativa (LEGAL-09 §2.1). Pendiente de asesoría fiscal externa confirmar que esto no genera deemed supplier por aplicación directa de la ley antes de envíos multi-país a gran escala.
 - Antes de producción, Seguridad debe aprobar los límites y ventanas de autenticación y recuperación.
 - Antes de producción, Infraestructura debe fijar secretos, SMTP, URLs públicas, almacenamiento de objetos y configuración Stripe definitiva.
+- Staging no está todavía desplegado: el workflow, Caddy, GHCR y la topología privada están integrados, pero `STAGING_DEPLOY_ENABLED` permanece desactivado hasta cargar los secretos del environment `staging`.
+- El servidor Hetzner creado para staging debe reconciliarse con `infrastructure/hetzner` y recibir las reglas TCP 80/443 limitadas a las redes oficiales de Cloudflare antes del primer despliegue.
+- Cloudflare R2 UE, SMTP y Stripe en modo prueba siguen sin credenciales operativas; no se usarán valores ficticios para arrancar el backend.
 - El modelo actual no reserva stock antes del cobro; el webhook impide stock negativo y revierte atómicamente, pero la política operativa ante un cobro confirmado sin stock debe cerrarse antes de producción.
 - El botón de cancelación de contrato (Directiva (UE) 2023/2673, ya exigible desde el 19/06/2026) está redactado en LEGAL-07 §3 pero no implementado en Checkout/Pedidos; priorizarlo en el próximo ciclo.
 - La plantilla de condiciones de envío por bodega (LEGAL-09) no tiene todavía campo en el panel de Bodega ni en el modelo de datos; falta la funcionalidad para que cada bodega la complete.
