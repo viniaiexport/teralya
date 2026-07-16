@@ -54,6 +54,7 @@ jobs:
         run: |
           bash -n infrastructure/cloudflare/provision-r2-eu.sh
           bash -n infrastructure/cloudflare/configure-dns.sh
+          bash -n infrastructure/staging/deploy-staging.sh
           bash -n deploy/production/scripts/deploy.sh
           bash -n deploy/production/scripts/backup-postgres.sh
           bash -n deploy/production/scripts/verify-latest-backup.sh
