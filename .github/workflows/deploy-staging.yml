@@ -15,8 +15,6 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  FRONTEND_IMAGE: ghcr.io/viniaiexport/teralya-frontend
-  BACKEND_IMAGE: ghcr.io/viniaiexport/teralya-backend
 
 jobs:
   build:
@@ -35,17 +33,14 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Authenticate to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build and publish ${{ matrix.component }}
         uses: docker/build-push-action@v6
         with:
@@ -70,7 +65,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Configure SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
@@ -81,23 +75,24 @@ jobs:
           chmod 600 ~/.ssh/teralya_staging
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-
       - name: Upload deployment definition
         env:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
           SSH_USER: ${{ secrets.STAGING_SSH_USER }}
         run: |
-          ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" 'install -d -m 750 /opt/teralya/infrastructure/staging /opt/teralya/docs/INF'
-          scp -i ~/.ssh/teralya_staging compose.staging.yaml "$SSH_USER@$SSH_HOST:/opt/teralya/compose.staging.yaml"
-          scp -i ~/.ssh/teralya_staging infrastructure/staging/Caddyfile "$SSH_USER@$SSH_HOST:/opt/teralya/infrastructure/staging/Caddyfile"
-          scp -i ~/.ssh/teralya_staging docs/INF/teralya_schema_v1.4_APROBADO.sql "$SSH_USER@$SSH_HOST:/opt/teralya/docs/INF/teralya_schema_v1.4_APROBADO.sql"
-          scp -i ~/.ssh/teralya_staging infrastructure/staging/deploy-staging.sh "$SSH_USER@$SSH_HOST:/opt/teralya/deploy-staging.sh"
-
-      - name: Install staging environment
+          ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" 'install -d -m 750 ~/teralya/infrastructure/staging ~/teralya/docs/INF'
+          scp -i ~/.ssh/teralya_staging compose.staging.yaml "$SSH_USER@$SSH_HOST:~/teralya/compose.staging.yaml"
+          scp -i ~/.ssh/teralya_staging infrastructure/staging/Caddyfile "$SSH_USER@$SSH_HOST:~/teralya/infrastructure/staging/Caddyfile"
+          scp -i ~/.ssh/teralya_staging docs/INF/teralya_schema_v1.4_APROBADO.sql "$SSH_USER@$SSH_HOST:~/teralya/docs/INF/teralya_schema_v1.4_APROBADO.sql"
+          scp -i ~/.ssh/teralya_staging infrastructure/staging/deploy-staging.sh "$SSH_USER@$SSH_HOST:~/teralya/deploy-staging.sh"
+      - name: Install environment and deploy
         env:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
           SSH_USER: ${{ secrets.STAGING_SSH_USER }}
           STAGING_ENV_FILE: ${{ secrets.STAGING_ENV_FILE }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
         run: |
-          printf '%s' "$STAGING_ENV_FILE" | ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" 'umask 077; cat > /opt/teralya/.env.staging'
-          ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" 'chmod 700 /opt/teralya/deploy-staging.sh && /opt/teralya/deploy-staging.sh'
+          printf '%s' "$STAGING_ENV_FILE" | ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" 'umask 077; cat > ~/teralya/.env.staging'
+          printf '%s' "$GHCR_TOKEN" | ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" "docker login ghcr.io -u '$GHCR_USER' --password-stdin"
+          ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" 'chmod 700 ~/teralya/deploy-staging.sh && ~/teralya/deploy-staging.sh'
