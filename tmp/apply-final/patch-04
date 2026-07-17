@@ -1,0 +1,221 @@
+ await client.query<CancellationOrderRow>(
++        `SELECT p.id,p.numero_pedido,p.comprador_id,p.estado,p.total::text,
++                pg.id AS pago_id,pg.estado AS pago_estado,pg.stripe_checkout_session_id,
++                u.email
++           FROM pedido p
++           JOIN pago pg ON pg.pedido_id=p.id
++           JOIN usuario u ON u.id=p.comprador_id
++          WHERE p.id=$1
++          FOR UPDATE OF p,pg`,
++        [id],
++      );
++      const order = rows.rows[0];
++      if (order === undefined) return { kind: "missing" };
++      if (order.comprador_id !== owner) return { kind: "foreign" };
++
++      const existingRows = await client.query<CancellationRecord>(
++        `SELECT id,estado,stripe_refund_id,stripe_refund_status,solicitada_at,completada_at,intentos
++           FROM cancelacion_pedido
++          WHERE pedido_id=$1
++          FOR UPDATE`,
++        [id],
++      );
++      const existing = existingRows.rows[0];
++      if (existing?.estado === "completada") {
++        return {
++          kind: "completed",
++          value: this.cancellationResult(order, existing),
++          notification: {
++            cancelacionId: existing.id,
++            pedidoId: order.id,
++            numeroPedido: order.numero_pedido,
++            email: order.email,
++          },
++        };
++      }
++
++      if (!["pagado", "en_preparacion"].includes(order.estado)) {
++        return {
++          kind: "conflict",
++          message: "El pedido ya no admite cancelación directa.",
++        };
++      }
++      if (order.pago_estado !== "pagado") {
++        return {
++          kind: "conflict",
++          message: "El pago no está en un estado reembolsable.",
++        };
++      }
++      if (order.stripe_checkout_session_id === null) {
++        return {
++          kind: "conflict",
++          message: "El pago no dispone de una referencia Stripe reembolsable.",
++        };
++      }
++
++      const logistics = await client.query<{
++        total: number;
++        active: number;
++        blocked: number;
++      }>(
++        `SELECT count(*)::int AS total,
++                count(*) FILTER (WHERE estado <> 'cancelado')::int AS active,
++                count(*) FILTER (WHERE estado IN ('enviado','entregado','incidencia'))::int AS blocked
++           FROM subpedido
++          WHERE pedido_id=$1`,
++        [id],
++      );
++      const logisticsState = logistics.rows[0];
++      if (
++        logisticsState === undefined ||
++        logisticsState.total === 0 ||
++        logisticsState.active === 0 ||
++        logisticsState.blocked > 0
++      ) {
++        return {
++          kind: "conflict",
++          message:
++            "El pedido ya contiene expedición, incidencia o no tiene operativa cancelable.",
++        };
++      }
++
++      const cancellation =
++        existing?.estado === "fallida"
++          ? (
++              await client.query<CancellationRecord>(
++                `UPDATE cancelacion_pedido
++                SET estado='procesando',stripe_refund_id=NULL,stripe_refund_status=NULL,
++                    intentos=intentos+1,ultimo_error=NULL,updated_at=now()
++              WHERE id=$1
++              RETURNING id,estado,stripe_refund_id,stripe_refund_status,
++                        solicitada_at,completada_at,intentos`,
++                [existing.id],
++              )
++            ).rows[0]
++          : (existing ??
++            (
++              await client.query<CancellationRecord>(
++                `INSERT INTO cancelacion_pedido(
++               pedido_id,pago_id,usuario_id,estado,importe,intentos,solicitada_at,updated_at
++             ) VALUES($1,$2,$3,'procesando',$4,1,now(),now())
++             RETURNING id,estado,stripe_refund_id,stripe_refund_status,
++                       solicitada_at,completada_at,intentos`,
++                [id, order.pago_id, owner, order.total],
++              )
++            ).rows[0]);
++      if (cancellation === undefined) {
++        throw new Error("No se pudo registrar la cancelación.");
++      }
++      return {
++        kind: "ready",
++        context: {
++          cancelacionId: cancellation.id,
++          pedidoId: order.id,
++          numeroPedido: order.numero_pedido,
++          pagoId: order.pago_id,
++          total: order.total,
++          email: order.email,
++          stripeSessionId: order.stripe_checkout_session_id,
++          stripeRefundId: cancellation.stripe_refund_id,
++          attempt: cancellation.intentos,
++        },
++      };
++    });
++  }
++
++  async aplicarReembolso(
++    context: CancellationContext,
++    refund: StripeRefund,
++  ): Promise<OrderCancellationResult> {
++    return this.database.withTransaction(async (client) => {
++      const cancellationRows = await client.query<CancellationRecord>(
++        `SELECT id,estado,stripe_refund_id,stripe_refund_status,solicitada_at,completada_at,intentos
++           FROM cancelacion_pedido
++          WHERE id=$1
++          FOR UPDATE`,
++        [context.cancelacionId],
++      );
++      const cancellation = cancellationRows.rows[0];
++      if (cancellation === undefined) {
++        throw new Error("La cancelación registrada ya no existe.");
++      }
++
++      const orderRows = await client.query<CancellationOrderRow>(
++        `SELECT p.id,p.numero_pedido,p.comprador_id,p.estado,p.total::text,
++                pg.id AS pago_id,pg.estado AS pago_estado,pg.stripe_checkout_session_id,
++                u.email
++           FROM pedido p
++           JOIN pago pg ON pg.pedido_id=p.id
++           JOIN usuario u ON u.id=p.comprador_id
++          WHERE p.id=$1
++          FOR UPDATE OF p,pg`,
++        [context.pedidoId],
++      );
++      const order = orderRows.rows[0];
++      if (order === undefined) throw new Error("El pedido ya no existe.");
++
++      const accepted = ["pending", "requires_action", "succeeded"].includes(
++        refund.status,
++      );
++      if (refund.status === "succeeded" && order.estado !== "cancelado") {
++        await this.cancelCommercialState(client, order, context.cancelacionId);
++        order.estado = "cancelado";
++      }
++
++      const cancellationState: OrderCancellationStatus =
++        refund.status === "succeeded"
++          ? "completada"
++          : accepted
++            ? "procesando"
++            : "fallida";
++      await client.query(
++        `UPDATE cancelacion_pedido
++            SET estado=$2::estado_cancelacion_pedido,
++                stripe_refund_id=$3,
++                stripe_refund_status=$4,
++                completada_at=CASE WHEN $2::text='completada' THEN coalesce(completada_at,now()) ELSE completada_at END,
++                ultimo_error=CASE WHEN $2::text='fallida' THEN $5 ELSE NULL END,
++                updated_at=now()
++          WHERE id=$1`,
++        [
++          context.cancelacionId,
++          cancellationState,
++          refund.id,
++          refund.status,
++          ["failed", "canceled"].includes(refund.status)
++            ? "Stripe no completó el reembolso."
++            : null,
++        ],
++      );
++
++      if (refund.status === "succeeded") {
++        await client.query(
++          `UPDATE pago
++              SET estado='reembolsado',total_reembolsado=total_cobrado,
++                  fecha_reembolso=coalesce(fecha_reembolso,now()),updated_at=now()
++            WHERE id=$1`,
++          [context.pagoId],
++        );
++        order.pago_estado = "reembolsado";
++      }
++
++      const updated: CancellationRecord = {
++        ...cancellation,
++        estado: cancellationState,
++        stripe_refund_id: refund.id,
++        stripe_refund_status: refund.status,
++        completada_at:
++          refund.status === "succeeded"
++            ? (cancellation.completada_at ?? new Date())
++            : cancellation.completada_at,
++        intentos: cancellation.intentos,
++      };
++      return this.cancellationResult(order, updated);
++    });
++  }
++
++  async reclamarNotificacionCancelacion(input: {
++    usuarioId: string;
++    pedidoId: string;
++    numeroPedido: string;
++  }): Promise<string | null> {
