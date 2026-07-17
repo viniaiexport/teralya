@@ -23,14 +23,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Reconstruct and verify reviewed bundle
+      - name: Reconstruct and verify reviewed patch
         run: |
-          cat tmp/apply-final/part-* > /tmp/teralya-changes.tar.gz.b64
-          base64 --decode /tmp/teralya-changes.tar.gz.b64 > /tmp/teralya-changes.tar.gz
-          echo "6008f14e09e1168d82b95492267d1ac91a3d7e92da7808a171dec8f2fcec7bb9  /tmp/teralya-changes.tar.gz" | sha256sum --check --strict
+          cat tmp/apply-final/patch-* > /tmp/teralya-web-final-reviewed.patch
+          echo "8c7b066a464e1e07122b6afdef201650358f5b4f38dd03a2d5bba1d8cd050381  /tmp/teralya-web-final-reviewed.patch" | sha256sum --check --strict
       - name: Apply reviewed source and remove bootstrap files
         run: |
-          tar --extract --gzip --file /tmp/teralya-changes.tar.gz --directory .
+          git apply --index --whitespace=error-all /tmp/teralya-web-final-reviewed.patch
           rm -rf tmp/apply-final
           rm -f .github/workflows/apply-final-bundle.yml
       - name: Commit reviewed web closure
