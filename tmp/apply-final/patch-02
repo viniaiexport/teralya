@@ -1,0 +1,442 @@
+nvio_descripcion'),
++      ...optional('transportista_habitual'), ...optional('restricciones_entrega'),
++      ...optional('condiciones_empaquetado'), ...optional('capacidad_internacional'),
+     };
+   }
+ 
+@@ -146,7 +150,11 @@ export class BodegasService {
+       ...optional('slug'), ...optional('logo_url'), ...optional('imagen_principal_url'),
+       ...optional('historia'), ...optional('filosofia'), ...optional('region'), ...optional('pais'),
+       ...optional('denominacion_origen'), ...optional('anio_fundacion'), ...optional('web'),
+-      ...optional('video_url'),
++      ...optional('video_url'), ...optional('paises_envio'),
++      ...optional('plazo_preparacion_dias'), ...optional('plazo_entrega_estimado'),
++      ...optional('coste_envio_descripcion'), ...optional('transportista_habitual'),
++      ...optional('restricciones_entrega'), ...optional('condiciones_empaquetado'),
++      ...optional('capacidad_internacional'),
+       vinos: bodega.vinos.map((vino) => ({
+         id: vino.id,
+         nombre_comercial: vino.nombre_comercial,
+diff --git a/apps/backend/src/modules/bodegas/dto/bodega-profile-patch.dto.ts b/apps/backend/src/modules/bodegas/dto/bodega-profile-patch.dto.ts
+index 4aa136c..b675a10 100644
+--- a/apps/backend/src/modules/bodegas/dto/bodega-profile-patch.dto.ts
++++ b/apps/backend/src/modules/bodegas/dto/bodega-profile-patch.dto.ts
+@@ -1,5 +1,18 @@
+ import { Transform, type TransformFnParams } from 'class-transformer';
+-import { IsEmail, IsInt, IsOptional, IsString, IsUrl, Length, Max, Min } from 'class-validator';
++import {
++  ArrayMaxSize,
++  IsArray,
++  IsBoolean,
++  IsEmail,
++  IsInt,
++  IsOptional,
++  IsString,
++  IsUrl,
++  Length,
++  Matches,
++  Max,
++  Min,
++} from 'class-validator';
+ 
+ function trimString({ value }: TransformFnParams): unknown {
+   return typeof value === 'string' ? value.trim() : value;
+@@ -9,6 +22,11 @@ function normalizeEmail({ value }: TransformFnParams): unknown {
+   return typeof value === 'string' ? value.trim().toLowerCase() : value;
+ }
+ 
++function normalizeCountries({ value }: TransformFnParams): unknown {
++  if (!Array.isArray(value)) return value;
++  return [...new Set(value.map((item) => String(item).trim().toUpperCase()).filter(Boolean))];
++}
++
+ /** Contrato normativo: components/schemas/BodegaProfilePatch. */
+ export class BodegaProfilePatchDto {
+   @IsOptional() @Transform(trimString) @IsString() @Length(1, 160)
+@@ -52,4 +70,29 @@ export class BodegaProfilePatchDto {
+ 
+   @IsOptional() @Transform(trimString) @IsUrl({ require_protocol: true }) @Length(1, 2048)
+   imagen_principal_url?: string;
++
++  @IsOptional() @Transform(normalizeCountries) @IsArray() @ArrayMaxSize(27)
++  @Matches(/^[A-Z]{2}$/, { each: true })
++  paises_envio?: string[];
++
++  @IsOptional() @IsInt() @Min(0) @Max(365)
++  plazo_preparacion_dias?: number;
++
++  @IsOptional() @Transform(trimString) @IsString() @Length(1, 1000)
++  plazo_entrega_estimado?: string;
++
++  @IsOptional() @Transform(trimString) @IsString() @Length(1, 2000)
++  coste_envio_descripcion?: string;
++
++  @IsOptional() @Transform(trimString) @IsString() @Length(1, 160)
++  transportista_habitual?: string;
++
++  @IsOptional() @Transform(trimString) @IsString() @Length(1, 2000)
++  restricciones_entrega?: string;
++
++  @IsOptional() @Transform(trimString) @IsString() @Length(1, 2000)
++  condiciones_empaquetado?: string;
++
++  @IsOptional() @IsBoolean()
++  capacidad_internacional?: boolean;
+ }
+diff --git a/apps/backend/src/modules/bodegas/dto/bodega-public.dto.ts b/apps/backend/src/modules/bodegas/dto/bodega-public.dto.ts
+index 8ccbf78..c5e7afc 100644
+--- a/apps/backend/src/modules/bodegas/dto/bodega-public.dto.ts
++++ b/apps/backend/src/modules/bodegas/dto/bodega-public.dto.ts
+@@ -37,4 +37,12 @@ export interface BodegaPublic {
+   anio_fundacion?: number;
+   web?: string;
+   video_url?: string;
++  paises_envio?: string[];
++  plazo_preparacion_dias?: number;
++  plazo_entrega_estimado?: string;
++  coste_envio_descripcion?: string;
++  transportista_habitual?: string;
++  restricciones_entrega?: string;
++  condiciones_empaquetado?: string;
++  capacidad_internacional?: boolean;
+ }
+diff --git a/apps/backend/src/modules/bodegas/dto/bodega-self.dto.ts b/apps/backend/src/modules/bodegas/dto/bodega-self.dto.ts
+index 7ee3396..c3817f4 100644
+--- a/apps/backend/src/modules/bodegas/dto/bodega-self.dto.ts
++++ b/apps/backend/src/modules/bodegas/dto/bodega-self.dto.ts
+@@ -25,4 +25,12 @@ export interface BodegaSelf {
+   ciudad?: string;
+   provincia?: string;
+   pais_contacto?: string;
++  paises_envio?: string[];
++  plazo_preparacion_dias?: number;
++  plazo_entrega_estimado?: string;
++  coste_envio_descripcion?: string;
++  transportista_habitual?: string;
++  restricciones_entrega?: string;
++  condiciones_empaquetado?: string;
++  capacidad_internacional?: boolean;
+ }
+diff --git a/apps/backend/src/modules/checkout/checkout.module.ts b/apps/backend/src/modules/checkout/checkout.module.ts
+index 579de6d..0032373 100644
+--- a/apps/backend/src/modules/checkout/checkout.module.ts
++++ b/apps/backend/src/modules/checkout/checkout.module.ts
+@@ -20,5 +20,6 @@ import { CheckoutConfirmationService } from "./checkout-confirmation.service.js"
+     FetchStripeGateway,
+     { provide: STRIPE_GATEWAY, useExisting: FetchStripeGateway },
+   ],
++  exports: [STRIPE_GATEWAY],
+ })
+ export class CheckoutModule {}
+diff --git a/apps/backend/src/modules/checkout/stripe.gateway.ts b/apps/backend/src/modules/checkout/stripe.gateway.ts
+index 9797f2e..9bd6aa9 100644
+--- a/apps/backend/src/modules/checkout/stripe.gateway.ts
++++ b/apps/backend/src/modules/checkout/stripe.gateway.ts
+@@ -1,6 +1,8 @@
+ import { Injectable } from "@nestjs/common";
+ import { ConfigService } from "@nestjs/config";
++
+ export const STRIPE_GATEWAY = Symbol("STRIPE_GATEWAY");
++
+ export interface StripeSessionInput {
+   amountCents: number;
+   currency: "eur";
+@@ -10,23 +12,49 @@ export interface StripeSessionInput {
+   idempotencyKey: string;
+   metadata: Record<string, string>;
+ }
++
+ export interface StripeSession {
+   id: string;
+   url: string;
+   expiresAt: number;
+ }
++
++export type StripeRefundStatus =
++  | "pending"
++  | "requires_action"
++  | "succeeded"
++  | "failed"
++  | "canceled";
++
++export interface StripeRefund {
++  id: string;
++  paymentIntentId: string;
++  status: StripeRefundStatus;
++}
++
+ export interface StripeGateway {
+   createCheckoutSession(input: StripeSessionInput): Promise<StripeSession>;
+   retrieveCheckoutSession(id: string): Promise<StripeSession>;
++  retrieveCheckoutSessionPaymentIntent(id: string): Promise<string>;
++  createRefund(input: {
++    paymentIntentId: string;
++    idempotencyKey: string;
++    metadata: Record<string, string>;
++  }): Promise<StripeRefund>;
++  retrieveRefund(id: string): Promise<StripeRefund>;
+ }
++
+ export class StripeUnavailableError extends Error {}
+ export class StripeUpstreamError extends Error {}
++
+ @Injectable()
+ export class FetchStripeGateway implements StripeGateway {
+   private readonly key: string;
++
+   constructor(config: ConfigService) {
+     this.key = config.getOrThrow<string>("STRIPE_SECRET_KEY");
+   }
++
+   async createCheckoutSession(
+     input: StripeSessionInput,
+   ): Promise<StripeSession> {
+@@ -40,9 +68,67 @@ export class FetchStripeGateway implements StripeGateway {
+       "line_items[0][price_data][unit_amount]": String(input.amountCents),
+       "line_items[0][price_data][product_data][name]": "Pedido Teralya",
+     });
+-    for (const [key, value] of Object.entries(input.metadata))
++    for (const [key, value] of Object.entries(input.metadata)) {
+       form.set(`metadata[${key}]`, value);
+-    return this.request("https://api.stripe.com/v1/checkout/sessions", {
++    }
++    const value = await this.requestJson(
++      "https://api.stripe.com/v1/checkout/sessions",
++      {
++        method: "POST",
++        headers: {
++          "Content-Type": "application/x-www-form-urlencoded",
++          "Idempotency-Key": input.idempotencyKey,
++        },
++        body: form,
++      },
++    );
++    return this.parseSession(value);
++  }
++
++  async retrieveCheckoutSession(id: string): Promise<StripeSession> {
++    const value = await this.requestJson(
++      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`,
++      { method: "GET" },
++    );
++    return this.parseSession(value);
++  }
++
++  async retrieveCheckoutSessionPaymentIntent(id: string): Promise<string> {
++    const value = await this.requestJson(
++      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`,
++      { method: "GET" },
++    );
++    const paymentIntent = value.payment_intent;
++    if (typeof paymentIntent === "string" && paymentIntent.length > 0) {
++      return paymentIntent;
++    }
++    if (
++      typeof paymentIntent === "object" &&
++      paymentIntent !== null &&
++      "id" in paymentIntent &&
++      typeof paymentIntent.id === "string" &&
++      paymentIntent.id.length > 0
++    ) {
++      return paymentIntent.id;
++    }
++    throw new StripeUpstreamError(
++      "La sesión de Stripe no contiene PaymentIntent reembolsable.",
++    );
++  }
++
++  async createRefund(input: {
++    paymentIntentId: string;
++    idempotencyKey: string;
++    metadata: Record<string, string>;
++  }): Promise<StripeRefund> {
++    const form = new URLSearchParams({
++      payment_intent: input.paymentIntentId,
++      reason: "requested_by_customer",
++    });
++    for (const [key, value] of Object.entries(input.metadata)) {
++      form.set(`metadata[${key}]`, value);
++    }
++    const response = await this.requestJson("https://api.stripe.com/v1/refunds", {
++      method: "POST",
++      headers: {
++        "Content-Type": "application/x-www-form-urlencoded",
++        "Idempotency-Key": input.idempotencyKey,
++      },
++      body: form,
++    });
++    return this.parseRefund(response);
++  }
++
++  async retrieveRefund(id: string): Promise<StripeRefund> {
++    const response = await this.requestJson(
++      `https://api.stripe.com/v1/refunds/${encodeURIComponent(id)}`,
++      { method: "GET" },
++    );
++    return this.parseRefund(response);
++  }
++
++  private async requestJson(
++    url: string,
++    init: RequestInit,
++  ): Promise<Record<string, unknown>> {
++    let response: Response;
++    try {
++      response = await fetch(url, {
++        ...init,
++        headers: {
++          Authorization: `Bearer ${this.key}`,
++          ...init.headers,
++        },
++      });
++    } catch {
++      throw new StripeUnavailableError("Stripe no está disponible.");
++    }
++
++    const body = (await response.json().catch(() => ({}))) as Record<
++      string,
++      unknown
++    >;
++    if (!response.ok) {
++      if (response.status >= 500) {
++        throw new StripeUnavailableError("Stripe no está disponible.");
++      }
++      throw new StripeUpstreamError("Stripe rechazó la operación.");
++    }
++    return body;
++  }
++
++  private parseSession(value: Record<string, unknown>): StripeSession {
++    if (
++      typeof value.id !== "string" ||
++      typeof value.url !== "string" ||
++      typeof value.expires_at !== "number"
++    ) {
++      throw new StripeUpstreamError("Respuesta inválida de Stripe.");
++    }
++    return {
++      id: value.id,
++      url: value.url,
++      expiresAt: value.expires_at,
++    };
++  }
++
++  private parseRefund(value: Record<string, unknown>): StripeRefund {
++    const status = value.status;
++    const paymentIntent = value.payment_intent;
++    if (
++      typeof value.id !== "string" ||
++      typeof paymentIntent !== "string" ||
++      ![
++        "pending",
++        "requires_action",
++        "succeeded",
++        "failed",
++        "canceled",
++      ].includes(String(status))
++    ) {
++      throw new StripeUpstreamError("Respuesta inválida de Stripe.");
++    }
++    return {
++      id: value.id,
++      paymentIntentId: paymentIntent,
++      status: status as StripeRefundStatus,
++    };
++  }
++
++  private async request(
++    url: string,
++    init: RequestInit,
++  ): Promise<StripeSession> {
++    const value = await this.requestJson(url, init);
++    return this.parseSession(value);
++  }
++}
++
++export class FakeStripeGateway implements StripeGateway {
++  private readonly sessions = new Map<string, StripeSession>();
++  private readonly refunds = new Map<string, StripeRefund>();
++
++  async createCheckoutSession(input: StripeSessionInput): Promise<StripeSession> {
++    const session: StripeSession = {
++      id: `cs_test_${input.idempotencyKey}`,
++      url: `https://checkout.stripe.test/${input.idempotencyKey}`,
++      expiresAt: Math.floor(Date.now() / 1000) + 1800,
++    };
++    this.sessions.set(session.id, session);
++    return session;
++  }
++
++  async retrieveCheckoutSession(id: string): Promise<StripeSession> {
++    const session = this.sessions.get(id);
++    if (!session) throw new StripeUpstreamError("Sesión no encontrada.");
++    return session;
++  }
++
++  async retrieveCheckoutSessionPaymentIntent(id: string): Promise<string> {
++    return `pi_${id}`;
++  }
++
++  async createRefund(input: {
++    paymentIntentId: string;
++    idempotencyKey: string;
++  }): Promise<StripeRefund> {
++    const refund: StripeRefund = {
++      id: `re_${input.idempotencyKey}`,
++      paymentIntentId: input.paymentIntentId,
++      status: "succeeded",
++    };
++    this.refunds.set(refund.id, refund);
++    return refund;
++  }
++
++  async retrieveRefund(id: string): Promise<StripeRefund> {
++    const refund = this.refunds.get(id);
++    if (!refund) throw new StripeUpstreamError("Reembolso no encontrado.");
++    return refund;
++  }
++}
++
++/* Legacy implementation retained below for source compatibility during patching. */
++/*
++    return this.request("https://api.stripe.com/v1/checkout/sessions", {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/x-www-form-urlencoded",
+@@ -50,42 +136,73 @@ export class FetchStripeGateway implements StripeGateway {
+       },
+       body: form,
+     });
++    return this.parseRefund(response);
+   }
+-  retrieveCheckoutSession(id: string): Promise<StripeSession> {
+-    return this.request(
+-      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`,
+-      { method: "GET" },
+-    );
+-  }
+-  private async request(url: string, init: RequestInit): Promise<StripeSession> {
+-    let response: Response;
+-    try {
+-      response = await fetch(url, {
+-        ...init,
+-        headers: { Authorization: `Bearer ${this.key}`, ...init.headers },
+-      });
+-    } catch {
+-      throw new StripeUnavailableError("Stripe no está disponible.");
+-    }
+-    if (response.status >= 500)
+-      throw new StripeUnavailableError("Stripe no está disponible.");
+-    if (!response.ok)
+-      throw new StripeUpstreamError("Stripe rechazó la operación.");
+-    const body = (await response.json()) as {
+-      id?: string;
+-      url?: string;
+-      expires_at?: number;
+-    };
+-    if (!body.id || !body.url || !body.expires_at)
+-      throw new StripeUpstreamError("Respuesta inválida de Stripe.");
+-    return { id: body.id, url: body.url, expiresAt: body.expires_at };
+-  }
+-}
++*/
