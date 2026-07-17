@@ -1,0 +1,237 @@
+ {
++    const rows = await this.database.query<{ id: string }>(
++      `INSERT INTO notificacion(
++         usuario_id,tipo_notificacion,asunto,contenido,canal,estado,pedido_id,
++         evento_origen,updated_at
++       ) VALUES($1,'cancelacion_pedido',$2,$3,'email','pendiente',$4,'API-051',now())
++       ON CONFLICT (pedido_id,evento_origen) WHERE evento_origen='API-051'
++       DO UPDATE SET estado='pendiente',contenido=EXCLUDED.contenido,updated_at=now()
++         WHERE notificacion.estado='fallida'
++            OR (notificacion.estado='pendiente'
++                AND notificacion.updated_at < now() - interval '10 minutes')
++       RETURNING id`,
++      [
++        input.usuarioId,
++        `Cancelación del pedido ${input.numeroPedido}`,
++        "Cancelación confirmada; pendiente de enviar la notificación por email.",
++        input.pedidoId,
++      ],
++    );
++    return rows[0]?.id ?? null;
++  }
++
++  async finalizarNotificacionCancelacion(input: {
++    notificacionId: string;
++    emailSent: boolean;
++  }): Promise<void> {
++    await this.database.query(
++      `UPDATE notificacion
++          SET estado=$2::estado_notificacion,
++              contenido=$3,
++              fecha_envio=CASE WHEN $2::text='enviada' THEN now() ELSE NULL END,
++              updated_at=now()
++        WHERE id=$1`,
++      [
++        input.notificacionId,
++        input.emailSent ? "enviada" : "fallida",
++        input.emailSent
++          ? "Cancelación registrada y reembolso confirmado."
++          : "La cancelación se registró, pero el correo no pudo enviarse.",
++      ],
++    );
++  }
++
++  private async cancelCommercialState(
++    client: PoolClient,
++    order: CancellationOrderRow,
++    cancellationId: string,
++  ): Promise<void> {
++    const lines = await client.query<{ vino_id: string; cantidad: number }>(
++      `SELECT vino_id,cantidad
++         FROM pedido_item
++        WHERE pedido_id=$1 AND estado='normal'
++        ORDER BY vino_id
++        FOR UPDATE`,
++      [order.id],
++    );
++    for (const line of lines.rows) {
++      await client.query(
++        `UPDATE vino
++            SET stock_disponible=stock_disponible+$2,updated_at=now()
++          WHERE id=$1`,
++        [line.vino_id, line.cantidad],
++      );
++    }
++    await client.query(
++      `UPDATE pedido_item SET estado='cancelado',updated_at=now()
++        WHERE pedido_id=$1 AND estado='normal'`,
++      [order.id],
++    );
++    await client.query(
++      `UPDATE subpedido
++          SET estado='cancelado',fecha_ultimo_cambio_estado=now(),updated_at=now()
++        WHERE pedido_id=$1 AND estado IN ('pendiente','aceptado','en_preparacion')`,
++      [order.id],
++    );
++    await client.query(
++      `UPDATE pedido
++          SET estado='cancelado',fecha_cierre=coalesce(fecha_cierre,now()),updated_at=now()
++        WHERE id=$1`,
++      [order.id],
++    );
++    await client.query(
++      `INSERT INTO auditoria(
++         usuario_id,tipo_entidad,entidad_id,accion,valor_anterior,valor_nuevo,
++         descripcion,sistema,resultado
++       ) VALUES($1,'pedido',$2,'cancelacion_contrato',
++                jsonb_build_object('estado',$3::text),
++                jsonb_build_object('estado','cancelado','cancelacion_id',$4::text),
++                'Cancelación contractual directa con restitución de stock.',
++                'backend','correcto')`,
++      [order.comprador_id, order.id, order.estado, cancellationId],
++    );
++  }
++
++  private cancellationResult(
++    order: CancellationOrderRow,
++    cancellation: CancellationRecord,
++  ): OrderCancellationResult {
++    const summary = this.mapCancellation(cancellation);
++    return {
++      pedido_id: order.id,
++      pedido_estado: order.estado,
++      pago_estado:
++        order.pago_estado === "reembolsado" ? "reembolsado" : "pagado",
++      ...summary,
++    };
++  }
++
++  private mapCancellation(
++    cancellation: CancellationRecord,
++  ): OrderCancellationSummary {
++    return {
++      estado: cancellation.estado,
++      ...(cancellation.stripe_refund_status === null
++        ? {}
++        : { reembolso_estado: cancellation.stripe_refund_status }),
++      solicitada_at: this.toIso(cancellation.solicitada_at),
++      ...(cancellation.completada_at === null
++        ? {}
++        : { completada_at: this.toIso(cancellation.completada_at) }),
++    };
++  }
++
++  private toIso(value: Date | string): string {
++    return value instanceof Date
++      ? value.toISOString()
++      : new Date(value).toISOString();
+   }
+ }
+diff --git a/apps/backend/src/modules/pedidos/pedidos.service.ts b/apps/backend/src/modules/pedidos/pedidos.service.ts
+index 7ab6360..7e9c9e9 100644
+--- a/apps/backend/src/modules/pedidos/pedidos.service.ts
++++ b/apps/backend/src/modules/pedidos/pedidos.service.ts
+@@ -1,18 +1,36 @@
+ import {
++  BadGatewayException,
++  ConflictException,
+   ForbiddenException,
++  Inject,
+   Injectable,
+   NotFoundException,
++  ServiceUnavailableException,
+ } from "@nestjs/common";
+ import { isUUID } from "class-validator";
+-import { PedidosRepository } from "./pedidos.repository.js";
++import { OrderCancellationMailService } from "../../common/notifications/order-cancellation-mail.service.js";
++import {
++  STRIPE_GATEWAY,
++  StripeUnavailableError,
++  StripeUpstreamError,
++  type StripeGateway,
++} from "../checkout/stripe.gateway.js";
+ import type {
+   OrderBuyerDetail,
++  OrderCancellationResult,
+   OrderSummary,
+   PageOrderSummary,
+ } from "./dto/pedidos.dto.js";
++import { PedidosRepository } from "./pedidos.repository.js";
++
+ @Injectable()
+ export class PedidosService {
+-  constructor(private readonly repository: PedidosRepository) {}
++  constructor(
++    private readonly repository: PedidosRepository,
++    @Inject(STRIPE_GATEWAY) private readonly stripe: StripeGateway,
++    private readonly mail: OrderCancellationMailService,
++  ) {}
++
+   async listar(
+     owner: string,
+     page: number,
+@@ -30,15 +48,17 @@ export class PedidosService {
+       total_pages: Math.ceil(result.total / pageSize),
+     };
+   }
++
+   async obtener(owner: string, id: string): Promise<OrderBuyerDetail> {
+     if (!isUUID(id)) this.notFound();
+     const result = await this.repository.obtener(owner, id);
+     if (result.kind === "missing") this.notFound();
+-    if (result.kind === "foreign")
++    if (result.kind === "foreign") {
+       throw new ForbiddenException({
+         code: "FORBIDDEN",
+         message: "El pedido pertenece a otro comprador.",
+       });
++    }
+     const r = result.order;
+     const summary: OrderSummary = {
+       id: r.id,
+@@ -50,6 +70,8 @@ export class PedidosService {
+     };
+     return {
+       ...summary,
++      puede_cancelar: r.puede_cancelar,
++      ...(r.cancelacion === null ? {} : { cancelacion: r.cancelacion }),
+       totales: {
+         subtotal: r.subtotal,
+         gastos_envio: r.gastos_envio,
+@@ -61,9 +83,114 @@ export class PedidosService {
+       direccion_envio_snapshot: r.direccion_envio_snapshot,
+       direccion_facturacion_snapshot: r.direccion_facturacion_snapshot,
+       lineas: r.lineas,
+-      ...(r.subpedidos.length === 0 ? {} : { subpedidos: r.subpedidos }),
+     };
+   }
++
++  async cancelar(owner: string, id: string): Promise<OrderCancellationResult> {
++    if (!isUUID(id)) this.notFound();
++    const prepared = await this.repository.prepararCancelacion(owner, id);
++    if (prepared.kind === "missing") this.notFound();
++    if (prepared.kind === "foreign") {
++      throw new ForbiddenException({
++        code: "FORBIDDEN",
++        message: "El pedido pertenece a otro comprador.",
++      });
++    }
++    if (prepared.kind === "conflict") {
++      throw new ConflictException({
++        code: "CONFLICT",
++        message: prepared.message,
++      });
++    }
++    if (prepared.kind === "completed") {
++      await this.notificarCancelacion(
++        owner,
++        prepared.notification,
++        prepared.value,
++      );
++      return prepared.value;
++    }
++
++    const { context } = prepared;
++    let refund;
++    try {
++      if 
