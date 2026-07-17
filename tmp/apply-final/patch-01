@@ -1,0 +1,151 @@
+/apps/backend/src/modules/auth/auth.controller.ts b/apps/backend/src/modules/auth/auth.controller.ts
+index ed900f1..c36c0c3 100644
+--- a/apps/backend/src/modules/auth/auth.controller.ts
++++ b/apps/backend/src/modules/auth/auth.controller.ts
+@@ -19,21 +19,21 @@ export class AuthController {
+     private readonly passwordResetService: PasswordResetService,
+   ) {}
+ 
+-  /** API-001 — POST /auth/registro/comprador (contrato: teralya-openapi-v1.0.yaml). */
++  /** API-001 — POST /auth/registro/comprador (contrato: teralya-openapi-v1.1.yaml). */
+   @Post('registro/comprador')
+   @HttpCode(HttpStatus.CREATED)
+   async registrarComprador(@Body() body: RegisterBuyerRequestDto): Promise<AuthSession> {
+     return this.authService.registrarComprador(body);
+   }
+ 
+-  /** API-002 — POST /auth/login (contrato: teralya-openapi-v1.0.yaml). */
++  /** API-002 — POST /auth/login (contrato: teralya-openapi-v1.1.yaml). */
+   @Post('login')
+   @HttpCode(HttpStatus.OK)
+   async login(@Body() body: LoginRequestDto): Promise<AuthSession> {
+     return this.authService.login(body);
+   }
+ 
+-  /** API-003 — POST /auth/recuperar-password (contrato: teralya-openapi-v1.0.yaml). */
++  /** API-003 — POST /auth/recuperar-password (contrato: teralya-openapi-v1.1.yaml). */
+   @Post('recuperar-password')
+   @HttpCode(HttpStatus.OK)
+   async recuperarPassword(
+@@ -46,7 +46,7 @@ export class AuthController {
+     );
+   }
+ 
+-  /** API-004 — POST /auth/restablecer-password (contrato: teralya-openapi-v1.0.yaml). */
++  /** API-004 — POST /auth/restablecer-password (contrato: teralya-openapi-v1.1.yaml). */
+   @Post('restablecer-password')
+   @HttpCode(HttpStatus.OK)
+   async restablecerPassword(
+diff --git a/apps/backend/src/modules/auth/dto/password-reset-request.dto.ts b/apps/backend/src/modules/auth/dto/password-reset-request.dto.ts
+index 7a873a6..ddc5fd5 100644
+--- a/apps/backend/src/modules/auth/dto/password-reset-request.dto.ts
++++ b/apps/backend/src/modules/auth/dto/password-reset-request.dto.ts
+@@ -1,7 +1,7 @@
+ import { IsString, Length } from 'class-validator';
+ import { MatchesProperty } from '../../../common/validation/matches-property.decorator.js';
+ 
+-/** Contrato normativo: components/schemas/PasswordResetRequest (teralya-openapi-v1.0.yaml). */
++/** Contrato normativo: components/schemas/PasswordResetRequest (teralya-openapi-v1.1.yaml). */
+ export class PasswordResetRequestDto {
+   @IsString()
+   @Length(32, 512)
+diff --git a/apps/backend/src/modules/auth/dto/register-buyer-request.dto.ts b/apps/backend/src/modules/auth/dto/register-buyer-request.dto.ts
+index 80e8585..db53aaa 100644
+--- a/apps/backend/src/modules/auth/dto/register-buyer-request.dto.ts
++++ b/apps/backend/src/modules/auth/dto/register-buyer-request.dto.ts
+@@ -28,7 +28,7 @@ function normalizeLanguage({ value }: TransformFnParams): unknown {
+   return typeof value === 'string' ? value.trim().toLowerCase() : value;
+ }
+ 
+-/** Contrato normativo: components/schemas/RegisterBuyerRequest (teralya-openapi-v1.0.yaml). */
++/** Contrato normativo: components/schemas/RegisterBuyerRequest (teralya-openapi-v1.1.yaml). */
+ export class RegisterBuyerRequestDto {
+   @Transform(normalizeEmail)
+   @IsEmail()
+diff --git a/apps/backend/src/modules/bodegas/bodegas.controller.ts b/apps/backend/src/modules/bodegas/bodegas.controller.ts
+index 4d4df3c..68b7211 100644
+--- a/apps/backend/src/modules/bodegas/bodegas.controller.ts
++++ b/apps/backend/src/modules/bodegas/bodegas.controller.ts
+@@ -12,7 +12,7 @@ import type { BodegaPublic } from './dto/bodega-public.dto.js';
+ export class BodegasController {
+   constructor(private readonly bodegasService: BodegasService) {}
+ 
+-  /** API-005 — POST /bodegas (contrato: teralya-openapi-v1.0.yaml). */
++  /** API-005 — POST /bodegas (contrato: teralya-openapi-v1.1.yaml). */
+   @Post()
+   @HttpCode(HttpStatus.CREATED)
+   async registrar(@Body() body: BodegaRegistrationRequestDto): Promise<BodegaSelf> {
+diff --git a/apps/backend/src/modules/bodegas/bodegas.repository.ts b/apps/backend/src/modules/bodegas/bodegas.repository.ts
+index 63329e7..dcdf3be 100644
+--- a/apps/backend/src/modules/bodegas/bodegas.repository.ts
++++ b/apps/backend/src/modules/bodegas/bodegas.repository.ts
+@@ -64,6 +64,14 @@ export interface BodegaPerfil {
+   ciudad: string | null;
+   provincia: string | null;
+   pais_contacto: string | null;
++  paises_envio: string[] | null;
++  plazo_preparacion_dias: number | null;
++  plazo_entrega_estimado: string | null;
++  coste_envio_descripcion: string | null;
++  transportista_habitual: string | null;
++  restricciones_entrega: string | null;
++  condiciones_empaquetado: string | null;
++  capacidad_internacional: boolean | null;
+ }
+ 
+ export interface VinoResumenPublico {
+@@ -93,6 +101,14 @@ export interface BodegaPublicaRecord {
+   anio_fundacion: number | null;
+   web: string | null;
+   video_url: string | null;
++  paises_envio: string[] | null;
++  plazo_preparacion_dias: number | null;
++  plazo_entrega_estimado: string | null;
++  coste_envio_descripcion: string | null;
++  transportista_habitual: string | null;
++  restricciones_entrega: string | null;
++  condiciones_empaquetado: string | null;
++  capacidad_internacional: boolean | null;
+   vinos: VinoResumenPublico[];
+ }
+ 
+@@ -100,12 +116,16 @@ export type ActualizarPerfilBodegaInput = Partial<Pick<BodegaPerfil,
+   | 'nombre_comercial' | 'historia' | 'filosofia' | 'region' | 'pais'
+   | 'denominacion_origen' | 'anio_fundacion' | 'web' | 'video_url'
+   | 'email_principal' | 'telefono' | 'persona_contacto' | 'logo_url'
+-  | 'imagen_principal_url'>>;
++  | 'imagen_principal_url' | 'paises_envio' | 'plazo_preparacion_dias'
++  | 'plazo_entrega_estimado' | 'coste_envio_descripcion' | 'transportista_habitual'
++  | 'restricciones_entrega' | 'condiciones_empaquetado' | 'capacidad_internacional'>>;
+ 
+ const PERFIL_COLUMNS = `id, nombre_comercial, slug, logo_url, imagen_principal_url,
+   historia, filosofia, region, pais, denominacion_origen, anio_fundacion, web, video_url,
+   estado, created_at, updated_at, razon_social, cif_vat, email_principal, telefono,
+-  persona_contacto, direccion_fisica, codigo_postal, ciudad, provincia, pais_contacto`;
++  persona_contacto, direccion_fisica, codigo_postal, ciudad, provincia, pais_contacto,
++  paises_envio, plazo_preparacion_dias, plazo_entrega_estimado, coste_envio_descripcion,
++  transportista_habitual, restricciones_entrega, condiciones_empaquetado, capacidad_internacional`;
+ 
+ @Injectable()
+ export class BodegasRepository {
+@@ -181,7 +201,9 @@ export class BodegasRepository {
+   async obtenerPublica(id: string): Promise<BodegaPublicaRecord | null> {
+     const bodegas = await this.databaseService.query<Omit<BodegaPublicaRecord, 'vinos'>>(
+       `SELECT id, nombre_comercial, slug, logo_url, imagen_principal_url, historia, filosofia,
+-              region, pais, denominacion_origen, anio_fundacion, web, video_url
++              region, pais, denominacion_origen, anio_fundacion, web, video_url,
++              paises_envio, plazo_preparacion_dias, plazo_entrega_estimado, coste_envio_descripcion,
++              transportista_habitual, restricciones_entrega, condiciones_empaquetado, capacidad_internacional
+          FROM bodega
+         WHERE id = $1 AND estado IN ('aprobada', 'activa')`,
+       [id],
+diff --git a/apps/backend/src/modules/bodegas/bodegas.service.ts b/apps/backend/src/modules/bodegas/bodegas.service.ts
+index 2e5b36b..08148ac 100644
+--- a/apps/backend/src/modules/bodegas/bodegas.service.ts
++++ b/apps/backend/src/modules/bodegas/bodegas.service.ts
+@@ -128,6 +128,10 @@ export class BodegasService {
+       ...optional('email_principal'), ...optional('telefono'), ...optional('persona_contacto'),
+       ...optional('direccion_fisica'), ...optional('codigo_postal'), ...optional('ciudad'),
+       ...optional('provincia'), ...optional('pais_contacto'),
++      ...optional('paises_envio'), ...optional('plazo_preparacion_dias'),
++      ...optional('plazo_entrega_estimado'), ...optional('coste_e
