@@ -1,0 +1,45 @@
+name: Apply final web bundle
+
+on:
+  push:
+    branches:
+      - agent/web-final-review
+    paths:
+      - "tmp/apply-final/READY"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: teralya-apply-final-web
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reconstruct and verify reviewed bundle
+        run: |
+          cat tmp/apply-final/part-* > /tmp/teralya-changes.tar.gz.b64
+          base64 --decode /tmp/teralya-changes.tar.gz.b64 > /tmp/teralya-changes.tar.gz
+          echo "6008f14e09e1168d82b95492267d1ac91a3d7e92da7808a171dec8f2fcec7bb9  /tmp/teralya-changes.tar.gz" | sha256sum --check --strict
+      - name: Apply reviewed source and remove bootstrap files
+        run: |
+          tar --extract --gzip --file /tmp/teralya-changes.tar.gz --directory .
+          rm -rf tmp/apply-final
+          rm -f .github/workflows/apply-final-bundle.yml
+      - name: Commit reviewed web closure
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          git diff --cached --check
+          changed="$(git diff --cached --name-only | wc -l)"
+          test "$changed" -ge 71
+          git commit -m "Cerrar web y preparar revisión visual"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
