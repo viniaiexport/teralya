@@ -1,0 +1,104 @@
+name: Diagnose final backend
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - ".github/final-payload/**"
+      - ".github/workflows/backend-diagnostic-final.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NODE_ENV: test
+      PORT: 3999
+      DATABASE_URL: postgresql://teralya:teralya_ci@localhost:5432/teralya
+      REDIS_URL: redis://localhost:6379
+      PUBLIC_BASE_URL: http://localhost:3001
+      OBJECT_STORAGE_REGION: eu-west-1
+      OBJECT_STORAGE_BUCKET: teralya-ci
+      OBJECT_STORAGE_ENDPOINT: http://localhost:9000
+      OBJECT_STORAGE_FORCE_PATH_STYLE: "true"
+      OBJECT_STORAGE_ACCESS_KEY_ID: teralya-ci
+      OBJECT_STORAGE_SECRET_ACCESS_KEY: teralya-ci-secret
+      OBJECT_STORAGE_CDN_BASE_URL: https://cdn.teralya.test
+      IMAGE_CONFIRMATION_HMAC_SECRET: ci-image-confirmation-secret-at-least-32-bytes
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder_0000000000
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_CHECKOUT_SUCCESS_URL: https://teralya.test/checkout/success
+      STRIPE_CHECKOUT_CANCEL_URL: https://teralya.test/checkout/cancel
+      STRIPE_CHECKOUT_TTL_SECONDS: 1800
+      MINIMUM_PURCHASE_AGE: 18
+      ALCOHOL_TERMS_VERSION: ci-test-v1
+      LOGIN_RATE_LIMIT_MAX_ATTEMPTS: 5
+      LOGIN_RATE_LIMIT_WINDOW_SECONDS: 60
+      PASSWORD_RECOVERY_TOKEN_TTL_SECONDS: 3600
+      PASSWORD_RECOVERY_RATE_LIMIT_MAX_ATTEMPTS: 3
+      PASSWORD_RECOVERY_RATE_LIMIT_WINDOW_SECONDS: 900
+      PASSWORD_RECOVERY_URL: http://localhost:3000/restablecer-password
+      PASSWORD_RECOVERY_FROM_EMAIL: no-reply@teralya.test
+      SMTP_HOST: localhost
+      SMTP_PORT: 1025
+      SMTP_SECURE: false
+      SMTP_USER: ci
+      SMTP_PASSWORD: ci
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: teralya
+          POSTGRES_USER: teralya
+          POSTGRES_PASSWORD: teralya_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U teralya -d teralya"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply exact candidate
+        run: |
+          set -Eeuo pipefail
+          while IFS= read -r file; do tail -n +2 "$file"; done < <(find .github/final-payload -type f -name 'part-*' | sort -V) | tr -d '\n' | base64 --decode > /tmp/final.patch.xz
+          echo "5b8e49000d4a6cd952c179ee61e41fcd88d6b6a98992f531e2eb7ea50a3919cc  /tmp/final.patch.xz" | sha256sum -c -
+          xz -dc /tmp/final.patch.xz > /tmp/final.patch
+          git apply /tmp/final.patch
+      - name: Install and prepare database
+        run: |
+          npm ci --silent
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f docs/INF/teralya_schema_v1.5_APROBADO.sql >/dev/null
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/migrations/20260717_001_cierre_web.sql >/dev/null
+      - name: Diagnose backend failure
+        run: |
+          set +e
+          npm run backend:check > /tmp/backend-check.log 2>&1
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo "BACKEND_CHECK_FAILED=$status"
+            tail -n 240 /tmp/backend-check.log
+            exit "$status"
+          fi
+          echo "BACKEND_CHECK_OK"
+          tail -n 40 /tmp/backend-check.log
