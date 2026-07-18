@@ -10,7 +10,6 @@ import './premium-responsive.css';
 export const metadata: Metadata = {
   title: { default: 'Teralya · El futuro del vino', template: '%s · Teralya' },
   description: 'Vinos europeos seleccionados, vendidos y enviados directamente por sus bodegas.',
-  themeColor: '#090811',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
