@@ -381,7 +381,7 @@ export class PedidosRepository {
           : accepted
             ? "procesando"
             : "fallida";
-      await client.query(
+      const updatedRows = await client.query<CancellationRecord>(
         `UPDATE cancelacion_pedido
             SET estado=$2::estado_cancelacion_pedido,
                 stripe_refund_id=$3,
@@ -389,7 +389,9 @@ export class PedidosRepository {
                 completada_at=CASE WHEN $2::text='completada' THEN coalesce(completada_at,now()) ELSE completada_at END,
                 ultimo_error=CASE WHEN $2::text='fallida' THEN $5 ELSE NULL END,
                 updated_at=now()
-          WHERE id=$1`,
+          WHERE id=$1
+          RETURNING id,estado,stripe_refund_id,stripe_refund_status,
+                    solicitada_at,completada_at,intentos`,
         [
           context.cancelacionId,
           cancellationState,
@@ -400,6 +402,10 @@ export class PedidosRepository {
             : null,
         ],
       );
+      const updatedCancellation = updatedRows.rows[0];
+      if (updatedCancellation === undefined) {
+        throw new Error("No se pudo actualizar la cancelación.");
+      }
 
       if (refund.status === "succeeded") {
         await client.query(
@@ -412,18 +418,7 @@ export class PedidosRepository {
         order.pago_estado = "reembolsado";
       }
 
-      const updated: CancellationRecord = {
-        ...cancellation,
-        estado: cancellationState,
-        stripe_refund_id: refund.id,
-        stripe_refund_status: refund.status,
-        completada_at:
-          refund.status === "succeeded"
-            ? (cancellation.completada_at ?? new Date())
-            : cancellation.completada_at,
-        intentos: cancellation.intentos,
-      };
-      return this.cancellationResult(order, updated);
+      return this.cancellationResult(order, updatedCancellation);
     });
   }
 
@@ -544,19 +539,13 @@ export class PedidosRepository {
   ): OrderCancellationSummary {
     return {
       estado: cancellation.estado,
-      ...(cancellation.stripe_refund_status === null
-        ? {}
-        : { reembolso_estado: cancellation.stripe_refund_status }),
-      solicitada_at: this.toIso(cancellation.solicitada_at),
-      ...(cancellation.completada_at === null
-        ? {}
-        : { completada_at: this.toIso(cancellation.completada_at) }),
+      reembolso_estado: cancellation.stripe_refund_status,
+      intentos: cancellation.intentos,
+      solicitada_at: new Date(cancellation.solicitada_at).toISOString(),
+      completada_at:
+        cancellation.completada_at === null
+          ? null
+          : new Date(cancellation.completada_at).toISOString(),
     };
-  }
-
-  private toIso(value: Date | string): string {
-    return value instanceof Date
-      ? value.toISOString()
-      : new Date(value).toISOString();
   }
 }
