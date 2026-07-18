@@ -1,0 +1,9 @@
+:root {
+  --estate-photo: url("https://images.pexels.com/photos/18248851/pexels-photo-18248851.jpeg?auto=compress&cs=tinysrgb&w=1600");
+}
+
+.winery-card-visual::before,
+.winery-card-visual::after {
+  content: none !important;
+  display: none !important;
+}
