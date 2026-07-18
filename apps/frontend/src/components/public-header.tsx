@@ -13,7 +13,7 @@ const navigation = [
 const accessDestination = { href: '/acceso', label: 'Iniciar sesión' } as const;
 const privateDestinations = {
   comprador: { href: '/cuenta', label: 'Mi cuenta' },
-  bodega: { href: '/bodega', label: 'Mi bodega' },
+  bodega: { href: '/bodega', label: 'Panel de bodega' },
   administrador: { href: '/admin', label: 'Administración' },
 } as const satisfies Readonly<Record<SessionIdentity['rol'], { href: string; label: string }>>;
 
