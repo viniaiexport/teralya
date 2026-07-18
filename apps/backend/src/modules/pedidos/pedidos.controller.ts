@@ -1,4 +1,13 @@
-import { Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { CurrentActor, Roles } from "../../common/security/auth.decorators.js";
 import { BearerAuthGuard } from "../../common/security/bearer-auth.guard.js";
 import type { SessionActor } from "../../common/security/session.service.js";
@@ -34,6 +43,7 @@ export class PedidosController {
 
   /** API-051 — POST /pedidos/{id}/cancelacion. */
   @Post(":id/cancelacion")
+  @HttpCode(HttpStatus.OK)
   cancelar(
     @CurrentActor() actor: SessionActor,
     @Param("id") id: string,
