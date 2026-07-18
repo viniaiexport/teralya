@@ -1,0 +1,123 @@
+name: Publicar vista pública de Teralya
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public-preview/**"
+      - ".github/workflows/public-preview-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  issues: write
+
+concurrency:
+  group: teralya-public-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Habilitar GitHub Pages para GitHub Actions
+        id: enable
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/pages"
+          common=(
+            --header "Authorization: Bearer ${GH_TOKEN}"
+            --header "Accept: application/vnd.github+json"
+            --header "X-GitHub-Api-Version: 2022-11-28"
+          )
+
+          status="$(curl --silent --show-error --output /tmp/pages.json --write-out '%{http_code}' "${common[@]}" "$api")"
+          case "$status" in
+            200)
+              build_type="$(jq -r '.build_type // empty' /tmp/pages.json)"
+              if [[ "$build_type" != "workflow" ]]; then
+                curl --fail --silent --show-error \
+                  --request PUT \
+                  "${common[@]}" \
+                  --header "Content-Type: application/json" \
+                  --data '{"build_type":"workflow"}' \
+                  "$api" >/tmp/pages-updated.json
+              fi
+              ;;
+            404)
+              curl --fail --silent --show-error \
+                --request POST \
+                "${common[@]}" \
+                --header "Content-Type: application/json" \
+                --data '{"build_type":"workflow"}' \
+                "$api" >/tmp/pages-created.json
+              ;;
+            *)
+              cat /tmp/pages.json >&2 || true
+              echo "GitHub devolvió HTTP ${status} al consultar Pages." >&2
+              exit 1
+              ;;
+          esac
+
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
+      - name: Configurar GitHub Pages
+        id: configure
+        uses: actions/configure-pages@v5
+
+      - name: Empaquetar la vista pública
+        id: package
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public-preview
+
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Registrar la URL pública y el resultado
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ENABLE_OUTCOME: ${{ steps.enable.outcome }}
+          CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
+          PACKAGE_OUTCOME: ${{ steps.package.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          fallback_url="https://raw.githack.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/public-preview/index.html"
+          body="$(cat <<EOF
+          ## Vista pública estable de Teralya
+
+          - Habilitación de GitHub Pages: **${ENABLE_OUTCOME:-no ejecutada}**
+          - Configuración: **${CONFIGURE_OUTCOME:-no ejecutada}**
+          - Empaquetado: **${PACKAGE_OUTCOME:-no ejecutado}**
+          - Despliegue Pages: **${DEPLOY_OUTCOME:-no ejecutado}**
+          - URL GitHub Pages: ${PAGE_URL:-no disponible}
+          - URL pública alternativa: ${fallback_url}
+          - Commit: \`${GITHUB_SHA}\`
+
+          La vista es estática, no transaccional y no sustituye OPS-01 ni la publicación de producción en teralya.eu.
+          EOF
+          )"
+          payload="$(jq -nc --arg body "$body" '{body:$body}')"
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "Accept: application/vnd.github+json" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data "$payload" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/70/comments" >/dev/null
