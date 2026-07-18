@@ -1,11 +1,13 @@
 name: Apply final web bundle
 
 on:
-  push:
-    branches:
-      - agent/web-final-review
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
     paths:
       - "tmp/apply-final/READY"
+      - "tmp/apply-final/patch-*"
+      - ".github/workflows/apply-final-bundle.yml"
 
 permissions:
   contents: write
@@ -22,6 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
       - name: Reconstruct and verify reviewed patch
         run: |
@@ -41,4 +44,4 @@ jobs:
           changed="$(git diff --cached --name-only | wc -l)"
           test "$changed" -ge 71
           git commit -m "Cerrar web y preparar revisión visual"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "HEAD:${{ github.head_ref }}"
