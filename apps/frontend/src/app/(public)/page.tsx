@@ -6,9 +6,9 @@ export default function HomePage() {
       <section aria-labelledby="hero-title" className="premium-hero">
         <div className="premium-hero-copy">
           <p className="eyebrow">El futuro del vino</p>
-          <h1 id="hero-title">Las mejores bodegas. <span className="brand-gradient">Directo a tu casa.</span></h1>
+          <h1 id="hero-title">Descubre las bodegas que están construyendo <span className="brand-gradient">Teralya.</span></h1>
           <p className="hero-copy">Teralya conecta bodegas europeas con personas que buscan vinos auténticos. Sin intermediarios, con información clara y envío desde el origen.</p>
-          <div className="premium-hero-actions"><Link className="button primary" href="/vinos">Descubrir vinos</Link><Link className="button secondary" href="/bodegas">Conocer bodegas</Link></div>
+          <div className="premium-hero-actions hero-actions"><Link className="button primary" href="/vinos">Explorar vinos</Link><Link className="button secondary" href="/bodegas">Conocer bodegas</Link></div>
           <div aria-label="Ventajas de Teralya" className="premium-trust-row"><span><strong>Directo de bodega</strong>Compra a quien elabora</span><span><strong>Selección legible</strong>Origen e información clara</span><span><strong>Pago protegido</strong>Checkout seguro con Stripe</span></div>
         </div>
         <div aria-label="Botella de vino europeo frente a un viñedo al atardecer" className="premium-hero-media" role="img"><div className="premium-hero-caption"><strong>Bodega Valdeluz</strong><span>Historia visual de una bodega imaginaria</span></div></div>
