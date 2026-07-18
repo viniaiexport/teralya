@@ -16,7 +16,20 @@ function optionalText(form:FormData):Partial<WineInput>{const result:Record<stri
 function optionalNumbers(form:FormData):Partial<WineInput>{const result:Record<string,number>={};for(const name of ['anada','meses_crianza','volumen_ml','peso_gramos','plazo_preparacion_dias','botellas_por_caja'] as const){const value=integer(form,name);if(value!==undefined)result[name]=value}return result}
 function optionalLists(form:FormData):Partial<WineInput>{return {variedades_uva:list(form,'variedades_uva'),certificaciones:list(form,'certificaciones'),premios:list(form,'premios')}}
 
-export async function saveProfileAction(form:FormData):Promise<never>{const body:WineryProfilePatch={};for(const [name,max] of [['nombre_comercial',160],['historia',5000],['filosofia',5000],['region',160],['pais',100],['denominacion_origen',160],['web',2048],['video_url',2048],['email_principal',254],['telefono',32],['persona_contacto',100],['logo_url',2048],['imagen_principal_url',2048]] as const){const value=text(form,name,max);if(value!==undefined)body[name]=value}const year=integer(form,'anio_fundacion');if(year!==undefined)body.anio_fundacion=year;if(Object.keys(body).length===0)redirect('/bodega/perfil?error=datos');try{await updateWineryProfile(body)}catch{redirect('/bodega/perfil?error=guardar')}redirect('/bodega/perfil?updated=1')}
+export async function saveProfileAction(form:FormData):Promise<never>{
+  const body:WineryProfilePatch={};
+  for(const [name,max] of [['nombre_comercial',160],['historia',5000],['filosofia',5000],['region',160],['pais',100],['denominacion_origen',160],['web',2048],['video_url',2048],['email_principal',254],['telefono',32],['persona_contacto',100],['logo_url',2048],['imagen_principal_url',2048],['plazo_entrega_estimado',1000],['coste_envio_descripcion',2000],['transportista_habitual',160],['restricciones_entrega',2000],['condiciones_empaquetado',2000]] as const){const value=text(form,name,max);if(value!==undefined)body[name]=value}
+  const year=integer(form,'anio_fundacion');if(year!==undefined)body.anio_fundacion=year;
+  const preparation=integer(form,'plazo_preparacion_dias');if(preparation!==undefined)body.plazo_preparacion_dias=preparation;
+  const rawCountries=String(form.get('paises_envio')??'');
+  const countries=rawCountries.split(',').map(item=>item.trim().toUpperCase()).filter(Boolean);
+  if(countries.some(item=>!/^[A-Z]{2}$/.test(item))||new Set(countries).size>27)redirect('/bodega/perfil?error=datos');
+  body.paises_envio=[...new Set(countries)];
+  body.capacidad_internacional=form.get('capacidad_internacional')==='on';
+  if(Object.keys(body).length===0)redirect('/bodega/perfil?error=datos');
+  try{await updateWineryProfile(body)}catch{redirect('/bodega/perfil?error=guardar')}
+  redirect('/bodega/perfil?updated=1')
+}
 export async function createWineAction(form:FormData):Promise<never>{const body=winePayload(form);if(body===undefined)redirect('/bodega/vinos/nuevo?error=datos');let id:string;try{id=(await createWineryWine(body)).id}catch{redirect('/bodega/vinos/nuevo?error=guardar')}redirect(`/bodega/vinos/${encodeURIComponent(id)}?created=1`)}
 export async function updateWineAction(form:FormData):Promise<never>{const id=String(form.get('vino_id')??''),body=winePayload(form);if(!isUuid(id)||body===undefined)redirect('/bodega/vinos?error=datos');try{await updateWineryWine(id,body)}catch{redirect(`/bodega/vinos/${encodeURIComponent(id)}?error=guardar`)}redirect(`/bodega/vinos/${encodeURIComponent(id)}?updated=1`)}
 export async function requestPublicationAction(form:FormData):Promise<never>{const id=String(form.get('vino_id')??'');if(!isUuid(id))redirect('/bodega/vinos?error=solicitud');try{await requestWinePublication(id)}catch{redirect(`/bodega/vinos/${encodeURIComponent(id)}?error=publicacion`)}redirect(`/bodega/vinos/${encodeURIComponent(id)}?requested=1`)}

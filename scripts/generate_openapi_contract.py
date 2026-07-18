@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 import yaml
 
-OUT = Path("teralya-openapi-v1.0.yaml")
+OUT = Path("docs/INF/openapi/teralya-openapi-v1.1.yaml")
 
 
 def ref(name):
@@ -86,6 +86,8 @@ ORDER_ITEM_STATE = string(enum=["normal", "cancelado", "devuelto"])
 PAYMENT_STATE = string(enum=["pendiente", "autorizado", "pagado", "parcialmente_reembolsado", "reembolsado", "fallido", "cancelado"])
 SUBORDER_STATE = string(enum=["pendiente", "aceptado", "en_preparacion", "enviado", "entregado", "cancelado", "incidencia"])
 INCIDENT_STATE = string(enum=["abierta", "en_revision", "resuelta", "cerrada"])
+CANCELLATION_STATE = string(enum=["procesando", "completada", "fallida"])
+REFUND_STATE = string(enum=["pending", "requires_action", "succeeded", "failed", "canceled"])
 QUANTITY = integer(minimum=1, maximum=999)
 STOCK = integer(minimum=0, maximum=999999)
 YEAR = integer(minimum=1800, maximum=2100)
@@ -144,6 +146,14 @@ winery_patch_props = {
     "pais": T100, "denominacion_origen": T160, "anio_fundacion": YEAR, "web": URI,
     "video_url": URI, "email_principal": EMAIL, "telefono": T32, "persona_contacto": T100,
     "logo_url": URI, "imagen_principal_url": URI,
+    "paises_envio": array(string(pattern=r"^[A-Z]{2}$"), max_items=27),
+    "plazo_preparacion_dias": integer(minimum=0, maximum=365),
+    "plazo_entrega_estimado": string(minLength=1, maxLength=1000),
+    "coste_envio_descripcion": string(minLength=1, maxLength=2000),
+    "transportista_habitual": T160,
+    "restricciones_entrega": string(minLength=1, maxLength=2000),
+    "condiciones_empaquetado": string(minLength=1, maxLength=2000),
+    "capacidad_internacional": boolean(),
 }
 add("BodegaProfilePatch", obj(winery_patch_props, minProperties=1))
 add("BodegaSummary", obj({
@@ -155,6 +165,14 @@ public_winery_props = {
     "logo_url": URI, "imagen_principal_url": URI, "historia": T5000, "filosofia": T5000,
     "region": T160, "pais": T100, "denominacion_origen": T160, "anio_fundacion": YEAR,
     "web": URI, "video_url": URI,
+    "paises_envio": array(string(pattern=r"^[A-Z]{2}$"), max_items=27),
+    "plazo_preparacion_dias": integer(minimum=0, maximum=365),
+    "plazo_entrega_estimado": string(minLength=1, maxLength=1000),
+    "coste_envio_descripcion": string(minLength=1, maxLength=2000),
+    "transportista_habitual": T160,
+    "restricciones_entrega": string(minLength=1, maxLength=2000),
+    "condiciones_empaquetado": string(minLength=1, maxLength=2000),
+    "capacidad_internacional": boolean(),
 }
 add("BodegaPublic", obj(public_winery_props, ["id", "nombre_comercial", "vinos"]))
 self_winery_props = {k: v for k, v in public_winery_props.items() if k != "vinos"}
@@ -317,11 +335,22 @@ add("OrderSummary", obj({
     "created_at": DATETIME,
 }, ["id", "numero_pedido", "estado", "total", "moneda", "created_at"]))
 buyer_order = merge(schemas["OrderSummary"])
+add("OrderCancellationSummary", obj({
+    "estado": CANCELLATION_STATE, "reembolso_estado": REFUND_STATE,
+    "solicitada_at": DATETIME, "completada_at": DATETIME,
+}, ["estado", "solicitada_at"]))
+add("OrderCancellationResult", obj({
+    "pedido_id": UUID, "pedido_estado": ORDER_STATE,
+    "pago_estado": string(enum=["pagado", "reembolsado"]),
+    "estado": CANCELLATION_STATE, "reembolso_estado": REFUND_STATE,
+    "solicitada_at": DATETIME, "completada_at": DATETIME,
+}, ["pedido_id", "pedido_estado", "pago_estado", "estado", "solicitada_at"]))
 buyer_order["properties"].update({
+    "puede_cancelar": boolean(), "cancelacion": ref("OrderCancellationSummary"),
     "totales": ref("MoneyBreakdown"), "direccion_envio_snapshot": ref("AddressSnapshot"),
     "direccion_facturacion_snapshot": ref("AddressSnapshot"), "lineas": array(ref("OrderLine")),
 })
-buyer_order["required"] += ["totales", "direccion_envio_snapshot", "direccion_facturacion_snapshot", "lineas"]
+buyer_order["required"] += ["puede_cancelar", "totales", "direccion_envio_snapshot", "direccion_facturacion_snapshot", "lineas"]
 add("OrderBuyerDetail", buyer_order)
 add("SubOrderStatePatch", obj({"estado_destino": SUBORDER_STATE}, ["estado_destino"]))
 add("Tracking", obj({
@@ -339,9 +368,16 @@ subdetail["properties"].update({
 })
 subdetail["required"] += ["totales", "lineas", "direccion_envio_snapshot", "tracking"]
 add("SubOrderDetail", subdetail)
-admin_order = merge(schemas["OrderBuyerDetail"])
-admin_order["properties"].update({"subpedidos": array(ref("SubOrderDetail")), "comprador_id": UUID})
-admin_order["required"].append("subpedidos")
+admin_order = merge(schemas["OrderSummary"])
+admin_order["properties"].update({
+    "totales": ref("MoneyBreakdown"), "direccion_envio_snapshot": ref("AddressSnapshot"),
+    "direccion_facturacion_snapshot": ref("AddressSnapshot"), "lineas": array(ref("OrderLine")),
+    "subpedidos": array(ref("SubOrderDetail")), "comprador_id": UUID,
+})
+admin_order["required"] += [
+    "totales", "direccion_envio_snapshot", "direccion_facturacion_snapshot", "lineas",
+    "subpedidos", "comprador_id",
+]
 add("OrderAdminDetail", admin_order)
 add("DashboardSales", obj({"importe": MONEY, "moneda": CURRENCY, "num_pedidos": integer(minimum=0)}, ["importe", "moneda", "num_pedidos"]))
 add("Dashboard", obj({"ventas_dia": ref("DashboardSales"), "pedidos_pendientes": integer(minimum=0)}, ["ventas_dia", "pedidos_pendientes"]))
@@ -387,6 +423,7 @@ def schema_example(schema, depth=0, seen=()):
             "MoneyBreakdown": {"subtotal": "10.00", "gastos_envio": "2.00", "impuestos": "2.10", "descuentos": "1.00", "total": "13.10", "moneda": "EUR"},
             "SubOrderMoneyBreakdown": {"subtotal": "10.00", "gastos_envio": "2.00", "impuestos": "2.10", "total": "14.10", "moneda": "EUR"},
             "OrderConfirmation": {"pedido_id": "11111111-1111-4111-8111-111111111111", "numero_pedido": "TER-2026-0001", "pago_estado": "pagado", "pedido_estado": "pagado", "confirmado_at": "2026-07-13T12:00:00Z"},
+            "OrderCancellationResult": {"pedido_id": "11111111-1111-4111-8111-111111111111", "pedido_estado": "cancelado", "pago_estado": "reembolsado", "estado": "completada", "reembolso_estado": "succeeded", "solicitada_at": "2026-07-17T10:00:00Z", "completada_at": "2026-07-17T10:00:05Z"},
         }
         if name in special:
             return deepcopy(special[name])
@@ -557,6 +594,7 @@ op(47,"POST","/bodegas/yo/vinos/{id}/imagenes/upload-url","Imágenes","Solicitar
 op(48,"POST","/bodegas/yo/vinos/{id}/imagenes","Imágenes","Confirmar imagen cargada",201,"Image",[400,401,403,404,409,410,500],"ImageConfirmRequest",params=[idp()])
 op(49,"PATCH","/bodegas/yo/vinos/{id}/imagenes/{imagen_id}","Imágenes","Actualizar metadatos de imagen",200,"Image",[400,401,403,404,409,500],"ImagePatchRequest",params=[idp(),idp("imagen_id")])
 op(50,"DELETE","/bodegas/yo/vinos/{id}/imagenes/{imagen_id}","Imágenes","Desactivar imagen",204,None,[401,403,404,409,500],params=[idp(),idp("imagen_id")],success_status=204)
+op(51,"POST","/pedidos/{id}/cancelacion","Pedidos","Cancelar Pedido propio",200,"OrderCancellationResult",[401,403,404,409,500,502,503],params=[idp()])
 
 add("StripeEvent", {
     "type": "object", "additionalProperties": True,
@@ -609,7 +647,7 @@ TRACE = {
     1: (["CU-001"], ["PT-ACC-001"]),
     2: (["CU-002", "CU-013", "CU-020"], ["PT-ACC-003", "PT-BOD-001", "PT-ADM-001", "PT-SIS-003"]),
     3: (["CU-003"], ["PT-ACC-004"]), 4: (["CU-003"], ["PT-ACC-005"]),
-    5: (["CU-012"], ["PT-ACC-002"]), 6: (["CU-014"], ["PT-BOD-002"]),
+    5: (["CU-012"], ["PT-ACC-002"]), 6: (["CU-014", "CU-034"], ["PT-BOD-002"]),
     7: (["CU-015"], ["PT-BOD-004"]), 8: (["CU-016"], ["PT-BOD-005"]),
     9: (["CU-004", "CU-005"], ["PT-PUB-002"]), 10: (["CU-006"], ["PT-PUB-003"]),
     11: (["CU-002", "CU-007", "CU-008"], ["PT-ACC-001", "PT-ACC-003", "PT-COM-002"]),
@@ -624,8 +662,8 @@ TRACE = {
     25: (["CU-023"], ["PT-ADM-004", "PT-ADM-005"]),
     26: (["CU-024"], ["PT-ADM-004", "PT-ADM-005"]),
     27: (["CU-025"], ["PT-ADM-006", "PT-ADM-007"]), 28: (["CU-026"], ["PT-ADM-001"]),
-    29: (["CU-028", "CU-029"], []), 30: (["CU-006"], ["PT-PUB-004"]),
-    31: (["CU-014"], ["PT-BOD-002"]),
+    29: (["CU-028", "CU-029"], []), 30: (["CU-006", "CU-034"], ["PT-PUB-004"]),
+    31: (["CU-014", "CU-034"], ["PT-BOD-002"]),
     32: (["CU-015", "CU-016", "CU-017"], ["PT-BOD-003"]),
     33: (["CU-015", "CU-016", "CU-017"], ["PT-BOD-006"]),
     34: (["CU-017"], ["PT-BOD-003", "PT-BOD-005", "PT-BOD-006", "PT-ADM-004"]),
@@ -641,6 +679,7 @@ TRACE = {
     47: (["CU-016"], ["PT-BOD-005"]), 48: (["CU-016"], ["PT-BOD-005"]),
     49: (["CU-016"], ["PT-BOD-005"]),
     50: (["CU-016", "CU-017", "CU-022", "CU-023"], ["PT-BOD-005", "PT-ADM-005"]),
+    51: (["CU-033"], ["PT-COM-007"]),
 }
 
 SEMANTICS = {
@@ -658,6 +697,7 @@ SEMANTICS = {
     47: "Emite URL prefirmada con TTL de 10 minutos y token de confirmación con TTL de 30 minutos, ligados a upload_id, clave, MIME, tamaño, checksum, vino y propietario.",
     48: "Dentro del TTL de confirmación de 30 minutos, confirma mediante HEAD que clave, MIME, Content-Length y checksum coinciden con la autorización; registra la imagen y publica su URL CDN estable. Primera confirmación 201, replay idéntico 200.",
     50: "Desactivación idempotente. Impide eliminar la última imagen activa con 409; los replays válidos responden 204.",
+    51: "Cancela un Pedido propio cobrado solo antes de expedición, entrega o incidencia. Bloquea Pedido, Pago y SubPedidos; usa un ledger único y reintentos idempotentes de Stripe. Solo al confirmar el reembolso cancela Pedido/SubPedidos/líneas, restituye stock una vez, marca Pago reembolsado, audita y envía confirmación por email. Un reembolso pendiente bloquea transiciones logísticas y uno fallido puede reintentarse con nueva clave idempotente.",
 }
 
 paths = {}
@@ -709,8 +749,8 @@ spec = {
     "openapi": "3.1.0",
     "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
     "info": {
-        "title": "Teralya API", "version": "1.0.0",
-        "description": "Contrato OpenAPI 3.1 del MVP. Derivado de INF-08 v2.5, INF-10 v1.0 e INF-10-A v1.0.",
+        "title": "Teralya API", "version": "1.1.0",
+        "description": "Contrato OpenAPI 3.1 del MVP. Derivado de INF-08 v2.6, INF-10 v1.1 e INF-10-A v1.1.",
         "contact": {"name": "Teralya", "url": "https://teralya.es"},
         "license": {"name": "Propietario — Teralya", "identifier": "LicenseRef-Teralya-Proprietary"},
     },
@@ -721,7 +761,7 @@ spec = {
         {"name": "Vinos", "description": "Catálogo y gestión del ciclo de vida del vino."},
         {"name": "Carrito", "description": "Gestión y fusión idempotente del carrito de compra."},
         {"name": "Checkout", "description": "Preparación del Pedido, pago y confirmación."},
-        {"name": "Pedidos", "description": "Consulta de Pedidos del comprador."},
+        {"name": "Pedidos", "description": "Consulta y cancelación contractual de Pedidos del comprador."},
         {"name": "SubPedidos", "description": "Operativa logística propia de cada bodega."},
         {"name": "Administración", "description": "Revisión, publicación, Pedidos e incidencias administrativas."},
         {"name": "Sistema", "description": "Integraciones internas y webhooks firmados."},

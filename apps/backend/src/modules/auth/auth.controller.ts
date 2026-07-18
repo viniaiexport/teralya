@@ -19,21 +19,21 @@ export class AuthController {
     private readonly passwordResetService: PasswordResetService,
   ) {}
 
-  /** API-001 — POST /auth/registro/comprador (contrato: teralya-openapi-v1.0.yaml). */
+  /** API-001 — POST /auth/registro/comprador (contrato: teralya-openapi-v1.1.yaml). */
   @Post('registro/comprador')
   @HttpCode(HttpStatus.CREATED)
   async registrarComprador(@Body() body: RegisterBuyerRequestDto): Promise<AuthSession> {
     return this.authService.registrarComprador(body);
   }
 
-  /** API-002 — POST /auth/login (contrato: teralya-openapi-v1.0.yaml). */
+  /** API-002 — POST /auth/login (contrato: teralya-openapi-v1.1.yaml). */
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() body: LoginRequestDto): Promise<AuthSession> {
     return this.authService.login(body);
   }
 
-  /** API-003 — POST /auth/recuperar-password (contrato: teralya-openapi-v1.0.yaml). */
+  /** API-003 — POST /auth/recuperar-password (contrato: teralya-openapi-v1.1.yaml). */
   @Post('recuperar-password')
   @HttpCode(HttpStatus.OK)
   async recuperarPassword(
@@ -46,7 +46,7 @@ export class AuthController {
     );
   }
 
-  /** API-004 — POST /auth/restablecer-password (contrato: teralya-openapi-v1.0.yaml). */
+  /** API-004 — POST /auth/restablecer-password (contrato: teralya-openapi-v1.1.yaml). */
   @Post('restablecer-password')
   @HttpCode(HttpStatus.OK)
   async restablecerPassword(

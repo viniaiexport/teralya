@@ -1,6 +1,6 @@
 # LEGAL-09 — Plantilla de Condiciones de Envío por Bodega
 
-**Teralya · Versión 1.1 · Julio 2026 · Preparado por Claude · Estado: APROBADO PARA LA VERSIÓN ACTUAL**
+**Teralya · Versión 1.2 · Julio 2026 · Preparado por Claude · Estado: APROBADO PARA LA VERSIÓN ACTUAL · IMPLEMENTACIÓN TÉCNICA CERRADA**
 
 ## ⚠️ Aviso obligatorio
 
@@ -49,4 +49,4 @@ Estas condiciones se muestran en la ficha pública de cada Bodega y se enlazan d
 
 ---
 
-*Pendiente de: (a) habilitar en el panel de Bodega un formulario para completar estos campos y la lista orientativa de §2.1 por país — hoy no existe ese campo en el modelo de datos ni en el frontend, es tarea de ingeniería pendiente; (b) revisión legal antes de producción; (c) la confirmación pendiente en LEGAL-01 §2 de que el modelo de responsabilidad individual por Bodega no genera deemed supplier para Teralya por aplicación directa de la ley.*
+*Los campos operativos de §2 están implementados en PT-BOD-002, API-006/API-031, el modelo de datos y la ficha pública API-030. La lista orientativa de §2.1 sigue siendo contenido informativo, no una validación automática. Permanecen pendientes la revisión legal antes de producción y la confirmación externa indicada en LEGAL-01 §2 sobre el riesgo de deemed supplier.*

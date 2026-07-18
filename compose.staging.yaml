@@ -56,7 +56,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD in .env.staging}
     volumes:
       - teralya-staging-postgres:/var/lib/postgresql/data
-      - ./docs/INF/teralya_schema_v1.4_APROBADO.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - ./docs/INF/teralya_schema_v1.5_APROBADO.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U teralya -d teralya"]
       interval: 5s
