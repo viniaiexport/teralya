@@ -1,4 +1,4 @@
-BACKEND_STATUS=1
+BACKEND_STATUS=2
 PLAYWRIGHT_INSTALL_STATUS=0
 E2E_STATUS=1
 
@@ -18,103 +18,70 @@ E2E_STATUS=1
 
 [1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m/home/runner/work/teralya/teralya/apps/backend[39m
 
- [31m❯[39m test/checkout.e2e.spec.ts [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 576[2mms[22m[39m
-   [32m✓[39m API016 checkout E2E[2m > [22mclasifica carrito vacío, uso incorrecto, inactiva y ajena[32m 114[2mms[22m[39m
-   [32m✓[39m API016 checkout E2E[2m > [22mcrea exactamente un Pedido y Pago atómicos bajo concurrencia[32m 47[2mms[22m[39m
-   [32m✓[39m API016 checkout E2E[2m > [22mcrea una sola sesión Stripe y reutiliza la vigente bajo concurrencia[32m 15[2mms[22m[39m
-   [32m✓[39m API016 checkout E2E[2m > [22mreplay ignora cambios del body y devuelve snapshots originales[32m 8[2mms[22m[39m
-   [32m✓[39m API016 checkout E2E[2m > [22mexpone confirmación pagada y listado/detalle propios[32m 35[2mms[22m[39m
-[31m   [31m×[31m API016 checkout E2E[2m > [22mcancela, reembolsa y repone stock una sola vez[39m[32m 86[2mms[22m[39m
-[31m     → expected { …(7) } to match object { …(7) }[39m
-   [32m✓[39m API016 checkout E2E[2m > [22mrechaza como conflicto el pedido previo que ya no está pendiente[32m 12[2mms[22m[39m
- [32m✓[39m test/auth-password-reset.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 3151[2mms[22m[39m
-   [33m[2m✓[22m[39m API-004 — POST /auth/restablecer-password[2m > [22mrestablece la contraseña correctamente y el hash nuevo es verificable [33m 324[2mms[22m[39m
-   [33m[2m✓[22m[39m API-004 — POST /auth/restablecer-password[2m > [22mrechaza un token expirado, uno cancelado y uno ya utilizado con 409 [33m 306[2mms[22m[39m
- [32m✓[39m test/auth-register-buyer.spec.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1470[2mms[22m[39m
- [32m✓[39m test/auth-login.spec.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 3875[2mms[22m[39m
- [32m✓[39m test/stripe-webhook.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 432[2mms[22m[39m
- [32m✓[39m test/pedidos-buyer.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 18[2mms[22m[39m
- [32m✓[39m test/auth-password-recovery.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 1489[2mms[22m[39m
- [32m✓[39m test/subpedidos.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 508[2mms[22m[39m
- [32m✓[39m test/admin-bodegas-validar.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 394[2mms[22m[39m
- [32m✓[39m test/admin-pedidos.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 368[2mms[22m[39m
- [32m✓[39m test/admin-incidencias.e2e.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 444[2mms[22m[39m
- [32m✓[39m test/imagenes.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 18[2mms[22m[39m
- [32m✓[39m test/imagenes.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 551[2mms[22m[39m
- [32m✓[39m test/direcciones.e2e.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 614[2mms[22m[39m
- [32m✓[39m test/bodega-public.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
- [32m✓[39m test/bodegas-registration.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 533[2mms[22m[39m
- [32m✓[39m test/bodegas-profile.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 15[2mms[22m[39m
- [32m✓[39m test/vinos-own.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 509[2mms[22m[39m
- [32m✓[39m test/admin-pedidos.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 15[2mms[22m[39m
- [32m✓[39m test/admin-bodegas-list-detail.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 19[2mms[22m[39m
- [32m✓[39m test/carrito.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 507[2mms[22m[39m
- [32m✓[39m test/direcciones.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 23[2mms[22m[39m
- [32m✓[39m test/bearer-auth.guard.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 19[2mms[22m[39m
- [32m✓[39m test/admin-dashboard.e2e.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 354[2mms[22m[39m
- [32m✓[39m test/admin-vinos.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 415[2mms[22m[39m
- [32m✓[39m test/subpedidos.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
- [32m✓[39m test/catalog.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 331[2mms[22m[39m
- [32m✓[39m test/admin-bodegas-validar.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
- [32m✓[39m test/vinos-own.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 15[2mms[22m[39m
- [32m✓[39m test/admin-incidencias.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 14[2mms[22m[39m
- [32m✓[39m test/http-foundation.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 192[2mms[22m[39m
- [32m✓[39m test/admin-vinos.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 13[2mms[22m[39m
- [32m✓[39m test/health.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 362[2mms[22m[39m
-   [33m[2m✓[22m[39m health endpoints[2m > [22mkeeps liveness independent from PostgreSQL and Redis [33m 333[2mms[22m[39m
- [32m✓[39m test/catalog.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
- [32m✓[39m test/stripe-webhook.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 18[2mms[22m[39m
- [32m✓[39m test/checkout.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 11[2mms[22m[39m
- [32m✓[39m test/session-resolution.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 11[2mms[22m[39m
- [32m✓[39m test/checkout-payment.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
- [32m✓[39m test/carrito.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
- [32m✓[39m test/checkout-confirmation.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 9[2mms[22m[39m
- [32m✓[39m test/admin-dashboard.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m test/checkout.e2e.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 428[2mms[22m[39m
+ [32m✓[39m test/auth-password-reset.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 2629[2mms[22m[39m
+ [32m✓[39m test/auth-register-buyer.spec.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1072[2mms[22m[39m
+ [32m✓[39m test/auth-login.spec.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 3332[2mms[22m[39m
+   [33m[2m✓[22m[39m API-002 — POST /auth/login[2m > [22mresponde 429 cuando se supera el límite configurable [33m 322[2mms[22m[39m
+ [32m✓[39m test/stripe-webhook.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 376[2mms[22m[39m
+ [32m✓[39m test/auth-password-recovery.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 1110[2mms[22m[39m
+ [32m✓[39m test/pedidos-buyer.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m test/subpedidos.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 391[2mms[22m[39m
+ [32m✓[39m test/admin-bodegas-validar.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 275[2mms[22m[39m
+ [32m✓[39m test/admin-pedidos.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 312[2mms[22m[39m
+ [32m✓[39m test/admin-incidencias.e2e.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 442[2mms[22m[39m
+ [32m✓[39m test/imagenes.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m test/imagenes.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 425[2mms[22m[39m
+ [32m✓[39m test/direcciones.e2e.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 460[2mms[22m[39m
+ [32m✓[39m test/bodega-public.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m test/bodegas-registration.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 463[2mms[22m[39m
+ [32m✓[39m test/vinos-own.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 414[2mms[22m[39m
+ [32m✓[39m test/bodegas-profile.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m test/admin-pedidos.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m test/carrito.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 418[2mms[22m[39m
+ [32m✓[39m test/admin-bodegas-list-detail.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m test/direcciones.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m test/bearer-auth.guard.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m test/admin-dashboard.e2e.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 263[2mms[22m[39m
+ [32m✓[39m test/subpedidos.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m test/admin-vinos.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 317[2mms[22m[39m
+ [32m✓[39m test/catalog.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 283[2mms[22m[39m
+ [32m✓[39m test/vinos-own.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m test/admin-bodegas-validar.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m test/admin-incidencias.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m test/admin-vinos.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m test/http-foundation.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 148[2mms[22m[39m
+ [32m✓[39m test/catalog.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/health.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 248[2mms[22m[39m
+ [32m✓[39m test/stripe-webhook.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m test/checkout.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/session-resolution.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m test/checkout-payment.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/carrito.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m test/checkout-confirmation.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
  [32m✓[39m test/openapi-contract.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/admin-dashboard.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
 
-[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
-
-[41m[1m FAIL [22m[49m test/checkout.e2e.spec.ts[2m > [22mAPI016 checkout E2E[2m > [22mcancela, reembolsa y repone stock una sola vez
-[31m[1mAssertionError[22m: expected { …(7) } to match object { …(7) }[39m
-
-[32m- Expected[39m
-[31m+ Received[39m
-
-[33m@@ -1,7 +1,7 @@[39m
-[2m  {[22m
-[32m-   "completada_at": "2026-07-18T08:22:56.240Z",[39m
-[31m+   "completada_at": "2026-07-18T08:22:56.221Z",[39m
-[2m    "estado": "completada",[22m
-[2m    "pago_estado": "reembolsado",[22m
-[2m    "pedido_estado": "cancelado",[22m
-[2m    "pedido_id": "4b13bdbf-162b-4f20-b810-ceac3127e5dd",[22m
-[2m    "reembolso_estado": "succeeded",[22m
-
-[36m [2m❯[22m test/checkout.e2e.spec.ts:[2m357:25[22m[39m
-    [90m355| [39m      [33m.[39m[34msend[39m({})
-    [90m356| [39m      [33m.[39m[34mexpect[39m([34m200[39m)[33m;[39m
-    [90m357| [39m    [34mexpect[39m(replay[33m.[39mbody)[33m.[39m[34mtoMatchObject[39m(first[33m.[39mbody)[33m;[39m
-    [90m   | [39m                        [31m^[39m
-    [90m358| [39m    [34mexpect[39m(stripe[33m.[39mrefundCalls)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
-    [90m359| [39m
-
-[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+[2m Test Files [22m [1m[32m42 passed[39m[22m[90m (42)[39m
+[2m      Tests [22m [1m[32m209 passed[39m[22m[90m (209)[39m
+[2m   Start at [22m 08:29:00
+[2m   Duration [22m 16.33s[2m (transform 803ms, setup 0ms, collect 24.07s, tests 14.02s, environment 12ms, prepare 3.93s)[22m
 
 
-[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m41 passed[39m[22m[90m (42)[39m
-[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m208 passed[39m[22m[90m (209)[39m
-[2m   Start at [22m 08:22:53
-[2m   Duration [22m 21.84s[2m (transform 1.17s, setup 0ms, collect 32.64s, tests 17.38s, environment 20ms, prepare 5.49s)[22m
+> @teralya/backend@0.1.0 build
+> tsc -p tsconfig.build.json
 
-
-::error file=/home/runner/work/teralya/teralya/apps/backend/test/checkout.e2e.spec.ts,title=test/checkout.e2e.spec.ts > API016 checkout E2E > cancela%2C reembolsa y repone stock una sola vez,line=357,column=25::AssertionError: expected { …(7) } to match object { …(7) }%0A%0A- Expected%0A+ Received%0A%0A@@ -1,7 +1,7 @@%0A  {%0A-   "completada_at": "2026-07-18T08:22:56.240Z",%0A+   "completada_at": "2026-07-18T08:22:56.221Z",%0A    "estado": "completada",%0A    "pago_estado": "reembolsado",%0A    "pedido_estado": "cancelado",%0A    "pedido_id": "4b13bdbf-162b-4f20-b810-ceac3127e5dd",%0A    "reembolso_estado": "succeeded",%0A%0A ❯ test/checkout.e2e.spec.ts:357:25%0A%0A
-npm error Lifecycle script `test` failed with error:
-npm error code 1
+src/modules/pedidos/pedidos.repository.ts(542,7): error TS2322: Type 'StripeRefundStatus | null' is not assignable to type 'RefundStatus'.
+  Type 'null' is not assignable to type 'RefundStatus'.
+src/modules/pedidos/pedidos.repository.ts(545,7): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
 npm error path /home/runner/work/teralya/teralya/apps/backend
 npm error workspace @teralya/backend@0.1.0
 npm error location /home/runner/work/teralya/teralya/apps/backend
 npm error command failed
-npm error command sh -c vitest run
+npm error command sh -c tsc -p tsconfig.build.json
 
 ===== PLAYWRIGHT INSTALL TAIL =====
 Unpacking libasound2t64:amd64 (1.2.11-1ubuntu0.3) over (1.2.11-1ubuntu0.2) ...
