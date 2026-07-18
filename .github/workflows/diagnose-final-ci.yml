@@ -75,6 +75,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/aplicar-cierre-real
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -102,18 +103,19 @@ jobs:
             echo "E2E_STATUS=$e2e_status"
             echo
             echo "===== BACKEND TAIL ====="
-            tail -n 320 /tmp/backend.log
+            tail -n 360 /tmp/backend.log
             echo
             echo "===== PLAYWRIGHT INSTALL TAIL ====="
             tail -n 80 /tmp/playwright-install.log
             echo
             echo "===== E2E TAIL ====="
-            tail -n 360 /tmp/e2e.log
-          } > ci-diagnostics/final-ci.txt
+            tail -n 420 /tmp/e2e.log
+          } > ci-diagnostics/final-ci-latest.txt
       - name: Publish diagnostics to the branch
         run: |
           git config user.name "Teralya CTO"
           git config user.email "viniaiexport@gmail.com"
-          git add ci-diagnostics/final-ci.txt
-          git commit -m "Registrar diagnóstico final de CI"
+          git add ci-diagnostics/final-ci-latest.txt
+          git commit -m "Actualizar diagnóstico final de CI"
+          git pull --rebase origin agent/aplicar-cierre-real
           git push origin HEAD:agent/aplicar-cierre-real
