@@ -94,7 +94,7 @@ jobs:
           sed -i '/^FRONTEND_IMAGE=/d;/^BACKEND_IMAGE=/d' /tmp/.env.production
           printf '\nFRONTEND_IMAGE=%s\nBACKEND_IMAGE=%s\n' "$FRONTEND_IMAGE" "$BACKEND_IMAGE" >> /tmp/.env.production
           chmod 0600 /tmp/.env.production
-          tar -czf /tmp/teralya-release.tgz deploy/production docs/INF/teralya_schema_v1.4_APROBADO.sql
+          tar -czf /tmp/teralya-release.tgz deploy/production docs/INF/teralya_schema_v1.5_APROBADO.sql database/migrations/20260717_001_cierre_web.sql
 
       - name: Authenticate the server to GHCR
         shell: bash
@@ -115,9 +115,10 @@ jobs:
             rm -rf /tmp/teralya-release
             mkdir -p /tmp/teralya-release
             tar -xzf /tmp/teralya-release.tgz -C /tmp/teralya-release
-            sudo install -d -o deployer -g deployer -m 0750 /srv/teralya /srv/teralya/docs/INF
+            sudo install -d -o deployer -g deployer -m 0750 /srv/teralya /srv/teralya/docs/INF /srv/teralya/database/migrations
             sudo cp -a /tmp/teralya-release/deploy/production/. /srv/teralya/
-            sudo install -o deployer -g deployer -m 0644 /tmp/teralya-release/docs/INF/teralya_schema_v1.4_APROBADO.sql /srv/teralya/docs/INF/
+            sudo install -o deployer -g deployer -m 0644 /tmp/teralya-release/docs/INF/teralya_schema_v1.5_APROBADO.sql /srv/teralya/docs/INF/
+            sudo install -o deployer -g deployer -m 0644 /tmp/teralya-release/database/migrations/20260717_001_cierre_web.sql /srv/teralya/database/migrations/
             sudo install -o deployer -g deployer -m 0600 /tmp/.env.production /srv/teralya/.env.production
             sudo chown -R deployer:deployer /srv/teralya
             chmod 0750 /srv/teralya/scripts/*.sh

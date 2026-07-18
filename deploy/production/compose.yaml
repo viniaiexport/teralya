@@ -84,7 +84,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./docs/INF/teralya_schema_v1.4_APROBADO.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - ./docs/INF/teralya_schema_v1.5_APROBADO.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
     networks:
       - data
     healthcheck:

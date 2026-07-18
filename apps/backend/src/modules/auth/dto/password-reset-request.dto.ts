@@ -1,7 +1,7 @@
 import { IsString, Length } from 'class-validator';
 import { MatchesProperty } from '../../../common/validation/matches-property.decorator.js';
 
-/** Contrato normativo: components/schemas/PasswordResetRequest (teralya-openapi-v1.0.yaml). */
+/** Contrato normativo: components/schemas/PasswordResetRequest (teralya-openapi-v1.1.yaml). */
 export class PasswordResetRequestDto {
   @IsString()
   @Length(32, 512)

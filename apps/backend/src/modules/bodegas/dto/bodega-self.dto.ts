@@ -25,4 +25,12 @@ export interface BodegaSelf {
   ciudad?: string;
   provincia?: string;
   pais_contacto?: string;
+  paises_envio?: string[];
+  plazo_preparacion_dias?: number;
+  plazo_entrega_estimado?: string;
+  coste_envio_descripcion?: string;
+  transportista_habitual?: string;
+  restricciones_entrega?: string;
+  condiciones_empaquetado?: string;
+  capacidad_internacional?: boolean;
 }

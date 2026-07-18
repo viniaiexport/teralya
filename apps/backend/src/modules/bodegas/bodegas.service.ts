@@ -128,6 +128,10 @@ export class BodegasService {
       ...optional('email_principal'), ...optional('telefono'), ...optional('persona_contacto'),
       ...optional('direccion_fisica'), ...optional('codigo_postal'), ...optional('ciudad'),
       ...optional('provincia'), ...optional('pais_contacto'),
+      ...optional('paises_envio'), ...optional('plazo_preparacion_dias'),
+      ...optional('plazo_entrega_estimado'), ...optional('coste_envio_descripcion'),
+      ...optional('transportista_habitual'), ...optional('restricciones_entrega'),
+      ...optional('condiciones_empaquetado'), ...optional('capacidad_internacional'),
     };
   }
 
@@ -146,7 +150,11 @@ export class BodegasService {
       ...optional('slug'), ...optional('logo_url'), ...optional('imagen_principal_url'),
       ...optional('historia'), ...optional('filosofia'), ...optional('region'), ...optional('pais'),
       ...optional('denominacion_origen'), ...optional('anio_fundacion'), ...optional('web'),
-      ...optional('video_url'),
+      ...optional('video_url'), ...optional('paises_envio'),
+      ...optional('plazo_preparacion_dias'), ...optional('plazo_entrega_estimado'),
+      ...optional('coste_envio_descripcion'), ...optional('transportista_habitual'),
+      ...optional('restricciones_entrega'), ...optional('condiciones_empaquetado'),
+      ...optional('capacidad_internacional'),
       vinos: bodega.vinos.map((vino) => ({
         id: vino.id,
         nombre_comercial: vino.nombre_comercial,

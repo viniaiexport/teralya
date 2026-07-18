@@ -12,7 +12,7 @@ import type { BodegaPublic } from './dto/bodega-public.dto.js';
 export class BodegasController {
   constructor(private readonly bodegasService: BodegasService) {}
 
-  /** API-005 — POST /bodegas (contrato: teralya-openapi-v1.0.yaml). */
+  /** API-005 — POST /bodegas (contrato: teralya-openapi-v1.1.yaml). */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async registrar(@Body() body: BodegaRegistrationRequestDto): Promise<BodegaSelf> {

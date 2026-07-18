@@ -28,7 +28,25 @@ export interface OrderLine {
   anada?: number;
 }
 
+export type OrderCancellationStatus = 'procesando' | 'completada' | 'fallida';
+export type RefundStatus = 'pending' | 'requires_action' | 'succeeded' | 'failed' | 'canceled';
+
+export interface OrderCancellationSummary {
+  estado: OrderCancellationStatus;
+  reembolso_estado?: RefundStatus;
+  solicitada_at: string;
+  completada_at?: string;
+}
+
+export interface OrderCancellationResult extends OrderCancellationSummary {
+  pedido_id: string;
+  pedido_estado: OrderState;
+  pago_estado: 'pagado' | 'reembolsado';
+}
+
 export interface OrderBuyerDetail extends OrderSummary {
+  puede_cancelar: boolean;
+  cancelacion?: OrderCancellationSummary;
   totales: MoneyBreakdown;
   direccion_envio_snapshot: AddressSnapshot;
   direccion_facturacion_snapshot: AddressSnapshot;

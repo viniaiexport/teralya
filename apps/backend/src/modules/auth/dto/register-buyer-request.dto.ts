@@ -28,7 +28,7 @@ function normalizeLanguage({ value }: TransformFnParams): unknown {
   return typeof value === 'string' ? value.trim().toLowerCase() : value;
 }
 
-/** Contrato normativo: components/schemas/RegisterBuyerRequest (teralya-openapi-v1.0.yaml). */
+/** Contrato normativo: components/schemas/RegisterBuyerRequest (teralya-openapi-v1.1.yaml). */
 export class RegisterBuyerRequestDto {
   @Transform(normalizeEmail)
   @IsEmail()

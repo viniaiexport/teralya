@@ -20,5 +20,6 @@ import { CheckoutConfirmationService } from "./checkout-confirmation.service.js"
     FetchStripeGateway,
     { provide: STRIPE_GATEWAY, useExisting: FetchStripeGateway },
   ],
+  exports: [STRIPE_GATEWAY],
 })
 export class CheckoutModule {}

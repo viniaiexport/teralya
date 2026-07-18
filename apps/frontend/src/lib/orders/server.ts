@@ -2,7 +2,7 @@ import 'server-only';
 import { apiRequest } from '@/lib/api/client';
 import { isUuid } from '@/lib/cart/contracts';
 import { readAccessToken, readSessionIdentity } from '@/lib/session/session';
-import type { OrderBuyerDetail, OrderSummary, Page } from './contracts';
+import type { OrderBuyerDetail, OrderCancellationResult, OrderSummary, Page } from './contracts';
 
 async function requiredBuyerToken(): Promise<string> {
   const [identity, token] = await Promise.all([readSessionIdentity(), readAccessToken()]);
@@ -23,6 +23,15 @@ export async function getBuyerOrder(orderId: string): Promise<OrderBuyerDetail> 
   if (!isUuid(orderId)) throw new Error('Pedido inválido.');
   return apiRequest<OrderBuyerDetail>(`/pedidos/${encodeURIComponent(orderId)}`, {
     method: 'GET',
+    token: await requiredBuyerToken(),
+  });
+}
+
+
+export async function cancelBuyerOrder(orderId: string): Promise<OrderCancellationResult> {
+  if (!isUuid(orderId)) throw new Error('Pedido inválido.');
+  return apiRequest<OrderCancellationResult>(`/pedidos/${encodeURIComponent(orderId)}/cancelacion`, {
+    method: 'POST',
     token: await requiredBuyerToken(),
   });
 }

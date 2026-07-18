@@ -17,8 +17,8 @@ const HTTP_METHODS = new Set(['get', 'post', 'put', 'patch', 'delete']);
 
 function contractPath(): string {
   const candidates = [
-    resolve(import.meta.dirname, '../../../docs/INF/openapi/teralya-openapi-v1.0.yaml'),
-    resolve(import.meta.dirname, '../../../teralya-openapi-v1.0.yaml'),
+    resolve(import.meta.dirname, '../../../docs/INF/openapi/teralya-openapi-v1.1.yaml'),
+    resolve(import.meta.dirname, '../../../teralya-openapi-v1.1.yaml'),
   ];
   const found = candidates.find((candidate) => existsSync(candidate));
   if (found === undefined) {
@@ -41,9 +41,9 @@ describe('approved OpenAPI contract', () => {
 
   it('keeps the approved surface unchanged', () => {
     expect(contract.openapi).toBe('3.1.0');
-    expect(Object.keys(contract.paths)).toHaveLength(41);
-    expect(allOperations).toHaveLength(50);
-    expect(new Set(allOperations.map((operation) => operation['x-teralya-api-code'])).size).toBe(50);
+    expect(Object.keys(contract.paths)).toHaveLength(42);
+    expect(allOperations).toHaveLength(51);
+    expect(new Set(allOperations.map((operation) => operation['x-teralya-api-code'])).size).toBe(51);
     expect(contract.paths['/health']).toBeUndefined();
     expect(contract.paths['/metrics']).toBeUndefined();
   });

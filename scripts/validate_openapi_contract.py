@@ -8,13 +8,13 @@ import sys
 import yaml
 
 
-SOURCE = Path(sys.argv[1] if len(sys.argv) > 1 else "teralya-openapi-v1.0_EN_REVISION.yaml")
+SOURCE = Path(sys.argv[1] if len(sys.argv) > 1 else "docs/INF/openapi/teralya-openapi-v1.1.yaml")
 HTTP = {"get", "post", "put", "patch", "delete", "options", "head", "trace"}
 PUBLIC = {1, 2, 3, 4, 5, 9, 10, 29, 30}
 PAGED = {9, 19, 21, 27, 32, 35, 37, 40}
 TAG_COUNTS = {
     "Autenticación": 4, "Bodegas": 4, "Vinos": 7, "Carrito": 5, "Checkout": 3,
-    "Pedidos": 2, "SubPedidos": 3, "Administración": 13, "Sistema": 1,
+    "Pedidos": 3, "SubPedidos": 3, "Administración": 13, "Sistema": 1,
     "Direcciones": 4, "Imágenes": 4,
 }
 MANIFEST = """
@@ -68,6 +68,7 @@ MANIFEST = """
 048 POST /bodegas/yo/vinos/{id}/imagenes
 049 PATCH /bodegas/yo/vinos/{id}/imagenes/{imagen_id}
 050 DELETE /bodegas/yo/vinos/{id}/imagenes/{imagen_id}
+051 POST /pedidos/{id}/cancelacion
 """
 EXPECTED = {int(c): (m.lower(), p) for c, m, p in (line.split() for line in MANIFEST.splitlines() if line)}
 errors = []
@@ -102,7 +103,7 @@ for path, item in doc.get("paths", {}).items():
         check(code not in operations, f"API-{code:03d} duplicada")
         operations[code] = (method, path, operation)
 
-check(set(operations) == set(range(1, 51)), "deben existir exactamente API-001..API-050")
+check(set(operations) == set(range(1, 52)), "deben existir exactamente API-001..API-051")
 for code, expected in EXPECTED.items():
     if code not in operations:
         continue
@@ -132,6 +133,7 @@ check(set(operations[46][2]["responses"]) & {"200", "201"} == set(), "API-046 de
 check("204" in operations[46][2]["responses"] and "204" in operations[50][2]["responses"], "API-046/API-050: falta 204")
 check(operations[29][2].get("x-raw-body-required") is True, "API-029: falta body crudo")
 check(operations[29][2].get("security") == [], "API-029: debe usar Stripe-Signature obligatorio sin Bearer")
+check(set(operations[51][2]["responses"]) == {"200", "401", "403", "404", "409", "500", "502", "503"}, "API-051: respuestas incorrectas")
 
 cart_merge = doc["components"]["schemas"]["CartMergeRequest"]["properties"]["items"]
 check(cart_merge.get("minItems") == 1 and cart_merge.get("maxItems") == 100, "CartMergeRequest.items debe admitir 1..100")
@@ -146,6 +148,7 @@ semantic_requirements = {
     29: ["checkout.session.completed", "async_payment_succeeded", "async_payment_failed", "checkout.session.expired", "payment_status=paid", "300 segundos", "event.id"],
     34: ["estado inicial no publicado", "bodega validada", "imagen confirmada y activa"],
     47: ["10 minutos", "30 minutos"], 48: ["30 minutos", "HEAD", "URL CDN estable"],
+    51: ["ledger único", "reintentos idempotentes", "restituye stock una vez", "confirmar el reembolso", "email"],
 }
 for code, needles in semantic_requirements.items():
     description = operations[code][2].get("description", "")
@@ -196,4 +199,4 @@ if errors:
     for error in errors:
         print(f"- {error}")
     raise SystemExit(1)
-print(f"OK: {SOURCE} — 50 operaciones, 41 rutas, 11 módulos y {len(doc['components']['schemas'])} schemas")
+print(f"OK: {SOURCE} — 51 operaciones, 42 rutas, 11 módulos y {len(doc['components']['schemas'])} schemas")

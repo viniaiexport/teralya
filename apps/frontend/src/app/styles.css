@@ -124,3 +124,16 @@ body { background:var(--cream); }
 @media (min-width:76rem) { .wine-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }.wine-card h2 { font-size:1.35rem; } }
 @media (max-width:55rem) { .home-hero { grid-template-columns:1fr; }.hero-art { aspect-ratio:16/10; }.home-paths { grid-template-columns:1fr; }.home-path { min-height:27rem; }.editorial-heading { grid-template-columns:1fr; }.winery-grid { grid-template-columns:1fr; } }
 @media (max-width:42rem) { .site-header { min-height:4.5rem; }.home-hero { min-height:auto;padding-top:3.25rem; }.home-hero-copy h1 { font-size:clamp(3rem,15vw,4.6rem); }.home-hero .hero-actions { display:grid; }.home-hero .button { width:100%; }.hero-art { aspect-ratio:4/5; }.home-values { grid-template-columns:1fr; }.home-values article+article { border-left:0;border-top:1px solid var(--line); }.site-footer { align-items:flex-start;flex-direction:column; }.site-footer nav { gap:1.5rem; }.editorial-heading h1 { font-size:3.2rem; } }
+
+.cancellation-form {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border, #d8d4cc);
+  border-radius: 0.75rem;
+  background: var(--surface, #fff);
+}
+.cancellation-form h2 { margin-top: 0; }
+.button.danger { background: #8b1e2d; color: #fff; border-color: #8b1e2d; }
+.management-form fieldset { border: 0; padding: 0; margin: 0 0 2rem; }
+.management-form legend { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+.form-help { color: var(--muted, #625f59); max-width: 70ch; }

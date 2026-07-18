@@ -1,7 +1,7 @@
 # Backend de Teralya
 
 Monolito modular Node.js/TypeScript desarrollado contract-first. El contrato normativo está en
-`docs/INF/openapi/teralya-openapi-v1.0.yaml`.
+`docs/INF/openapi/teralya-openapi-v1.1.yaml`.
 
 ## Requisitos
 
@@ -17,7 +17,7 @@ cp apps/backend/.env.example apps/backend/.env
 set -a
 . apps/backend/.env
 set +a
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f docs/INF/teralya_schema_v1.4_APROBADO.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f docs/INF/teralya_schema_v1.5_APROBADO.sql
 npm run start:dev --workspace @teralya/backend
 ```
 
@@ -32,7 +32,7 @@ Los valores de `.env.example` reflejan la decisión vigente y son válidos tambi
 
 ```bash
 npm run backend:check
-python3 scripts/validate_openapi_contract.py docs/INF/openapi/teralya-openapi-v1.0.yaml
+python3 scripts/validate_openapi_contract.py docs/INF/openapi/teralya-openapi-v1.1.yaml
 ```
 
 Las rutas operativas no forman parte del contrato de negocio OpenAPI:

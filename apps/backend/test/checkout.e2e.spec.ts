@@ -21,6 +21,7 @@ function req<T>(v: T | undefined): T {
 }
 class FakeStripe implements StripeGateway {
   calls = 0;
+  refundCalls = 0;
   readonly sessions = new Map<
     string,
     { id: string; url: string; expiresAt: number }
@@ -46,6 +47,28 @@ class FakeStripe implements StripeGateway {
       ? Promise.reject(new Error("missing"))
       : Promise.resolve(session);
   }
+  retrieveCheckoutSessionPaymentIntent(id: string): Promise<string> {
+    return Promise.resolve(`pi_${id}`);
+  }
+  createRefund(input: {
+    paymentIntentId: string;
+  }): Promise<{ id: string; paymentIntentId: string; status: "succeeded" }> {
+    this.refundCalls += 1;
+    return Promise.resolve({
+      id: `re_test_${String(this.refundCalls)}`,
+      paymentIntentId: input.paymentIntentId,
+      status: "succeeded",
+    });
+  }
+  retrieveRefund(
+    id: string,
+  ): Promise<{ id: string; paymentIntentId: string; status: "succeeded" }> {
+    return Promise.resolve({
+      id,
+      paymentIntentId: "pi_test",
+      status: "succeeded",
+    });
+  }
 }
 describe("API016 checkout E2E", () => {
   let app: INestApplication;
@@ -54,6 +77,7 @@ describe("API016 checkout E2E", () => {
   let token: string;
   let cart: string;
   let wine: string;
+  let winery: string;
   let shipping: string;
   let billing: string;
   let alternate: string;
@@ -83,9 +107,10 @@ describe("API016 checkout E2E", () => {
     const b = await pool.query<{ id: string }>(
       `INSERT INTO bodega(nombre_comercial,estado,tipo,comision) VALUES('Checkout Bodega','aprobada','estandar',10) RETURNING id`,
     );
+    winery = req(b.rows[0]).id;
     const v = await pool.query<{ id: string }>(
       `INSERT INTO vino(bodega_id,nombre_comercial,precio,moneda,stock_disponible,disponible_venta,estado,fecha_publicacion) VALUES($1,'Checkout Wine',10,'EUR',20,true,'publicado',now()) RETURNING id`,
-      [req(b.rows[0]).id],
+      [winery],
     );
     wine = req(v.rows[0]).id;
     const c = await pool.query<{ id: string }>(
@@ -282,6 +307,86 @@ describe("API016 checkout E2E", () => {
         }),
       );
   });
+  it("cancela, reembolsa y repone stock una sola vez", async () => {
+    const payment = req(
+      (
+        await pool.query<{ id: string }>(
+          "SELECT id FROM pago WHERE pedido_id=$1",
+          [orderId],
+        )
+      ).rows[0],
+    );
+    const suborder = req(
+      (
+        await pool.query<{ id: string }>(
+          `INSERT INTO subpedido(
+             pedido_id,bodega_id,pago_id,subtotal,gastos_envio,impuestos,
+             comision_marketplace,total,estado
+           ) VALUES($1,$2,$3,20,2,0,3,22,'pendiente') RETURNING id`,
+          [orderId, winery, payment.id],
+        )
+      ).rows[0],
+    );
+    await pool.query(
+      `INSERT INTO pedido_item(
+         pedido_id,subpedido_id,vino_id,bodega_id,nombre_vino_snapshot,
+         bodega_snapshot,precio_unitario,cantidad,importe_total
+       ) VALUES($1,$2,$3,$4,'Checkout Wine','Checkout Bodega',10,2,20)`,
+      [orderId, suborder.id, wine, winery],
+    );
+    await pool.query("UPDATE vino SET stock_disponible=18 WHERE id=$1", [wine]);
+
+    const first = await request(app.getHttpServer() as Server)
+      .post(`/pedidos/${orderId}/cancelacion`)
+      .set(auth())
+      .send({})
+      .expect(200);
+    expect(first.body).toMatchObject({
+      pedido_id: orderId,
+      pedido_estado: "cancelado",
+      pago_estado: "reembolsado",
+      estado: "completada",
+      reembolso_estado: "succeeded",
+    });
+
+    const replay = await request(app.getHttpServer() as Server)
+      .post(`/pedidos/${orderId}/cancelacion`)
+      .set(auth())
+      .send({})
+      .expect(200);
+    expect(replay.body).toMatchObject(first.body);
+    expect(stripe.refundCalls).toBe(1);
+
+    const state = await pool.query<{
+      stock: number;
+      order_state: string;
+      payment_state: string;
+      suborder_state: string;
+      line_state: string;
+      cancellations: number;
+    }>(
+      `SELECT v.stock_disponible::int AS stock,p.estado::text AS order_state,
+              pg.estado::text AS payment_state,sp.estado::text AS suborder_state,
+              pi.estado::text AS line_state,
+              (SELECT count(*)::int FROM cancelacion_pedido WHERE pedido_id=p.id) AS cancellations
+         FROM pedido p
+         JOIN pago pg ON pg.pedido_id=p.id
+         JOIN subpedido sp ON sp.pedido_id=p.id
+         JOIN pedido_item pi ON pi.pedido_id=p.id
+         JOIN vino v ON v.id=pi.vino_id
+        WHERE p.id=$1`,
+      [orderId],
+    );
+    expect(state.rows[0]).toEqual({
+      stock: 20,
+      order_state: "cancelado",
+      payment_state: "reembolsado",
+      suborder_state: "cancelado",
+      line_state: "cancelado",
+      cancellations: 1,
+    });
+  });
+
   it("rechaza como conflicto el pedido previo que ya no está pendiente", async () => {
     await pool.query(
       "UPDATE pedido SET estado='cancelado' WHERE carrito_id=$1",

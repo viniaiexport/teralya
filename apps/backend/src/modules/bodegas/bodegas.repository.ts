@@ -64,6 +64,14 @@ export interface BodegaPerfil {
   ciudad: string | null;
   provincia: string | null;
   pais_contacto: string | null;
+  paises_envio: string[] | null;
+  plazo_preparacion_dias: number | null;
+  plazo_entrega_estimado: string | null;
+  coste_envio_descripcion: string | null;
+  transportista_habitual: string | null;
+  restricciones_entrega: string | null;
+  condiciones_empaquetado: string | null;
+  capacidad_internacional: boolean | null;
 }
 
 export interface VinoResumenPublico {
@@ -93,6 +101,14 @@ export interface BodegaPublicaRecord {
   anio_fundacion: number | null;
   web: string | null;
   video_url: string | null;
+  paises_envio: string[] | null;
+  plazo_preparacion_dias: number | null;
+  plazo_entrega_estimado: string | null;
+  coste_envio_descripcion: string | null;
+  transportista_habitual: string | null;
+  restricciones_entrega: string | null;
+  condiciones_empaquetado: string | null;
+  capacidad_internacional: boolean | null;
   vinos: VinoResumenPublico[];
 }
 
@@ -100,12 +116,16 @@ export type ActualizarPerfilBodegaInput = Partial<Pick<BodegaPerfil,
   | 'nombre_comercial' | 'historia' | 'filosofia' | 'region' | 'pais'
   | 'denominacion_origen' | 'anio_fundacion' | 'web' | 'video_url'
   | 'email_principal' | 'telefono' | 'persona_contacto' | 'logo_url'
-  | 'imagen_principal_url'>>;
+  | 'imagen_principal_url' | 'paises_envio' | 'plazo_preparacion_dias'
+  | 'plazo_entrega_estimado' | 'coste_envio_descripcion' | 'transportista_habitual'
+  | 'restricciones_entrega' | 'condiciones_empaquetado' | 'capacidad_internacional'>>;
 
 const PERFIL_COLUMNS = `id, nombre_comercial, slug, logo_url, imagen_principal_url,
   historia, filosofia, region, pais, denominacion_origen, anio_fundacion, web, video_url,
   estado, created_at, updated_at, razon_social, cif_vat, email_principal, telefono,
-  persona_contacto, direccion_fisica, codigo_postal, ciudad, provincia, pais_contacto`;
+  persona_contacto, direccion_fisica, codigo_postal, ciudad, provincia, pais_contacto,
+  paises_envio, plazo_preparacion_dias, plazo_entrega_estimado, coste_envio_descripcion,
+  transportista_habitual, restricciones_entrega, condiciones_empaquetado, capacidad_internacional`;
 
 @Injectable()
 export class BodegasRepository {
@@ -181,7 +201,9 @@ export class BodegasRepository {
   async obtenerPublica(id: string): Promise<BodegaPublicaRecord | null> {
     const bodegas = await this.databaseService.query<Omit<BodegaPublicaRecord, 'vinos'>>(
       `SELECT id, nombre_comercial, slug, logo_url, imagen_principal_url, historia, filosofia,
-              region, pais, denominacion_origen, anio_fundacion, web, video_url
+              region, pais, denominacion_origen, anio_fundacion, web, video_url,
+              paises_envio, plazo_preparacion_dias, plazo_entrega_estimado, coste_envio_descripcion,
+              transportista_habitual, restricciones_entrega, condiciones_empaquetado, capacidad_internacional
          FROM bodega
         WHERE id = $1 AND estado IN ('aprobada', 'activa')`,
       [id],
