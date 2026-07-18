@@ -537,15 +537,21 @@ export class PedidosRepository {
   private mapCancellation(
     cancellation: CancellationRecord,
   ): OrderCancellationSummary {
+    const refundStatus = cancellation.stripe_refund_status;
+    const completedAt = cancellation.completada_at;
     return {
       estado: cancellation.estado,
-      reembolso_estado: cancellation.stripe_refund_status,
-      intentos: cancellation.intentos,
-      solicitada_at: new Date(cancellation.solicitada_at).toISOString(),
-      completada_at:
-        cancellation.completada_at === null
-          ? null
-          : new Date(cancellation.completada_at).toISOString(),
+      ...(refundStatus === null ? {} : { reembolso_estado: refundStatus }),
+      solicitada_at: this.toIso(cancellation.solicitada_at),
+      ...(completedAt === null
+        ? {}
+        : { completada_at: this.toIso(completedAt) }),
     };
+  }
+
+  private toIso(value: Date | string): string {
+    return value instanceof Date
+      ? value.toISOString()
+      : new Date(value).toISOString();
   }
 }
