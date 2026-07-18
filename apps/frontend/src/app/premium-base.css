@@ -192,7 +192,7 @@ a { transition: color .2s ease, opacity .2s ease, border-color .2s ease, transfo
 .footer-nav-groups { display: grid; gap: 2rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .footer-nav-groups section { display: grid; gap: .85rem; }
 .footer-nav-groups h2 { color: var(--gold-strong); font: 800 .75rem/1 Arial, Helvetica, sans-serif; letter-spacing: .16em; margin: 0; text-transform: uppercase; }
-.footer-nav-groups nav { align-items: flex-start; display: grid; gap: .75rem; }
+.footer-link-list { align-items: flex-start; display: grid; gap: .75rem; }
 .footer-nav-groups a { color: #c9c3cf; text-decoration: none; }
 .footer-nav-groups a:hover { color: #fff; }
 .footer-note { border-top: 1px solid rgba(255,255,255,.1); color: #746e7b; font-size: .76rem; grid-column: 1/-1; padding-top: 1.25rem; }
