@@ -1,0 +1,213 @@
+BACKEND_STATUS=1
+PLAYWRIGHT_INSTALL_STATUS=0
+E2E_STATUS=1
+
+===== BACKEND TAIL =====
+
+> teralya@0.1.0 backend:check
+> npm run lint --workspace @teralya/backend && npm run test --workspace @teralya/backend && npm run build --workspace @teralya/backend
+
+
+> @teralya/backend@0.1.0 lint
+> eslint src test --max-warnings=0
+
+
+> @teralya/backend@0.1.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m/home/runner/work/teralya/teralya/apps/backend[39m
+
+ [31m❯[39m test/checkout.e2e.spec.ts [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 525[2mms[22m[39m
+   [32m✓[39m API016 checkout E2E[2m > [22mclasifica carrito vacío, uso incorrecto, inactiva y ajena[32m 112[2mms[22m[39m
+   [32m✓[39m API016 checkout E2E[2m > [22mcrea exactamente un Pedido y Pago atómicos bajo concurrencia[32m 53[2mms[22m[39m
+   [32m✓[39m API016 checkout E2E[2m > [22mcrea una sola sesión Stripe y reutiliza la vigente bajo concurrencia[32m 17[2mms[22m[39m
+   [32m✓[39m API016 checkout E2E[2m > [22mreplay ignora cambios del body y devuelve snapshots originales[32m 9[2mms[22m[39m
+   [32m✓[39m API016 checkout E2E[2m > [22mexpone confirmación pagada y listado/detalle propios[32m 40[2mms[22m[39m
+[31m   [31m×[31m API016 checkout E2E[2m > [22mcancela, reembolsa y repone stock una sola vez[39m[32m 55[2mms[22m[39m
+[31m     → expected 200 "OK", got 201 "Created"[39m
+   [32m✓[39m API016 checkout E2E[2m > [22mrechaza como conflicto el pedido previo que ya no está pendiente[32m 9[2mms[22m[39m
+ [32m✓[39m test/auth-password-reset.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 3195[2mms[22m[39m
+ [32m✓[39m test/auth-register-buyer.spec.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1427[2mms[22m[39m
+ [32m✓[39m test/auth-login.spec.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 3945[2mms[22m[39m
+   [33m[2m✓[22m[39m API-002 — POST /auth/login[2m > [22mresponde 429 cuando se supera el límite configurable [33m 309[2mms[22m[39m
+ [32m✓[39m test/stripe-webhook.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 654[2mms[22m[39m
+ [32m✓[39m test/auth-password-recovery.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 1591[2mms[22m[39m
+ [32m✓[39m test/subpedidos.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 485[2mms[22m[39m
+ [32m✓[39m test/pedidos-buyer.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32m✓[39m test/admin-bodegas-validar.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 329[2mms[22m[39m
+ [32m✓[39m test/admin-incidencias.e2e.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 456[2mms[22m[39m
+ [32m✓[39m test/admin-pedidos.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 393[2mms[22m[39m
+ [32m✓[39m test/imagenes.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m test/imagenes.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 481[2mms[22m[39m
+ [32m✓[39m test/direcciones.e2e.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 543[2mms[22m[39m
+ [32m✓[39m test/bodega-public.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m test/bodegas-registration.e2e.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 491[2mms[22m[39m
+ [32m✓[39m test/vinos-own.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 468[2mms[22m[39m
+ [32m✓[39m test/bodegas-profile.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m test/admin-pedidos.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m test/admin-bodegas-list-detail.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m test/carrito.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 504[2mms[22m[39m
+ [32m✓[39m test/direcciones.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m test/bearer-auth.guard.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m test/admin-dashboard.e2e.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 375[2mms[22m[39m
+ [32m✓[39m test/subpedidos.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m test/admin-vinos.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 371[2mms[22m[39m
+ [32m✓[39m test/catalog.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 402[2mms[22m[39m
+ [32m✓[39m test/admin-bodegas-validar.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m test/vinos-own.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m test/admin-incidencias.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m test/admin-vinos.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m test/http-foundation.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 192[2mms[22m[39m
+ [32m✓[39m test/catalog.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m test/health.e2e.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 346[2mms[22m[39m
+   [33m[2m✓[22m[39m health endpoints[2m > [22mkeeps liveness independent from PostgreSQL and Redis [33m 322[2mms[22m[39m
+ [32m✓[39m test/stripe-webhook.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m test/checkout.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m test/session-resolution.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m test/checkout-payment.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m test/carrito.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m test/checkout-confirmation.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m test/openapi-contract.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m test/admin-dashboard.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/checkout.e2e.spec.ts[2m > [22mAPI016 checkout E2E[2m > [22mcancela, reembolsa y repone stock una sola vez
+[31m[1mError[22m: expected 200 "OK", got 201 "Created"[39m
+[36m [2m❯[22m test/checkout.e2e.spec.ts:[2m343:8[22m[39m
+    [90m341| [39m      [33m.[39m[35mset[39m([34mauth[39m())
+    [90m342| [39m      [33m.[39m[34msend[39m({})
+    [90m343| [39m      [33m.[39m[34mexpect[39m([34m200[39m)[33m;[39m
+    [90m   | [39m       [31m^[39m
+    [90m344| [39m    [34mexpect[39m(first[33m.[39mbody)[33m.[39m[34mtoMatchObject[39m({
+    [90m345| [39m      pedido_id[33m:[39m orderId[33m,[39m
+[90m [2m❯[22m Test._assertStatus ../../node_modules/supertest/lib/test.js:[2m309:14[22m[39m
+[90m [2m❯[22m ../../node_modules/supertest/lib/test.js:[2m365:13[22m[39m
+[90m [2m❯[22m Test._assertFunction ../../node_modules/supertest/lib/test.js:[2m342:13[22m[39m
+[90m [2m❯[22m Test.assert ../../node_modules/supertest/lib/test.js:[2m195:23[22m[39m
+[90m [2m❯[22m localAssert ../../node_modules/supertest/lib/test.js:[2m138:14[22m[39m
+[90m [2m❯[22m Server.<anonymous> ../../node_modules/supertest/lib/test.js:[2m152:11[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m41 passed[39m[22m[90m (42)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m208 passed[39m[22m[90m (209)[39m
+[2m   Start at [22m 08:15:19
+[2m   Duration [22m 21.22s[2m (transform 991ms, setup 0ms, collect 31.63s, tests 17.48s, environment 20ms, prepare 5.02s)[22m
+
+
+::error file=/home/runner/work/teralya/teralya/apps/backend/test/checkout.e2e.spec.ts,title=test/checkout.e2e.spec.ts > API016 checkout E2E > cancela%2C reembolsa y repone stock una sola vez,line=343,column=8::Error: expected 200 "OK", got 201 "Created"%0A ❯ test/checkout.e2e.spec.ts:343:8%0A ❯ Test._assertStatus ../../node_modules/supertest/lib/test.js:309:14%0A ❯ ../../node_modules/supertest/lib/test.js:365:13%0A ❯ Test._assertFunction ../../node_modules/supertest/lib/test.js:342:13%0A ❯ Test.assert ../../node_modules/supertest/lib/test.js:195:23%0A ❯ localAssert ../../node_modules/supertest/lib/test.js:138:14%0A ❯ Server.<anonymous> ../../node_modules/supertest/lib/test.js:152:11%0A%0A
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path /home/runner/work/teralya/teralya/apps/backend
+npm error workspace @teralya/backend@0.1.0
+npm error location /home/runner/work/teralya/teralya/apps/backend
+npm error command failed
+npm error command sh -c vitest run
+
+===== PLAYWRIGHT INSTALL TAIL =====
+Unpacking libasound2t64:amd64 (1.2.11-1ubuntu0.3) over (1.2.11-1ubuntu0.2) ...
+Preparing to unpack .../06-libasound2-data_1.2.11-1ubuntu0.3_all.deb ...
+Unpacking libasound2-data (1.2.11-1ubuntu0.3) over (1.2.11-1ubuntu0.2) ...
+Selecting previously unselected package xfonts-encodings.
+Preparing to unpack .../07-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+Selecting previously unselected package xfonts-utils.
+Preparing to unpack .../08-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+Unpacking xfonts-utils (1:7.7+6build3) ...
+Selecting previously unselected package xfonts-cyrillic.
+Preparing to unpack .../09-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+Selecting previously unselected package xfonts-scalable.
+Preparing to unpack .../10-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+Setting up fonts-wqy-zenhei (0.9.45-8) ...
+Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+Setting up libasound2-data (1.2.11-1ubuntu0.3) ...
+Setting up libasound2t64:amd64 (1.2.11-1ubuntu0.3) ...
+Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+Setting up fonts-unifont (1:15.1.01-1build1) ...
+Setting up xfonts-utils (1:7.7+6build3) ...
+Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+Setting up xfonts-scalable (1:1.0.3-1.3) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Not building database; man-db/auto-update is not 'true'.
+Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Downloading Chrome for Testing 149.0.7827.55 (playwright chromium v1228) from https://cdn.playwright.dev/builds/cft/149.0.7827.55/linux64/chrome-linux64.zip
+|                                                                                |   0% of 177 MiB
+|■■■■■■■■                                                                        |  10% of 177 MiB
+|■■■■■■■■■■■■■■■■                                                                |  20% of 177 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 177 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 177 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 177 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 177 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 177 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 177 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 177 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 177 MiB
+Chrome for Testing 149.0.7827.55 (playwright chromium v1228) downloaded to /home/runner/.cache/ms-playwright/chromium-1228
+Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+|                                                                                |   0% of 2.3 MiB
+|■■■■■■■■                                                                        |  10% of 2.3 MiB
+|■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+Downloading Chrome Headless Shell 149.0.7827.55 (playwright chromium-headless-shell v1228) from https://cdn.playwright.dev/builds/cft/149.0.7827.55/linux64/chrome-headless-shell-linux64.zip
+|                                                                                |   0% of 114.2 MiB
+|■■■■■■■■                                                                        |  10% of 114.2 MiB
+|■■■■■■■■■■■■■■■■                                                                |  20% of 114.2 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 114.2 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 114.2 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 114.2 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 114.2 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 114.2 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 114.2 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.2 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.2 MiB
+Chrome Headless Shell 149.0.7827.55 (playwright chromium-headless-shell v1228) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1228
+
+===== E2E TAIL =====
+
+> teralya@0.1.0 frontend:e2e
+> npm run e2e --workspace @teralya/frontend
+
+
+> @teralya/frontend@0.1.0 e2e
+> playwright test
+
+
+Error: Timed out waiting 60000ms from config.webServer.
+::error ::Error: Timed out waiting 60000ms from config.webServer.
+
+::notice title=🎭 Playwright Run Summary::
+
+npm error Lifecycle script `e2e` failed with error:
+npm error code 1
+npm error path /home/runner/work/teralya/teralya/apps/frontend
+npm error workspace @teralya/frontend@0.1.0
+npm error location /home/runner/work/teralya/teralya/apps/frontend
+npm error command failed
+npm error command sh -c playwright test
