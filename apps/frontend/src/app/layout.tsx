@@ -1,10 +1,16 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './styles.css';
+import './premium-base.css';
+import './premium-home.css';
+import './premium-catalog.css';
+import './premium-forms.css';
+import './premium-responsive.css';
+import './premium-fixes.css';
 
 export const metadata: Metadata = {
-  title: { default: 'Teralya', template: '%s · Teralya' },
-  description: 'Marketplace europeo de bodegas fundadoras.',
+  title: { default: 'Teralya · El futuro del vino', template: '%s · Teralya' },
+  description: 'Vinos europeos seleccionados, vendidos y enviados directamente por sus bodegas.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
