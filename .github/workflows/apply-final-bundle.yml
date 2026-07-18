@@ -22,17 +22,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
+      - name: Checkout branch quietly
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -Eeuo pipefail
+          git clone --quiet --depth 1 --branch "$GITHUB_HEAD_REF" \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
       - name: Reconstruct and validate reviewed patch
         run: |
           set -Eeuo pipefail
           cat tmp/apply-final/patch-* > /tmp/teralya-web-final-reviewed.patch
           test -s /tmp/teralya-web-final-reviewed.patch
-          sha256sum /tmp/teralya-web-final-reviewed.patch
-          git apply --check --whitespace=error-all /tmp/teralya-web-final-reviewed.patch
+          echo "Patch SHA-256: $(sha256sum /tmp/teralya-web-final-reviewed.patch | cut -d' ' -f1)"
+          git apply --check --verbose --whitespace=error-all /tmp/teralya-web-final-reviewed.patch
       - name: Apply reviewed source and remove bootstrap files
         run: |
           set -Eeuo pipefail
@@ -49,4 +52,4 @@ jobs:
           changed="$(git diff --cached --name-only | wc -l)"
           test "$changed" -ge 69
           git commit -m "Cerrar web y preparar revisión visual"
-          git push origin "HEAD:${{ github.head_ref }}"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
