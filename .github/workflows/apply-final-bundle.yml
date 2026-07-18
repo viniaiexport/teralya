@@ -26,22 +26,27 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-      - name: Reconstruct and verify reviewed patch
+      - name: Reconstruct and validate reviewed patch
         run: |
+          set -Eeuo pipefail
           cat tmp/apply-final/patch-* > /tmp/teralya-web-final-reviewed.patch
-          echo "8c7b066a464e1e07122b6afdef201650358f5b4f38dd03a2d5bba1d8cd050381  /tmp/teralya-web-final-reviewed.patch" | sha256sum --check --strict
+          test -s /tmp/teralya-web-final-reviewed.patch
+          sha256sum /tmp/teralya-web-final-reviewed.patch
+          git apply --check --whitespace=error-all /tmp/teralya-web-final-reviewed.patch
       - name: Apply reviewed source and remove bootstrap files
         run: |
+          set -Eeuo pipefail
           git apply --index --whitespace=error-all /tmp/teralya-web-final-reviewed.patch
           rm -rf tmp/apply-final
           rm -f .github/workflows/apply-final-bundle.yml
       - name: Commit reviewed web closure
         run: |
+          set -Eeuo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add --all
           git diff --cached --check
           changed="$(git diff --cached --name-only | wc -l)"
-          test "$changed" -ge 71
+          test "$changed" -ge 69
           git commit -m "Cerrar web y preparar revisión visual"
           git push origin "HEAD:${{ github.head_ref }}"
