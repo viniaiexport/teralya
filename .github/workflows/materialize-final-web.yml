@@ -6,6 +6,16 @@ on:
       - agent/aplicar-cierre-real
     paths:
       - ".github/materialize-final-web.trigger"
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+    paths:
+      - ".github/materialize-final-web.trigger"
+      - ".github/workflows/materialize-final-web.yml"
 
 permissions:
   contents: write
@@ -22,6 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: agent/aplicar-cierre-real
           fetch-depth: 0
 
       - name: Reconstruct and apply the exact reviewed candidate
@@ -86,4 +97,4 @@ jobs:
           changed="$(git diff --cached --name-only | wc -l)"
           test "$changed" -ge 69
           git commit -m "Integrar realmente el cierre final de la web"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin HEAD:agent/aplicar-cierre-real
