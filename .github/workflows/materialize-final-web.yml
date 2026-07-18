@@ -48,26 +48,17 @@ jobs:
           git apply --check --whitespace=error-all /tmp/teralya-final.patch
           git apply --whitespace=error-all /tmp/teralya-final.patch
 
-      - name: Remove temporary integration machinery
+          # El GITHUB_TOKEN no puede modificar workflows. Se conserva cualquier
+          # workflow que el parche pretendiera borrar y se limpiará después con
+          # el conector de GitHub.
+          git checkout HEAD -- .github/workflows/source-snapshot.yml 2>/dev/null || true
+
+      - name: Remove temporary non-workflow payloads
         shell: bash
         run: |
           set -Eeuo pipefail
           rm -rf .github/final-payload
           rm -f .github/materialize-final-web.trigger
-          rm -f .github/workflows/materialize-final-web.yml
-          rm -f .github/workflows/apply-and-validate-final-web.yml
-          rm -f .github/workflows/apply-and-validate-final-web-v2.yml
-          rm -f .github/workflows/backend-diagnostic-final.yml
-          rm -f .github/workflows/frontend-e2e-diagnostic.yml
-          rm -f .github/workflows/frontend-e2e-diagnostic-v2.yml
-          rm -f .github/workflows/apply-final-bundle.yml
-          rm -f .github/workflows/apply-final-candidate.yml
-          rm -f .github/workflows/final-merge-gate.yml
-          rm -f .github/workflows/finalize-and-merge.yml
-          rm -f .github/workflows/finalize-fallback.yml
-          rm -f .github/workflows/finalize-web.yml
-          rm -f .github/workflows/merge-validated-web.yml
-          rm -f .github/workflows/watch-and-merge-final-web.yml
           rm -rf .github/finish-b64 .github/finish-patch tmp/apply-final
           rm -f .github/apply-trigger .github/fallback-trigger .github/finalize-trigger
 
@@ -79,6 +70,11 @@ jobs:
           git config user.email "viniaiexport@gmail.com"
           git add --all
           git diff --cached --check
+          if git diff --cached --name-only | grep -q '^.github/workflows/'; then
+            echo "El commit del bot no puede modificar workflows" >&2
+            git diff --cached --name-only | grep '^.github/workflows/' >&2
+            exit 1
+          fi
           changed="$(git diff --cached --name-only | wc -l)"
           test "$changed" -ge 69
           git commit -m "Integrar realmente el cierre final de la web"
