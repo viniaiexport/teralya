@@ -48,10 +48,9 @@ jobs:
           git apply --check --whitespace=error-all /tmp/teralya-final.patch
           git apply --whitespace=error-all /tmp/teralya-final.patch
 
-          # El GITHUB_TOKEN no puede modificar workflows. Se conserva cualquier
-          # workflow que el parche pretendiera borrar y se limpiará después con
-          # el conector de GitHub.
-          git checkout HEAD -- .github/workflows/source-snapshot.yml 2>/dev/null || true
+          # El GITHUB_TOKEN no puede crear, actualizar ni borrar workflows.
+          # Se restauran todos y se actualizarán después mediante el conector.
+          git checkout HEAD -- .github/workflows
 
       - name: Remove temporary non-workflow payloads
         shell: bash
