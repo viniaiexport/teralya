@@ -6,6 +6,7 @@ import './premium-home.css';
 import './premium-catalog.css';
 import './premium-forms.css';
 import './premium-responsive.css';
+import './premium-fixes.css';
 
 export const metadata: Metadata = {
   title: { default: 'Teralya · El futuro del vino', template: '%s · Teralya' },
