@@ -1,11 +1,6 @@
 name: Materialize final Teralya web
 
 on:
-  push:
-    branches:
-      - agent/aplicar-cierre-real
-    paths:
-      - ".github/materialize-final-web.trigger"
   pull_request:
     branches:
       - main
@@ -39,35 +34,25 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-
           count="$(find .github/final-payload -type f -name 'part-*' | wc -l)"
           test "$count" -eq 27
-
           while IFS= read -r file; do
             tail -n +2 "$file"
           done < <(find .github/final-payload -type f -name 'part-*' | sort -V) \
             | tr -d '\n' \
             | base64 --decode \
             > /tmp/teralya-final.patch.xz
-
           echo "5b8e49000d4a6cd952c179ee61e41fcd88d6b6a98992f531e2eb7ea50a3919cc  /tmp/teralya-final.patch.xz" | sha256sum --check --strict
           xz -dc /tmp/teralya-final.patch.xz > /tmp/teralya-final.patch
           echo "a7e95673ce661e4b2329f317af0bd19a300c301afa8b10cf6a31ad663fbb9cd2  /tmp/teralya-final.patch" | sha256sum --check --strict
-
           git apply --check --whitespace=error-all /tmp/teralya-final.patch
           git apply --whitespace=error-all /tmp/teralya-final.patch
 
-          if [[ -f .github/final-fixes.patch ]]; then
-            git apply --check --whitespace=error-all .github/final-fixes.patch
-            git apply --whitespace=error-all .github/final-fixes.patch
-          fi
-
-      - name: Remove all temporary integration machinery
+      - name: Remove temporary integration machinery
         shell: bash
         run: |
           set -Eeuo pipefail
           rm -rf .github/final-payload
-          rm -f .github/final-fixes.patch
           rm -f .github/materialize-final-web.trigger
           rm -f .github/workflows/materialize-final-web.yml
           rm -f .github/workflows/apply-and-validate-final-web.yml
