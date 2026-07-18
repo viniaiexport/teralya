@@ -11,6 +11,8 @@ on:
       - ".dockerignore"
       - ".env.staging.example"
       - "compose.staging.yaml"
+      - "database/migrations/**"
+      - "docs/INF/teralya_schema_v1.5_APROBADO.sql"
       - ".github/workflows/staging.yml"
   push:
     branches: [main]
@@ -23,6 +25,8 @@ on:
       - ".dockerignore"
       - ".env.staging.example"
       - "compose.staging.yaml"
+      - "database/migrations/**"
+      - "docs/INF/teralya_schema_v1.5_APROBADO.sql"
       - ".github/workflows/staging.yml"
   workflow_dispatch:
 
@@ -102,10 +106,11 @@ jobs:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
           SSH_USER: ${{ secrets.STAGING_SSH_USER }}
         run: |
-          ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" 'install -d -m 750 ~/teralya/infrastructure/staging ~/teralya/docs/INF'
+          ssh -i ~/.ssh/teralya_staging "$SSH_USER@$SSH_HOST" 'install -d -m 750 ~/teralya/infrastructure/staging ~/teralya/docs/INF ~/teralya/database/migrations'
           scp -i ~/.ssh/teralya_staging compose.staging.yaml "$SSH_USER@$SSH_HOST:~/teralya/compose.staging.yaml"
           scp -i ~/.ssh/teralya_staging infrastructure/staging/Caddyfile "$SSH_USER@$SSH_HOST:~/teralya/infrastructure/staging/Caddyfile"
-          scp -i ~/.ssh/teralya_staging docs/INF/teralya_schema_v1.4_APROBADO.sql "$SSH_USER@$SSH_HOST:~/teralya/docs/INF/teralya_schema_v1.4_APROBADO.sql"
+          scp -i ~/.ssh/teralya_staging docs/INF/teralya_schema_v1.5_APROBADO.sql "$SSH_USER@$SSH_HOST:~/teralya/docs/INF/teralya_schema_v1.5_APROBADO.sql"
+          scp -i ~/.ssh/teralya_staging database/migrations/20260717_001_cierre_web.sql "$SSH_USER@$SSH_HOST:~/teralya/database/migrations/20260717_001_cierre_web.sql"
           scp -i ~/.ssh/teralya_staging infrastructure/staging/deploy-staging.sh "$SSH_USER@$SSH_HOST:~/teralya/deploy-staging.sh"
       - name: Install environment and deploy
         env:
