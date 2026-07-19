@@ -1,7 +1,0 @@
-import type { WineState } from './wine-request.dto.js';
-
-export interface ImageSummary { id:string; url:string; es_principal:boolean; orden:number; alt_text:string; resolucion?:string }
-export interface BodegaSummary { id:string; nombre_comercial:string; slug?:string; logo_url?:string; region?:string; pais?:string; denominacion_origen?:string }
-export interface WineOwnSummary { id:string; nombre_comercial:string; estado:WineState; stock_disponible:number; disponible_venta:boolean; updated_at:string; sku?:string; precio?:string; moneda?:'EUR'; imagen_principal?:ImageSummary }
-export interface WineOwnDetail { id:string; nombre_comercial:string; precio:string; moneda:'EUR'; disponible_venta:boolean; bodega:BodegaSummary; imagenes:ImageSummary[]; estado:WineState; stock_disponible:number; stock_reservado:number; stock_minimo:number; created_at:string; updated_at:string; slug?:string; sku?:string; tipo_vino?:string; anada?:number; pais?:string; region?:string; denominacion_origen?:string; variedades_uva?:string[]; crianza?:string; meses_crianza?:number; graduacion_alcoholica?:string; volumen_ml?:number; descripcion_corta?:string; descripcion_completa?:string; nota_cata?:string; maridaje?:string; temperatura_servicio?:string; certificaciones?:string[]; premios?:string[]; produccion_limitada?:boolean; peso_gramos?:number; plazo_preparacion_dias?:number; botellas_por_caja?:number; imagen_principal?:ImageSummary }
-export interface PageWineOwnSummary { items:WineOwnSummary[]; page:number; page_size:number; total_items:number; total_pages:number }

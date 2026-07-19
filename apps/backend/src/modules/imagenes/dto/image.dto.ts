@@ -1,2 +1,0 @@
-export interface UploadAuthorization{upload_id:string;upload_url:string;method:'PUT';required_headers:{'Content-Type':string;'x-amz-checksum-sha256':string;'If-None-Match':'*'};confirmation_token:string;upload_expires_at:string;confirmation_expires_at:string}
-export interface ImageDto{id:string;url:string;es_principal:boolean;orden:number;alt_text:string;formato:'jpeg'|'png'|'webp';activa:boolean;fecha_subida:string;updated_at:string;nombre_archivo?:string;tamanio_bytes?:number;resolucion?:string}

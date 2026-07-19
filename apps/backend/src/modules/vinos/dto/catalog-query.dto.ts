@@ -1,4 +1,0 @@
-import { Transform,Type,type TransformFnParams } from 'class-transformer';
-import { IsInt,IsOptional,IsString,Length,Matches,Max,Min } from 'class-validator';
-const trim=({value}:TransformFnParams):unknown=>typeof value==='string'?value.trim():value;
-export class CatalogQueryDto{@IsOptional() @Transform(trim) @IsString() @Length(1,120) q?:string;@IsOptional() @Transform(trim) @IsString() @Length(1,80) tipo_vino?:string;@IsOptional() @Transform(trim) @IsString() @Length(1,160) region?:string;@IsOptional() @Transform(trim) @IsString() @Length(1,160) denominacion_origen?:string;@IsOptional() @Matches(/^(0|[1-9][0-9]{0,7})\.[0-9]{2}$/) precio_min?:string;@IsOptional() @Matches(/^(0|[1-9][0-9]{0,7})\.[0-9]{2}$/) precio_max?:string;@IsOptional() @Type(()=>Number) @IsInt() @Min(1) page=1;@IsOptional() @Type(()=>Number) @IsInt() @Min(1) @Max(100) page_size=20;}

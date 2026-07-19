@@ -1,4 +1,0 @@
-import type { BodegaSummary,ImageSummary } from './wine.dto.js';
-export interface WineSummary{id:string;nombre_comercial:string;precio:string;moneda:'EUR';disponible_venta:boolean;bodega:BodegaSummary;slug?:string;tipo_vino?:string;anada?:number;region?:string;denominacion_origen?:string;imagen_principal?:ImageSummary}
-export interface WinePublicDetail extends WineSummary{imagenes:ImageSummary[];pais?:string;variedades_uva?:string[];crianza?:string;meses_crianza?:number;graduacion_alcoholica?:string;volumen_ml?:number;descripcion_corta?:string;descripcion_completa?:string;nota_cata?:string;maridaje?:string;temperatura_servicio?:string;certificaciones?:string[];premios?:string[];produccion_limitada?:boolean}
-export interface PageWineSummary{items:WineSummary[];page:number;page_size:number;total_items:number;total_pages:number}

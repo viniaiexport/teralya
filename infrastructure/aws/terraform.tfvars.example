@@ -1,6 +1,0 @@
-environment   = "staging"
-api_hostname  = "api.staging.example.com"
-certificate_arn = "arn:aws:acm:eu-west-1:123456789012:certificate/replace-me"
-frontend_image = "123456789012.dkr.ecr.eu-west-1.amazonaws.com/teralya-staging-frontend@sha256:replace-me"
-backend_image  = "123456789012.dkr.ecr.eu-west-1.amazonaws.com/teralya-staging-backend@sha256:replace-me"
-deletion_protection = true

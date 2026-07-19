@@ -1,3 +1,0 @@
-import Link from 'next/link';
-import { readPendingOrder } from '@/lib/checkout/pending-order';
-export default async function StripeCancelPage(){const orderId=await readPendingOrder();return <main className="screen-state payment-page"><p className="eyebrow">Pago cancelado</p><h1>No se ha realizado ningún cargo</h1><p className="screen-state-content">Puedes volver a Stripe para completar el pago o regresar al carrito.</p>{orderId!==undefined&&<Link className="button primary" href={`/checkout/pago?pedido_id=${encodeURIComponent(orderId)}`}>Reintentar pago</Link>}<Link className="button secondary" href="/carrito">Volver al carrito</Link></main>}
