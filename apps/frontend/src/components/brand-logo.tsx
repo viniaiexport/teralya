@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 4.1 seconds
-Output:
 interface BrandLogoProps {
   compact?: boolean;
   className?: string;
@@ -14,10 +11,9 @@ export function BrandLogo({ compact = false, className, full = false }: BrandLog
         alt="Teralya, el futuro del vino"
         className="brand-logo-artwork"
         height={900}
-        src="/brand/teralya-cristal.png"
+        src="/brand/teralya-cristal.svg"
         width={900}
       />
     </span>
   );
 }
-
