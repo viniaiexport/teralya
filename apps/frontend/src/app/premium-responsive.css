@@ -24,7 +24,11 @@
 
 @media (max-width: 42rem) {
   .site-header { min-height: 4.6rem; }
-  .brand-word { font-size: .82rem; letter-spacing: .2em; }
+  .brand-lockup { height: 2.7rem; width: 10.7rem; }
+  .brand-logo-artwork { width: 15.1rem; }
+  .brand-lockup--compact { width: 2.7rem; }
+  .brand-lockup--full { height: auto; width: min(12rem, 64vw); }
+  .brand-lockup--full .brand-logo-artwork { width: 100%; }
   .premium-hero { padding-top: 2.8rem; }
   .premium-hero h1 { font-size: clamp(3rem, 15vw, 4.7rem); }
   .premium-hero-media { border-radius: 1.25rem; min-height: 25rem; }
