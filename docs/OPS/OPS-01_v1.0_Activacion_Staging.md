@@ -1,6 +1,6 @@
 # OPS-01 — Activación y validación de staging
 
-**Teralya · Versión 1.0 · 17/07/2026 · Estado: EN EJECUCIÓN**
+**Teralya · Versión 1.1 · 20/07/2026 · Estado: EN EJECUCIÓN**
 
 ## Objetivo
 
@@ -10,7 +10,8 @@ Convertir la base de staging ya integrada en un entorno operativo verificable, s
 
 - Environment de GitHub `staging`.
 - `STAGING_DEPLOY_ENABLED=true` únicamente cuando el resto esté listo.
-- Acceso SSH al servidor Hetzner reconciliado con `infrastructure/hetzner`.
+- Acceso administrativo SSH al servidor Hetzner reconciliado con `infrastructure/hetzner`.
+- Reconciliador local de staging instalado para consumir automáticamente las imágenes validadas de GHCR sin abrir SSH a los runners dinámicos de GitHub.
 - Firewall TCP 80/443 limitado a las redes oficiales de Cloudflare.
 - Bucket Cloudflare R2 con jurisdicción `eu` y credenciales S3 compatibles.
 - DNS y TLS para `staging.teralya.eu`.
@@ -23,10 +24,10 @@ Convertir la base de staging ya integrada en un entorno operativo verificable, s
 1. Reconciliar el servidor existente con Terraform sin destruir recursos válidos.
 2. Aplicar firewall y DNS Cloudflare.
 3. Provisionar y verificar R2 UE.
-4. Cargar `STAGING_ENV_FILE` y secretos SSH en GitHub.
+4. Instalar `STAGING_ENV_FILE` con permisos restringidos y el reconciliador local en Hetzner.
 5. Mantener `ALCOHOL_TERMS_VERSION=LEGAL-06-v1.0`.
 6. Activar `STAGING_DEPLOY_ENABLED`.
-7. Ejecutar el workflow de staging.
+7. Ejecutar el workflow de staging, publicar imágenes inmutables y esperar la confirmación pública del commit desplegado.
 8. Verificar migración PostgreSQL v1.5, readiness de Backend y salud del Frontend.
 9. Ejecutar recorridos E2E de visitante, Comprador, Bodega y Administrador.
 10. Validar registro, login, recuperación, carrito, checkout Stripe, webhook, Pedido, cancelación, stock, condiciones de envío e imágenes.
@@ -47,4 +48,4 @@ Convertir la base de staging ya integrada en un entorno operativo verificable, s
 
 ## Estado actual
 
-El código, Compose, Caddy, GHCR, migración y workflows están preparados. La ejecución real continúa bloqueada hasta que las credenciales externas estén cargadas y verificadas.
+El código, Compose, Caddy, GHCR, migración y workflows están preparados. Staging está publicado en `https://staging.teralya.eu`. El despliegue rutinario no abre SSH a GitHub: el servidor consulta GHCR desde dentro y el workflow verifica por HTTPS el commit servido y la salud del Backend.
