@@ -111,7 +111,10 @@ test("entra como comprador y cancela un pedido propio de forma directa", async (
   if (await cancelButton.count()) {
     await page.getByLabel("Confirmo que deseo cancelar este pedido.").check();
     page.once("dialog", (dialog) => dialog.accept());
-    await cancelButton.click();
+    await Promise.all([
+      page.waitForURL(/cancelacion=completada/),
+      cancelButton.click(),
+    ]);
   }
   await expect(
     page.getByText(

@@ -84,7 +84,7 @@ LEGAL-03 a LEGAL-09 están aprobados para la versión actual por el CEO. La impl
 
 | Código | Nombre | Versión | Estado | Ubicación | Dependencias |
 |---|---|---|---|---|---|
-| OPS-01 | Activación y validación de staging | 1.0 | ▶ EN EJECUCIÓN | docs/OPS/OPS-01_v1.0_Activacion_Staging.md | FE-008, INF-07 v1.5, ADR-006, credenciales externas | Documento actualmente en desarrollo |
+| OPS-01 | Activación y validación de staging | 1.1 | ▶ EN EJECUCIÓN | docs/OPS/OPS-01_v1.0_Activacion_Staging.md | FE-008, INF-07 v1.5, ADR-006, credenciales externas | Staging publicado; gates finales en ejecución |
 
 ## ARCHIVE
 

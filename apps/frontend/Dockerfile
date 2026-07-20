@@ -8,8 +8,10 @@ RUN npm ci --workspace @teralya/frontend --include-workspace-root
 COPY apps/frontend apps/frontend
 ARG TERALYA_API_URL=http://backend:3001
 ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
+ARG NEXT_PUBLIC_BUILD_SHA=local
 ENV TERALYA_API_URL=$TERALYA_API_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_BUILD_SHA=$NEXT_PUBLIC_BUILD_SHA
 RUN npm run frontend:build
 
 FROM node:22-alpine AS runtime
