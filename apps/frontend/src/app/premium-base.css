@@ -73,24 +73,39 @@ a { transition: color .2s ease, opacity .2s ease, border-color .2s ease, transfo
 }
 
 .brand-lockup {
-  align-items: center;
-  display: inline-flex;
-  gap: .8rem;
+  display: block;
+  height: 3.15rem;
+  overflow: hidden;
+  position: relative;
+  width: 12.4rem;
 }
 
-.brand-mark {
-  filter: drop-shadow(0 8px 18px rgba(166, 71, 255, .26));
-  flex: 0 0 auto;
-  height: 2.35rem;
-  width: 2.35rem;
+.brand-logo-artwork {
+  height: auto;
+  left: 50%;
+  max-width: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -47%);
+  width: 17.45rem;
 }
 
-.brand-word {
-  color: #fff;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: .28em;
+.brand-lockup--compact {
+  width: 3.15rem;
+}
+
+.brand-lockup--full {
+  aspect-ratio: 1;
+  height: auto;
+  max-width: 13.5rem;
+  width: min(13.5rem, 58vw);
+}
+
+.brand-lockup--full .brand-logo-artwork {
+  height: 100%;
+  inset: 0;
+  transform: none;
+  width: 100%;
 }
 
 .desktop-navigation {
