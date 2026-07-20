@@ -11,7 +11,7 @@ export function BrandLogo({ compact = false, className, full = false }: BrandLog
         alt="Teralya, el futuro del vino"
         className="brand-logo-artwork"
         height={900}
-        src="/brand/teralya-cristal.svg"
+        src="/brand/teralya-cristal.png"
         width={900}
       />
     </span>
