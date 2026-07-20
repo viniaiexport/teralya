@@ -86,6 +86,8 @@ LEGAL-03 a LEGAL-09 están aprobados para la versión actual por el CEO. La impl
 |---|---|---|---|---|---|
 | OPS-01 | Activación y validación de staging | 1.1 | ▶ EN EJECUCIÓN | docs/OPS/OPS-01_v1.0_Activacion_Staging.md | FE-008, INF-07 v1.5, ADR-006, credenciales externas | Staging publicado; gates finales en ejecución |
 
+Evidencias operativas vigentes: `docs/OPS/OPS-01_Evidencias_Staging_2026-07-20.md`.
+
 ## ARCHIVE
 
 | Documento archivado | Motivo |
@@ -154,7 +156,7 @@ LEGAL-03 a LEGAL-09 están aprobados para la versión actual por el CEO. La impl
 
 ### Siguiente paso obligatorio
 
-Cargar secretos en el environment `staging`, reconciliar Hetzner/Cloudflare/R2, configurar SMTP y Stripe de pruebas, activar `STAGING_DEPLOY_ENABLED` y ejecutar la batería E2E, rendimiento, seguridad y restauración descrita en OPS-01.
+Cerrar los gates no técnicos de OPS-01: aprobación formal de Seguridad, decisión operativa del CEO ante cobro confirmado sin stock y revisión jurídica/fiscal externa. La infraestructura, los secretos, el despliegue automático, R2, SMTP, Stripe de pruebas y la restauración ya están validados.
 
 ### Orden de ejecución
 
@@ -170,10 +172,9 @@ Cargar secretos en el environment `staging`, reconciliar Hetzner/Cloudflare/R2, 
 
 ### Bloqueos abiertos
 
-- **Infraestructura y secretos:** environment `staging`, SSH Hetzner, firewall Cloudflare-only, DNS/TLS, R2 UE, SMTP, Stripe test y URLs públicas.
-- **Seguridad:** aprobación de límites y ventanas de autenticación y recuperación.
-- **Operación:** política ante cobro confirmado sin stock, ensayo de backup/restauración y monitorización.
-- **Validación:** E2E real sobre staging, rendimiento, seguridad y accesibilidad final.
+- **Seguridad:** aprobación formal de límites y ventanas de autenticación y recuperación.
+- **Operación:** aprobación por el CEO de la política ante cobro confirmado sin stock.
+- **Validación:** recorridos de negocio reales con datos y usuarios controlados de staging; la base permanece vacía para no inventar datos operativos.
 - **Legal/fiscal externo:** confirmar antes de producción y de ventas multi-país a escala que el modelo no genera obligaciones adicionales para Teralya, incluido el riesgo de deemed supplier.
 - Producción permanece bloqueada hasta cerrar OPS-01. No se usarán valores ficticios para arrancar el backend.
 
