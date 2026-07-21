@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { getCatalog, wineHref, wineryHref } from '@/lib/api/catalog';
 
+export const dynamic = 'force-dynamic';
+
 const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://teralya.eu');
 
 function absolute(path: string): string {
