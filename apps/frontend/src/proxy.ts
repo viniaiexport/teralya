@@ -5,6 +5,10 @@ const SESSION_COOKIE = 'teralya_session';
 const IDENTITY_COOKIE = 'teralya_identity';
 
 export function proxy(request: NextRequest) {
+  if (!['GET', 'HEAD'].includes(request.method)) {
+    return NextResponse.next();
+  }
+
   const hasSession = request.cookies.has(SESSION_COOKIE) && request.cookies.has(IDENTITY_COOKIE);
 
   if (!hasSession) {
