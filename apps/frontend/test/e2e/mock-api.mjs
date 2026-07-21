@@ -129,6 +129,18 @@ const server = createServer(async (request, response) => {
       total_items: 1,
       total_pages: 1,
     });
+  if (request.method === "GET" && url.pathname === `/vinos/${wineId}`)
+    return send(response, 200, {
+      ...wine,
+      imagenes: [],
+      pais: "España",
+      descripcion_corta: "Un tinto de origen para compartir.",
+      descripcion_completa: "Elaborado por Bodega Determinista en Rioja.",
+      nota_cata: "Fruta roja, especias y final equilibrado.",
+      maridaje: "Carnes asadas, quesos curados y cocina de temporada.",
+      variedades_uva: ["Tempranillo"],
+      volumen_ml: 750,
+    });
   if (request.method === "GET" && url.pathname === `/bodegas/${wineryId}`)
     return send(response, 200, publicWinery);
   if (request.method === "POST" && url.pathname === "/auth/login") {

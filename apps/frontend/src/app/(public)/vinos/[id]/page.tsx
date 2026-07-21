@@ -1,12 +1,17 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { AddToCart } from '@/components/add-to-cart';
-import { formatEuro, getPublicWine, wineryHref, type WinePublicDetail } from '@/lib/api/catalog';
+import { formatEuro, getPublicWine, wineHref, wineryHref, type WinePublicDetail } from '@/lib/api/catalog';
 import { ApiProblem } from '@/lib/api/problem';
 import { readSessionIdentity } from '@/lib/session/session';
 
 interface Props { params: Promise<{ id: string }> }
+
+const loadWine = cache(getPublicWine);
+const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://teralya.eu');
 
 function Fact({ label, value }: { label: string; value?: string | number }) {
   return value === undefined ? null : <div><dt>{label}</dt><dd>{value}</dd></div>;
@@ -16,19 +21,60 @@ function Failure({ problem }: { problem?: ApiProblem }) {
   return <div className="screen-state"><h1>No hemos podido cargar este vino</h1><p>Inténtalo de nuevo dentro de unos instantes.</p>{problem !== undefined && <p className="request-reference">Referencia: {problem.problem.request_id}</p>}<Link className="button secondary" href="/vinos">Volver al catálogo</Link></div>;
 }
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const wine = await loadWine(id);
+    const hero = wine.imagen_principal ?? wine.imagenes[0];
+    const description = wine.descripcion_corta ?? `${wine.nombre_comercial}, vendido directamente por ${wine.bodega.nombre_comercial} en Teralya.`;
+    return {
+      title: wine.nombre_comercial,
+      description,
+      alternates: { canonical: wineHref(wine.id) },
+      openGraph: {
+        type: 'website',
+        title: wine.nombre_comercial,
+        description,
+        ...(hero === undefined ? {} : { images: [{ url: hero.url, alt: hero.alt_text }] }),
+      },
+    };
+  } catch {
+    return { title: 'Vino no disponible', robots: { index: false, follow: false } };
+  }
+}
+
 export default async function WineDetailPage({ params }: Props) {
   const { id } = await params;
   const identity = await readSessionIdentity();
   let wine: WinePublicDetail;
   try {
-    wine = await getPublicWine(id);
+    wine = await loadWine(id);
   } catch (error) {
     if (error instanceof ApiProblem && error.problem.status === 404) notFound();
     return <Failure problem={error instanceof ApiProblem ? error : undefined}/>;
   }
   const hero = wine.imagen_principal ?? wine.imagenes[0];
   const origin = [wine.region, wine.denominacion_origen, wine.pais].filter(Boolean).join(' · ');
+  const description = wine.descripcion_corta ?? wine.descripcion_completa ?? `${wine.nombre_comercial} de ${wine.bodega.nombre_comercial}.`;
+  const productData = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: wine.nombre_comercial,
+    description,
+    image: [...new Set(wine.imagenes.map((image) => image.url))],
+    brand: { '@type': 'Brand', name: wine.bodega.nombre_comercial },
+    category: wine.tipo_vino ?? 'Vino',
+    offers: {
+      '@type': 'Offer',
+      url: new URL(wineHref(wine.id), siteUrl).toString(),
+      priceCurrency: wine.moneda,
+      price: wine.precio,
+      availability: wine.disponible_venta ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: wine.bodega.nombre_comercial },
+    },
+  };
   return <div className="wine-detail">
+    <script dangerouslySetInnerHTML={{ __html: JSON.stringify(productData).replace(/</g, '\\u003c') }} type="application/ld+json"/>
     <nav aria-label="Migas de pan" className="breadcrumbs"><Link href="/vinos">Vinos</Link><span aria-hidden="true">/</span><span aria-current="page">{wine.nombre_comercial}</span></nav>
     <section className="wine-hero premium-product-hero">
       <div className="wine-detail-image">{hero === undefined ? <span aria-hidden="true" className="image-placeholder">T</span> : <Image alt={hero.alt_text} fill priority sizes="(max-width: 800px) 100vw, 50vw" src={hero.url} unoptimized/>}</div>
