@@ -420,6 +420,7 @@ def schema_example(schema, depth=0, seen=()):
     if "$ref" in schema:
         name = schema["$ref"].split("/")[-1]
         special = {
+            "AuthSession": {"access_token": "A" * 43, "token_type": "Bearer", "expires_in": 28800, "expires_at": "2026-07-13T12:00:00Z", "usuario": {"id": "11111111-1111-4111-8111-111111111111", "email": "usuario@example.com", "rol": "comprador", "idioma": "es", "estado": "activo"}},
             "MoneyBreakdown": {"subtotal": "10.00", "gastos_envio": "2.00", "impuestos": "2.10", "descuentos": "1.00", "total": "13.10", "moneda": "EUR"},
             "SubOrderMoneyBreakdown": {"subtotal": "10.00", "gastos_envio": "2.00", "impuestos": "2.10", "total": "14.10", "moneda": "EUR"},
             "OrderConfirmation": {"pedido_id": "11111111-1111-4111-8111-111111111111", "numero_pedido": "TER-2026-0001", "pago_estado": "pagado", "pedido_estado": "pagado", "confirmado_at": "2026-07-13T12:00:00Z"},

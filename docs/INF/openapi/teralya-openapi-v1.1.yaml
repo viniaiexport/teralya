@@ -72,7 +72,7 @@ paths:
                       email: usuario@example.com
                       rol: comprador
                       idioma: es
-                      estado: pendiente_verificacion
+                      estado: activo
         '400':
           description: Validation Error
           headers:
@@ -186,7 +186,7 @@ paths:
                       email: usuario@example.com
                       rol: comprador
                       idioma: es
-                      estado: pendiente_verificacion
+                      estado: activo
         '400':
           description: Validation Error
           headers:

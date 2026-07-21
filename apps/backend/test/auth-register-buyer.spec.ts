@@ -102,7 +102,7 @@ describe('API-001 — POST /auth/registro/comprador', () => {
         email,
         rol: 'comprador',
         idioma: 'es',
-        estado: 'pendiente_verificacion',
+        estado: 'activo',
       },
     });
     expect(body.access_token).toMatch(/^[A-Za-z0-9_-]{43}$/);
@@ -124,10 +124,11 @@ describe('API-001 — POST /auth/registro/comprador', () => {
       declaracion_mayoria_edad_at: Date;
       aceptacion_condiciones_alcohol_at: Date;
       version_condiciones_alcohol: string;
+      estado: string;
     }>(
       `SELECT declaracion_mayoria_edad, aceptacion_condiciones_alcohol,
               declaracion_mayoria_edad_at, aceptacion_condiciones_alcohol_at,
-              version_condiciones_alcohol
+              version_condiciones_alcohol, u.estado
          FROM comprador c
          JOIN usuario u ON u.id = c.usuario_id
         WHERE u.email = $1`,
@@ -138,6 +139,7 @@ describe('API-001 — POST /auth/registro/comprador', () => {
       declaracion_mayoria_edad: true,
       aceptacion_condiciones_alcohol: true,
       version_condiciones_alcohol: process.env.ALCOHOL_TERMS_VERSION,
+      estado: 'activo',
     });
     expect(compradorRows.rows[0]?.declaracion_mayoria_edad_at).toBeInstanceOf(Date);
     expect(compradorRows.rows[0]?.aceptacion_condiciones_alcohol_at).toBeInstanceOf(Date);
@@ -157,6 +159,7 @@ describe('API-001 — POST /auth/registro/comprador', () => {
       }
     }
     expect(sessionEncontrada).toBe(true);
+
   });
 
   it('rechaza un email ya registrado con 409 Conflict', async () => {
