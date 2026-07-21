@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import './styles.css';
 import './premium-base.css';
 import './premium-home.css';
+import './premium-professional.css';
 import './premium-catalog.css';
 import './premium-forms.css';
 import './premium-responsive.css';
