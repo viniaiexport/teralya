@@ -58,7 +58,7 @@ export class AuthRepository {
           estado: EstadoUsuario;
         }>(
           `INSERT INTO usuario (email, password_hash, nombre, apellidos, idioma, rol, estado)
-           VALUES ($1, $2, $3, $4, $5, 'comprador', DEFAULT)
+           VALUES ($1, $2, $3, $4, $5, 'comprador', 'activo')
            RETURNING id, email, idioma, estado`,
           [input.email, input.passwordHash, input.nombre, input.apellidos, input.idioma],
         );

@@ -102,7 +102,7 @@ describe('API-001 — POST /auth/registro/comprador', () => {
         email,
         rol: 'comprador',
         idioma: 'es',
-        estado: 'pendiente_verificacion',
+        estado: 'activo',
       },
     });
     expect(body.access_token).toMatch(/^[A-Za-z0-9_-]{43}$/);
@@ -157,6 +157,14 @@ describe('API-001 — POST /auth/registro/comprador', () => {
       }
     }
     expect(sessionEncontrada).toBe(true);
+
+    const login = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email, password: 'contraseña-larga-123' })
+      .expect(200);
+    expect(login.body).toMatchObject({
+      usuario: { email, rol: 'comprador', estado: 'activo' },
+    });
   });
 
   it('rechaza un email ya registrado con 409 Conflict', async () => {
