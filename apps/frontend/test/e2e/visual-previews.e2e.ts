@@ -9,6 +9,7 @@ test('genera las primeras vistas públicas de Teralya',async({page})=>{
     {path:'/vinos',heading:'Vinos con origen',file:'02-catalogo-vinos.png'},
     {path:'/bodegas',heading:'Bodegas de Teralya',file:'03-bodegas.png'},
     {path:`/bodegas/${wineryId}`,heading:'Bodega Determinista',file:'04-ficha-bodega.png'},
+    {path:'/para-bodegas',heading:'Tu bodega merece vender por su nombre.',file:'05-para-bodegas.png'},
   ] as const;
   for(const preview of previews){
     await page.goto(preview.path);
