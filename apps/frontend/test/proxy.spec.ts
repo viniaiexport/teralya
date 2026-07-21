@@ -20,4 +20,15 @@ describe('private route proxy', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('x-middleware-next')).toBe('1');
   });
+
+  it('leaves server action writes to their authenticated handlers', () => {
+    const request = new NextRequest('https://staging.teralya.eu/pedidos/order-id', {
+      method: 'POST',
+    });
+
+    const response = proxy(request);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-middleware-next')).toBe('1');
+  });
 });
