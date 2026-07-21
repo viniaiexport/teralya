@@ -10,9 +10,11 @@ import './premium-responsive.css';
 import './premium-fixes.css';
 
 const siteDescription = 'Vinos europeos seleccionados, vendidos y enviados directamente por sus bodegas.';
+const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://teralya.eu');
+const allowIndexing = siteUrl.hostname === 'teralya.eu' || siteUrl.hostname === 'www.teralya.eu';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://teralya.eu'),
+  metadataBase: siteUrl,
   title: { default: 'Teralya · El futuro del vino', template: '%s · Teralya' },
   description: siteDescription,
   applicationName: 'Teralya',
@@ -30,7 +32,7 @@ export const metadata: Metadata = {
     title: 'Teralya · El futuro del vino',
     description: siteDescription,
   },
-  robots: { index: true, follow: true },
+  robots: { index: allowIndexing, follow: allowIndexing },
   other: { 'teralya-build': process.env.NEXT_PUBLIC_BUILD_SHA ?? 'local' },
 };
 
