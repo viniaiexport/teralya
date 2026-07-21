@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 
 export default function HomePage() {
   return (
@@ -31,6 +32,11 @@ export default function HomePage() {
         <article><span>02 · Criterio</span><h3>Selección con contexto</h3><p>Territorio, elaboración y condiciones visibles antes de comprar.</p></article>
         <article><span>03 · Europa</span><h3>Regiones diversas</h3><p>Un catálogo europeo construido bodega a bodega.</p></article>
         <article><span>04 · Confianza</span><h3>Checkout seguro</h3><p>Precios, stock y pedido validados de nuevo antes del pago.</p></article>
+      </section>
+
+      <section aria-labelledby="winery-invite-title" className="premium-winery-invite">
+        <div><p className="eyebrow">¿Elaboras vino?</p><h2 id="winery-invite-title">Tu bodega también puede formar parte de Teralya.</h2><p>Presenta tus vinos con identidad, gestiona tu catálogo y vende directamente a quienes valoran el origen.</p></div>
+        <Link className="button primary" href={'/para-bodegas' as Route}>Teralya para bodegas</Link>
       </section>
 
       <section aria-labelledby="process-title" className="premium-process">
