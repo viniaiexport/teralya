@@ -30,10 +30,19 @@
 - Webhook Stripe público y activo; las solicitudes sin firma válida son rechazadas.
 - Logotipo cristal aprobado publicado y servido como recurso estático.
 
+## Validación funcional adicional del 21/07/2026
+
+- Portada validada con perfiles reales de iPhone y Android: respuesta 200, sin errores JavaScript y sin desbordamiento horizontal.
+- Registro de comprador, creación de sesión, cierre y reingreso ejecutados contra staging con datos sintéticos controlados.
+- Detectada y corregida la incoherencia que dejaba al comprador en `pendiente_verificacion` sin existir un flujo de verificación de email en el MVP.
+- Backend, contrato OpenAPI e imágenes de staging validados en verde para el commit de la corrección.
+- Reingreso del comprador confirmado en staging tras el despliegue.
+- Solicitud profesional de bodega y solicitud de recuperación de contraseña confirmadas en staging.
+
 ## Gates que no son ejecutables como decisión técnica
 
 - Aprobación formal por Seguridad de límites y ventanas de autenticación y recuperación.
 - Aprobación por el CEO de la política operativa ante cobro confirmado sin stock.
 - Revisión jurídica y fiscal externa antes de operar comercialmente o a escala multi-país.
 
-Producción continúa bloqueada exclusivamente por estos gates de aprobación y revisión. No se han usado secretos ficticios ni se ha ampliado el MVP.
+Quedan por completar los recorridos controlados que requieren datos operativos de Bodega y Administrador, incluido el checkout de prueba de extremo a extremo. Producción continúa bloqueada por esos recorridos y por los gates de aprobación y revisión anteriores. No se han usado secretos ficticios ni se ha ampliado el MVP.
