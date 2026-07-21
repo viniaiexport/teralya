@@ -74,6 +74,7 @@ describe('API-001 — POST /auth/registro/comprador', () => {
         }
       }
 
+      await pool.query('DELETE FROM auditoria WHERE usuario_id = ANY($1)', [[...usuarioIds]]);
       await pool.query('DELETE FROM comprador WHERE usuario_id IN (SELECT id FROM usuario WHERE email = ANY($1))', [
         emailsCreados,
       ]);
