@@ -17,7 +17,7 @@
   --shadow-premium: 0 28px 90px rgba(0, 0, 0, .42);
   --gradient-brand: linear-gradient(115deg, #ff7b3e 0%, #ff3f7f 28%, #c132f3 60%, #438cf1 100%);
   --hero-photo: url("https://unsplash.com/photos/Lf5Xzq6NvWw/download?force=true&w=1400");
-  --film-photo: url("https://unsplash.com/photos/27G8PF-fjrs/download?force=true&w=1400");
+  --film-photo: url("/media/bodega-valdeluz.jpg");
   --delivery-photo: url("https://images.pexels.com/photos/6969679/pexels-photo-6969679.jpeg?auto=compress&cs=tinysrgb&w=1200");
   --couple-photo: url("https://images.pexels.com/photos/5911162/pexels-photo-5911162.jpeg?auto=compress&cs=tinysrgb&w=1200");
   --estate-photo: url("https://unsplash.com/photos/SpZZGSTS9fo/download?force=true&w=1600");
@@ -31,6 +31,8 @@ html {
   color: var(--ink);
   font-family: Georgia, "Times New Roman", serif;
   scroll-behavior: smooth;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -39,6 +41,8 @@ body {
     radial-gradient(circle at 88% 18%, rgba(255, 63, 127, .1), transparent 24rem),
     linear-gradient(180deg, #090811 0%, #07060d 55%, #0b0913 100%);
   color: var(--ink);
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body::before {

@@ -82,26 +82,35 @@
   overflow: hidden;
 }
 .premium-film-media {
-  background-image: linear-gradient(90deg, transparent 65%, rgba(8,7,13,.78)), var(--film-photo);
-  background-position: center;
-  background-size: cover;
+  background: #17121e;
   min-height: 23rem;
   overflow: hidden;
   position: relative;
 }
-.premium-film-media video {
-  height: 100%;
-  inset: 0;
-  object-fit: cover;
-  opacity: .78;
+.premium-film-media::before {
+  animation: valdeluz-film 14s ease-in-out infinite alternate;
+  background-image: var(--film-photo);
+  background-position: center;
+  background-size: cover;
+  content: "";
+  inset: -4%;
+  opacity: .82;
   position: absolute;
-  width: 100%;
 }
 .premium-film-media::after {
   background: linear-gradient(90deg, rgba(0,0,0,.06), rgba(8,7,13,.78));
   content: "";
   inset: 0;
   position: absolute;
+}
+
+@keyframes valdeluz-film {
+  from { transform: scale(1) translate3d(-1%, 0, 0); }
+  to { transform: scale(1.09) translate3d(1.5%, -1%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-film-media::before { animation: none; }
 }
 .film-play {
   align-items: center;
