@@ -23,7 +23,9 @@
 }
 
 @media (max-width: 42rem) {
-  .site-header { min-height: 4.6rem; }
+  .site-shell, .site-header, main { max-width: 100%; min-width: 0; width: 100%; }
+  .site-header { min-height: 4.6rem; overflow: visible; }
+  .header-actions { min-width: 0; }
   .brand-lockup { height: 2.7rem; width: 10.7rem; }
   .brand-logo-artwork { width: 15.1rem; }
   .brand-lockup--compact { width: 2.7rem; }

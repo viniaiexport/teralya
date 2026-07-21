@@ -17,3 +17,15 @@ test('genera las primeras vistas públicas de Teralya',async({page})=>{
     await page.screenshot({path:`visual-previews/${preview.file}`,fullPage:true});
   }
 });
+
+test('la portada no desborda ni depende de un vídeo externo en móvil',async({page})=>{
+  await page.setViewportSize({width:393,height:852});
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:'Descubre las bodegas que están construyendo Teralya.',exact:true})).toBeVisible();
+  await expect(page.locator('.premium-film-media video')).toHaveCount(0);
+  const viewport=await page.evaluate(()=>({
+    clientWidth:document.documentElement.clientWidth,
+    scrollWidth:document.documentElement.scrollWidth,
+  }));
+  expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
+});

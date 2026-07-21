@@ -16,7 +16,6 @@ export default function HomePage() {
 
       <section aria-labelledby="film-title" className="premium-film">
         <div className="premium-film-media">
-          <video aria-hidden="true" autoPlay loop muted playsInline poster="https://unsplash.com/photos/27G8PF-fjrs/download?force=true&w=1400" preload="metadata"><source src="https://cdn.coverr.co/videos/coverr-grapevine-in-italy-5448/1080p.mp4" type="video/mp4"/></video>
           <span aria-hidden="true" className="film-play">▶</span>
         </div>
         <div className="premium-film-copy"><p className="eyebrow">Bodega invitada · Historia visual</p><h2 id="film-title">Bodega Valdeluz, una finca imaginaria con alma europea.</h2><p>Una pieza editorial breve para transmitir el cuidado del viñedo, la paciencia de la crianza y la relación directa entre productor y comprador.</p><Link className="detail-link" href="/bodegas">Descubrir bodegas reales →</Link></div>
