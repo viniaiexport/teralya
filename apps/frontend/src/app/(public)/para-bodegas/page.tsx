@@ -31,7 +31,7 @@ export default function ForWineriesPage() {
       <section aria-label="Herramientas para bodegas" className="professional-benefits">
         <article><span>01</span><h2>Escaparate con identidad</h2><p>Historia, territorio, filosofía, imágenes y vinos reunidos en una presentación cuidada.</p></article>
         <article><span>02</span><h2>Control comercial</h2><p>Gestiona disponibilidad, precio, stock y condiciones de envío desde tu área profesional.</p></article>
-        <article><span>03</span><h2>Operación clara</h2><p>Recibe tus SubPedidos, actualiza su preparación y comunica el seguimiento al comprador.</p></article>
+        <article><span>03</span><h2>Operación clara</h2><p>Recibe los pedidos de tu bodega, actualiza su preparación y comunica el seguimiento al comprador.</p></article>
       </section>
 
       <section aria-labelledby="professional-process-title" className="professional-process">
