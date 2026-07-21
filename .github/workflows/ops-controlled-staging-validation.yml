@@ -1,0 +1,95 @@
+name: OPS controlled staging validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 15
+    env:
+      SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+      SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+      ADMIN_EMAIL: ops-admin-20260721@example.com
+      ADMIN_PASSWORD: Teralya-Staging-E2E-2026!
+      BODEGA_PASSWORD: Teralya-Bodega-E2E-2026!
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare protected SSH access
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Create controlled synthetic administrator
+        run: |
+          node - <<'NODE' > admin-hash.txt
+          const { scryptSync } = require('crypto');
+          const password = 'Teralya-Staging-E2E-2026!';
+          const salt = Buffer.from('teralya-ops-20260721');
+          const hash = scryptSync(password, salt, 64, { N: 16384, r: 8, p: 1 });
+          process.stdout.write(`scrypt$16384$8$1$${salt.toString('hex')}$${hash.toString('hex')}`);
+          NODE
+          ADMIN_HASH="$(<admin-hash.txt)"
+          ssh "$SSH_USER@$SSH_HOST" "cd ~/teralya && docker compose --env-file .env.staging -f compose.staging.yaml exec -T postgres psql -U teralya -d teralya -v ON_ERROR_STOP=1 -v admin_hash=\"$ADMIN_HASH\"" <<'SQL'
+          INSERT INTO usuario (email, password_hash, rol, estado)
+          VALUES ('ops-admin-20260721@example.com', :'admin_hash', 'administrador', 'activo')
+          ON CONFLICT (email) DO UPDATE
+            SET password_hash = EXCLUDED.password_hash,
+                rol = 'administrador',
+                estado = 'activo',
+                updated_at = now();
+          SQL
+          rm -f admin-hash.txt
+
+      - name: Exercise administrator and winery journeys
+        run: |
+          set -euo pipefail
+          API=https://staging.teralya.eu
+          RUN_ID="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          BODEGA_EMAIL="ops-bodega-${RUN_ID}@example.com"
+
+          admin_login="$(curl --fail-with-body --silent --show-error \
+            -H 'content-type: application/json' \
+            --data "$(jq -nc --arg email "$ADMIN_EMAIL" --arg password "$ADMIN_PASSWORD" '{email:$email,password:$password}')" \
+            "$API/auth/login")"
+          admin_token="$(jq -er '.access_token' <<<"$admin_login")"
+
+          bodega="$(curl --fail-with-body --silent --show-error \
+            -H 'content-type: application/json' \
+            --data "$(jq -nc --arg email "$BODEGA_EMAIL" --arg password "$BODEGA_PASSWORD" --arg run "$RUN_ID" '{nombre_comercial:("Bodega OPS "+$run),razon_social:("Bodega OPS "+$run+" SL"),cif_vat:("ESOPS"+$run),email:$email,password:$password,persona_contacto:"Equipo OPS Teralya",telefono:"+34910000000",aceptacion_condiciones:true,pais_contacto:"España",ciudad:"Madrid",codigo_postal:"28001"}')" \
+            "$API/bodegas")"
+          bodega_id="$(jq -er '.id' <<<"$bodega")"
+          test "$(jq -r '.estado' <<<"$bodega")" = pendiente_revision
+
+          pending="$(curl --fail-with-body --silent --show-error \
+            -H "authorization: Bearer $admin_token" \
+            "$API/admin/bodegas?estado=pendiente&page=1&page_size=100")"
+          jq -e --arg id "$bodega_id" '.items | any(.id == $id)' <<<"$pending" >/dev/null
+
+          approved="$(curl --fail-with-body --silent --show-error -X POST \
+            -H "authorization: Bearer $admin_token" \
+            "$API/admin/bodegas/$bodega_id/validar")"
+          test "$(jq -r '.estado' <<<"$approved")" = aprobada
+
+          bodega_login="$(curl --fail-with-body --silent --show-error \
+            -H 'content-type: application/json' \
+            --data "$(jq -nc --arg email "$BODEGA_EMAIL" --arg password "$BODEGA_PASSWORD" '{email:$email,password:$password}')" \
+            "$API/auth/login")"
+          bodega_token="$(jq -er '.access_token' <<<"$bodega_login")"
+          profile="$(curl --fail-with-body --silent --show-error \
+            -H "authorization: Bearer $bodega_token" \
+            "$API/bodegas/yo/perfil")"
+          test "$(jq -r '.id' <<<"$profile")" = "$bodega_id"
+          test "$(jq -r '.estado' <<<"$profile")" = aprobada
+
+          echo 'Controlled staging journeys passed.'
