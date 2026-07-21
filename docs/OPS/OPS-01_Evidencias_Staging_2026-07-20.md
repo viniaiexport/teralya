@@ -38,6 +38,8 @@
 - Backend, contrato OpenAPI e imágenes de staging validados en verde para el commit de la corrección.
 - Reingreso del comprador confirmado en staging tras el despliegue.
 - Solicitud profesional de bodega y solicitud de recuperación de contraseña confirmadas en staging.
+- Recorrido profesional controlado completado el 21 de julio de 2026 con datos sintéticos identificables: solicitud de bodega, aparición en la cola de Administración, aprobación administrativa, activación del usuario profesional, inicio de sesión de Bodega y lectura de su perfil propio.
+- La validación anterior se ejecutó dentro de la red privada de staging mediante el acceso SSH dedicado ya configurado; no se publicó la API general ni se expusieron PostgreSQL o Redis.
 
 ## Gates que no son ejecutables como decisión técnica
 
@@ -45,4 +47,4 @@
 - Aprobación por el CEO de la política operativa ante cobro confirmado sin stock.
 - Revisión jurídica y fiscal externa antes de operar comercialmente o a escala multi-país.
 
-Quedan por completar los recorridos controlados que requieren datos operativos de Bodega y Administrador, incluido el checkout de prueba de extremo a extremo. Producción continúa bloqueada por esos recorridos y por los gates de aprobación y revisión anteriores. No se han usado secretos ficticios ni se ha ampliado el MVP.
+Queda por completar el checkout de prueba de extremo a extremo con Stripe test y los gates de aprobación y revisión anteriores. Los recorridos controlados de Comprador, Bodega y Administrador ya están ejecutados. Producción continúa bloqueada hasta el cierre completo de OPS-01. No se han usado datos comerciales reales ni se ha ampliado el MVP.
