@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { getLocale } from '@/lib/i18n/server';
 import './styles.css';
 import './premium-base.css';
 import './premium-home.css';
@@ -42,9 +43,10 @@ export const metadata: Metadata = {
   other: { 'teralya-build': process.env.NEXT_PUBLIC_BUILD_SHA ?? 'local' },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const locale = await getLocale();
   return (
-    <html lang="es">
+    <html lang={locale}>
       <body>{children}</body>
     </html>
   );

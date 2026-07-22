@@ -6,7 +6,7 @@ const wineryId='22222222-2222-4222-8222-222222222222';
 test('genera las primeras vistas públicas de Teralya',async({page})=>{
   await page.setViewportSize({width:1440,height:1000});
   const previews=[
-    {path:'/',heading:'Descubre las bodegas que están construyendo Teralya.',file:'01-portada.png'},
+    {path:'/',heading:'El vino que eliges. La historia que recibes.',file:'01-portada.png'},
     {path:'/vinos',heading:'Vinos con origen',file:'02-catalogo-vinos.png'},
     {path:`/vinos/${wineId}`,heading:'Reserva E2E',file:'03-ficha-vino.png'},
     {path:'/bodegas',heading:'Bodegas de Teralya',file:'04-bodegas.png'},
@@ -33,11 +33,20 @@ test('publica un sitemap con catálogo y bodegas',async({request})=>{
 test('la portada no desborda ni depende de un vídeo externo en móvil',async({page})=>{
   await page.setViewportSize({width:393,height:852});
   await page.goto('/');
-  await expect(page.getByRole('heading',{name:'Descubre las bodegas que están construyendo Teralya.',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'El vino que eliges. La historia que recibes.',exact:true})).toBeVisible();
   await expect(page.locator('.premium-film-media video')).toHaveCount(0);
   const viewport=await page.evaluate(()=>({
     clientWidth:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth,
   }));
   expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
+});
+
+test('detecta el idioma y permite cambiarlo sin alterar la ruta',async({page,context})=>{
+  await context.addCookies([{name:'teralya_locale',value:'de',domain:'127.0.0.1',path:'/'}]);
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:'Der Wein, den Sie wählen. Die Geschichte, die Sie erhalten.',exact:true})).toBeVisible();
+  await page.getByLabel('Sprache').selectOption('fr');
+  await expect(page.getByRole('heading',{name:'Le vin que vous choisissez. L’histoire que vous recevez.',exact:true})).toBeVisible();
+  await expect(page).toHaveURL('http://127.0.0.1:3000/');
 });

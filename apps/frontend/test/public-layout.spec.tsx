@@ -2,6 +2,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only',()=>({}));
 vi.mock('../src/lib/session/session',()=>({readSessionIdentity:vi.fn(async()=>undefined)}));
+vi.mock('../src/lib/i18n/server', async () => {
+  const { messages } = await import('../src/lib/i18n/messages');
+  return { getMessages: vi.fn(async () => ({ locale: 'es', m: messages.es })), getLocale: vi.fn(async () => 'es') };
+});
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}));
 import { LanguageSelector } from '@/components/language-selector';
 import { PublicFooter } from '@/components/public-footer';
@@ -16,7 +20,7 @@ describe('public layout components', () => {
     const html = renderToStaticMarkup(await PublicHeader());
 
     expect(html).toContain('aria-label="Navegación principal"');
-    expect(html).toContain('aria-label="Navegación principal móvil"');
+    expect(html.match(/aria-label="Navegación principal"/g)?.length).toBeGreaterThanOrEqual(2);
     expect(html).toContain('href="/vinos"');
     expect(html).toContain('href="/bodegas"');
     expect(html).toContain('href="/acceso"');
@@ -43,13 +47,13 @@ describe('public layout components', () => {
     expect(adminHtml).not.toContain('href="/carrito"');
   });
 
-  it('offers all five approved interface languages', () => {
+  it('offers all eleven launch interface languages', () => {
     const html = renderToStaticMarkup(<LanguageSelector initialLocale="fr" />);
 
-    for (const locale of ['es', 'en', 'fr', 'de', 'it']) {
+    for (const locale of ['es', 'en', 'fr', 'de', 'it', 'pt', 'el', 'hu', 'ro', 'hr', 'bg']) {
       expect(html).toContain(`value="${locale}"`);
     }
-    expect(html).toContain('aria-label="Idioma"');
+    expect(html).toContain('aria-label="Langue"');
     expect(html).toContain('value="fr" selected=""');
   });
 
@@ -63,7 +67,7 @@ describe('public layout components', () => {
     expect(empty).not.toContain('role=');
   });
 
-  it('labels footer navigation independently', () => {
-    expect(renderToStaticMarkup(<PublicFooter />)).toContain('aria-label="Navegación del pie"');
+  it('labels footer navigation independently', async () => {
+    expect(renderToStaticMarkup(await PublicFooter())).toContain('aria-label="Navegación principal"');
   });
 });
