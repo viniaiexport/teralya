@@ -89,6 +89,7 @@
     width: 4.6rem;
   }
   .mobile-navigation { flex: 0 0 auto; }
+  .mobile-navigation:not([open]) > nav { display: none; }
   .mobile-navigation summary {
     align-items: center;
     display: flex;
