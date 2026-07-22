@@ -17,5 +17,7 @@ docker compose --env-file .env.staging -f compose.staging.yaml up -d postgres re
 docker compose --env-file .env.staging -f compose.staging.yaml exec -T postgres \
   psql -U teralya -d teralya -v ON_ERROR_STOP=1 < database/migrations/20260717_001_cierre_web.sql
 docker compose --env-file .env.staging -f compose.staging.yaml up -d --remove-orphans --wait --wait-timeout 180
+docker compose --env-file .env.staging -f compose.staging.yaml exec -T caddy \
+  caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 docker image prune -f
 docker compose --env-file .env.staging -f compose.staging.yaml ps
