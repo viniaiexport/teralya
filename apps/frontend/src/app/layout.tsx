@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './styles.css';
 import './premium-base.css';
@@ -12,6 +12,12 @@ import './premium-fixes.css';
 const siteDescription = 'Vinos europeos seleccionados, vendidos y enviados directamente por sus bodegas.';
 const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://teralya.eu');
 const allowIndexing = siteUrl.hostname === 'teralya.eu' || siteUrl.hostname === 'www.teralya.eu';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,

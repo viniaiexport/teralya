@@ -23,23 +23,98 @@
 }
 
 @media (max-width: 42rem) {
+  html, body { max-width: 100%; overflow-x: hidden; }
+  body { min-width: 0; }
   .site-shell, .site-header, main { max-width: 100%; min-width: 0; width: 100%; }
-  .site-header { min-height: 4.6rem; overflow: visible; }
-  .header-actions { min-width: 0; }
-  .brand-lockup { height: 2.7rem; width: 10.7rem; }
-  .brand-logo-artwork { width: 15.1rem; }
-  .brand-lockup--compact { width: 2.7rem; }
+  main, main > *, section, article, form, fieldset, nav { min-width: 0; }
+  img, video, iframe, svg { height: auto; max-width: 100%; }
+
+  .site-header {
+    align-items: center;
+    gap: .45rem;
+    min-height: 4.4rem;
+    overflow: visible;
+    padding: .7rem max(.65rem, env(safe-area-inset-right)) .7rem max(.65rem, env(safe-area-inset-left));
+  }
+  .site-header > .brand { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+  .header-actions { flex: 0 0 auto; gap: .4rem; min-width: 0; }
+  .brand-lockup { height: 2.45rem; width: 8.2rem; }
+  .brand-logo-artwork { width: 11.55rem; }
+  .brand-lockup--compact { width: 2.45rem; }
   .brand-lockup--full { height: auto; width: min(12rem, 64vw); }
   .brand-lockup--full .brand-logo-artwork { width: 100%; }
-  .premium-hero { padding-top: 2.8rem; }
-  .premium-hero h1 { font-size: clamp(3rem, 15vw, 4.7rem); }
+
+  .language-selector { flex: 0 0 auto; }
+  .language-selector select {
+    font-size: .76rem;
+    max-width: 4.6rem;
+    min-height: 2.75rem;
+    padding: .35rem 1.1rem .35rem .45rem;
+    width: 4.6rem;
+  }
+  .mobile-navigation { flex: 0 0 auto; }
+  .mobile-navigation summary {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 2.75rem;
+    min-width: 3.4rem;
+    padding: .45rem .65rem;
+    touch-action: manipulation;
+  }
+  .mobile-navigation nav {
+    bottom: auto;
+    left: max(.65rem, env(safe-area-inset-left));
+    max-height: 80vh;
+    max-height: calc(100dvh - 5.2rem);
+    overflow-y: auto;
+    padding: .6rem;
+    position: fixed;
+    right: max(.65rem, env(safe-area-inset-right));
+    top: calc(4.4rem + env(safe-area-inset-top));
+    width: auto;
+    z-index: 100;
+  }
+  .mobile-navigation nav a {
+    align-items: center;
+    display: flex;
+    min-height: 2.85rem;
+    padding: .8rem;
+    touch-action: manipulation;
+  }
+
+  .premium-hero { padding: 2.8rem 1rem 2.4rem; }
+  .premium-hero h1 { font-size: clamp(3rem, 15vw, 4.7rem); overflow-wrap: anywhere; }
   .premium-hero-media { border-radius: 1.25rem; min-height: 25rem; }
   .premium-trust-row { grid-template-columns: 1fr; }
   .premium-film, .premium-life-card, .editorial-heading, .winery-premium-hero { border-radius: 1.1rem; }
+  .premium-film, .premium-life-grid, .premium-values, .premium-process, .premium-winery-invite,
+  .professional-benefits, .professional-process, .professional-cta {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    max-width: calc(100% - 2rem);
+    width: auto;
+  }
   .premium-values, .premium-process-grid { grid-template-columns: 1fr; }
   .premium-values article { min-height: auto; }
+  .premium-process { padding-left: 0; padding-right: 0; }
   .catalog-filters, .wine-grid, .wineries-page .winery-grid { grid-template-columns: 1fr; }
   .catalog-filters .field-wide { grid-column: auto; }
-  .site-footer { padding-bottom: 2rem; }
+  .premium-hero-actions, .professional-actions { display: grid; grid-template-columns: 1fr; }
+  .premium-hero-actions .button, .professional-actions .button, .premium-winery-invite .button, .professional-cta .button {
+    min-width: 0;
+    width: 100%;
+  }
+  .site-footer { padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
   .footer-nav-groups { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 22.5rem) {
+  .site-header { gap: .3rem; padding-left: .5rem; padding-right: .5rem; }
+  .brand-lockup { height: 2.2rem; width: 6.8rem; }
+  .brand-logo-artwork { width: 9.6rem; }
+  .language-selector select { max-width: 4rem; width: 4rem; }
+  .mobile-navigation summary { font-size: 0; min-width: 2.75rem; padding: 0; width: 2.75rem; }
+  .mobile-navigation summary::after { content: "☰"; font-size: 1.15rem; line-height: 1; }
+  .premium-hero h1 { font-size: clamp(2.65rem, 14vw, 3.4rem); }
 }
