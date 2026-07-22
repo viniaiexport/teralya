@@ -3,7 +3,7 @@
   admin off
 }
 
-staging.teralya.eu {
+staging.teralya.eu, teralya.eu, www.teralya.eu {
   encode zstd gzip
 
   header {
