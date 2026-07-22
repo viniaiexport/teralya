@@ -31,18 +31,35 @@
 }
 
 @media (max-width: 42rem) {
-  html, body { max-width: 100%; overflow-x: hidden; }
+  html, body { max-width: 100%; overflow-x: clip; }
   body { min-width: 0; }
-  .warm-hero { min-height:39rem;padding-top:5rem; }
-  .warm-hero h1 { font-size:clamp(3.25rem,15vw,5rem); }
+  .warm-home { width:100%; }
+  .warm-hero {
+    align-items:end;
+    background-position:62% center;
+    min-height:calc(100svh - 4.4rem);
+    min-height:max(35rem,calc(100svh - 4.4rem));
+    padding:4rem max(1rem,env(safe-area-inset-right)) 2.25rem max(1rem,env(safe-area-inset-left));
+  }
+  .warm-hero::before {
+    background:linear-gradient(90deg,rgba(20,10,7,.82),rgba(20,10,7,.38) 75%,rgba(20,10,7,.18));
+    content:"";
+    inset:0;
+    position:absolute;
+    z-index:-1;
+  }
+  .warm-hero-copy { max-width:100%;width:100%; }
+  .warm-hero h1 { font-size:clamp(2.7rem,13vw,4.1rem);line-height:.94;max-width:10.5ch;overflow-wrap:normal; }
+  .warm-hero-copy>p:not(.eyebrow) { font-size:.98rem;line-height:1.58;max-width:31rem; }
   .warm-hero .hero-actions { display:grid; }
-  .warm-hero .button { width:100%; }
+  .warm-hero .button { min-height:3.15rem;width:100%; }
   .warm-trust-strip { grid-template-columns:1fr; }
   .warm-trust-strip article { justify-content:flex-start; }
   .warm-trust-strip article+article { border-left:0;border-top:1px solid #dfd2c1; }
   .recommended-section>header { align-items:flex-start;display:grid;gap:1rem; }
-  .recommended-grid { display:flex;margin-right:-1.25rem;overflow-x:auto;padding-bottom:1rem;scroll-snap-type:x mandatory; }
-  .recommended-wine-card { flex:0 0 82%;scroll-snap-align:start; }
+  .recommended-section { padding-left:1rem;padding-right:1rem; }
+  .recommended-grid { display:grid;gap:1rem;grid-template-columns:1fr;margin-right:0;overflow:visible;padding-bottom:0; }
+  .recommended-wine-card { width:100%; }
   .warm-story-image { min-height:24rem; }
   .site-shell, .site-header, main { max-width: 100%; min-width: 0; width: 100%; }
   main, main > *, section, article, form, fieldset, nav { min-width: 0; }
@@ -82,7 +99,10 @@
     touch-action: manipulation;
   }
   .mobile-navigation nav {
+    background:#15131d;
     bottom: auto;
+    border-radius:.75rem;
+    box-shadow:0 1.25rem 3.5rem rgba(0,0,0,.48);
     left: max(.65rem, env(safe-area-inset-left));
     max-height: 80vh;
     max-height: calc(100dvh - 5.2rem);
@@ -100,6 +120,14 @@
     min-height: 2.85rem;
     padding: .8rem;
     touch-action: manipulation;
+  }
+  .mobile-navigation[open] summary { background:rgba(233,189,117,.12); }
+  .mobile-navigation[open]::before {
+    background:rgba(5,4,8,.58);
+    content:"";
+    inset:4.4rem 0 0;
+    position:fixed;
+    z-index:99;
   }
 
   .premium-hero { padding: 2.8rem 1rem 2.4rem; }
