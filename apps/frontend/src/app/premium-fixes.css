@@ -7,3 +7,37 @@
   content: none !important;
   display: none !important;
 }
+
+
+/* Home winery invitation: preserve readable contrast over the cellar photograph. */
+.warm-winery-invite {
+  background-image:
+    linear-gradient(90deg, rgba(31, 15, 11, .94) 0%, rgba(31, 15, 11, .82) 42%, rgba(31, 15, 11, .38) 72%, rgba(31, 15, 11, .18) 100%),
+    var(--cellar-photo);
+  background-blend-mode: normal;
+  color: #fff;
+  isolation: isolate;
+}
+
+.warm-winery-invite .eyebrow {
+  color: #f2bd78;
+}
+
+.warm-winery-invite h2 {
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .38);
+}
+
+.warm-winery-invite p:not(.eyebrow) {
+  color: #f3e9df;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .32);
+}
+
+@media (max-width: 42rem) {
+  .warm-winery-invite {
+    background-image:
+      linear-gradient(90deg, rgba(31, 15, 11, .94), rgba(31, 15, 11, .7)),
+      var(--cellar-photo);
+    background-position: 55% center;
+  }
+}
