@@ -6,7 +6,7 @@ vi.mock('../src/lib/api/client', () => ({ apiRequest }));
 vi.mock('../src/lib/session/session', () => ({ readAccessToken, readSessionIdentity }));
 
 import { allowedSubOrderTransitions } from '../src/lib/suborders/contracts';
-import { getWinerySubOrder, listWinerySubOrders, transitionWinerySubOrder } from '../src/lib/suborders/server';
+import { getWineryEconomicDocument, getWinerySubOrder, listWinerySubOrders, transitionWinerySubOrder } from '../src/lib/suborders/server';
 
 const id = '33333333-3333-4333-8333-333333333333';
 
@@ -33,6 +33,14 @@ describe('contrato FE-007 SubPedidos de bodega', () => {
     apiRequest.mockResolvedValue({ id, estado: 'aceptado' });
     await transitionWinerySubOrder(id, 'aceptado');
     expect(apiRequest).toHaveBeenCalledWith(`/bodegas/yo/subpedidos/${id}/estado`, { method: 'PATCH', token: 'opaque-token', body: { estado_destino: 'aceptado' } });
+  });
+
+  it('consulta liquidación y factura propias por API-055/API-056',async()=>{
+    apiRequest.mockResolvedValue({pedido_id:id});
+    await getWineryEconomicDocument(id,'liquidacion');
+    expect(apiRequest).toHaveBeenLastCalledWith(`/bodegas/yo/subpedidos/${id}/liquidacion`,{method:'GET',token:'opaque-token'});
+    await getWineryEconomicDocument(id,'factura-comision');
+    expect(apiRequest).toHaveBeenLastCalledWith(`/bodegas/yo/subpedidos/${id}/factura-comision`,{method:'GET',token:'opaque-token'});
   });
 
   it('representa exactamente la matriz contractual de transiciones', () => {

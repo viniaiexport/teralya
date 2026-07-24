@@ -48,6 +48,33 @@ export class CheckoutPaymentRepository {
           kind: "conflict",
           message: "El pedido no está pendiente de pago.",
         };
+      const connect = await client.query<{ total: number; ready: number }>(
+        `SELECT count(DISTINCT v.bodega_id)::int AS total,
+                count(DISTINCT v.bodega_id) FILTER (
+                  WHERE c.estado_cuenta='activa'
+                    AND c.cuenta_verificada
+                    AND c.cargos_habilitados
+                    AND c.cobros_habilitados
+                )::int AS ready
+           FROM pedido p
+           JOIN carrito_item ci ON ci.carrito_id=p.carrito_id
+           JOIN vino v ON v.id=ci.vino_id
+           LEFT JOIN cuenta_stripe_connect c ON c.bodega_id=v.bodega_id
+          WHERE p.id=$1`,
+        [pedidoId],
+      );
+      const connectState = connect.rows[0];
+      if (
+        connectState === undefined ||
+        connectState.total === 0 ||
+        connectState.ready !== connectState.total
+      ) {
+        return {
+          kind: "conflict",
+          message:
+            "Una o más bodegas todavía no tienen Stripe Connect operativo.",
+        };
+      }
       const payments = await client.query<{
         id: string;
         estado: string;

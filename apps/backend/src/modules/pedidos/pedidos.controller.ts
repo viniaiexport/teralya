@@ -18,6 +18,7 @@ import {
   type PageOrderSummary,
 } from "./dto/pedidos.dto.js";
 import { PedidosService } from "./pedidos.service.js";
+import type { EconomicDocumentDto } from "./dto/economic-document.dto.js";
 
 @Controller("pedidos")
 @UseGuards(BearerAuthGuard)
@@ -39,6 +40,15 @@ export class PedidosController {
     @Param("id") id: string,
   ): Promise<OrderBuyerDetail> {
     return this.service.obtener(actor.usuarioId, id);
+  }
+
+  /** API-054 — GET /pedidos/{id}/justificante. */
+  @Get(":id/justificante")
+  justificante(
+    @CurrentActor() actor: SessionActor,
+    @Param("id") id: string,
+  ): Promise<EconomicDocumentDto> {
+    return this.service.justificante(actor.usuarioId, id);
   }
 
   /** API-051 — POST /pedidos/{id}/cancelacion. */

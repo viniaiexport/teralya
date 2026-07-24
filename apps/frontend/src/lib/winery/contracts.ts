@@ -2,6 +2,18 @@ import type { Page } from '@/lib/orders/contracts';
 
 export type WineryState = 'borrador'|'pendiente_revision'|'aprobada'|'activa'|'suspendida'|'archivada';
 export type WineState = 'borrador'|'pendiente_revision'|'publicado'|'oculto'|'archivado';
+export interface StripeConnectStatus {
+  estado:'no_iniciada'|'pendiente'|'en_revision'|'activa'|'restringida'|'suspendida';
+  cuenta_verificada:boolean;
+  cargos_habilitados:boolean;
+  cobros_habilitados:boolean;
+  puede_cobrar:boolean;
+  ultima_sincronizacion?:string;
+}
+export interface StripeConnectOnboarding extends StripeConnectStatus {
+  onboarding_url:string;
+  expires_at:string;
+}
 
 export interface WineryProfile {
   id:string; nombre_comercial:string; estado:WineryState; created_at:string; updated_at:string;

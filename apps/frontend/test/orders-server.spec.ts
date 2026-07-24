@@ -15,6 +15,7 @@ vi.mock("../src/lib/session/session", () => ({
 import {
   cancelBuyerOrder,
   getBuyerOrder,
+  getBuyerReceipt,
   listBuyerOrders,
 } from "../src/lib/orders/server";
 
@@ -84,6 +85,18 @@ describe("contrato de pedidos del comprador FE-007", () => {
       method: "POST",
       token: "opaque-token",
     });
+  });
+
+  it("consulta el justificante propio mediante API-054", async () => {
+    apiRequest.mockResolvedValue({
+      tipo: "justificante_cliente",
+      pedido_id: orderId,
+    });
+    await getBuyerReceipt(orderId);
+    expect(apiRequest).toHaveBeenCalledWith(
+      `/pedidos/${orderId}/justificante`,
+      { method: "GET", token: "opaque-token" },
+    );
   });
 
   it("rechaza identificadores manipulados sin consultar la API", async () => {

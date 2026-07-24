@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { PoolClient } from 'pg';
 import { DatabaseService } from '../../common/database/database.service.js';
 import type { AddressSnapshot, OrderLine, SubOrderState } from './dto/subpedido.dto.js';
+import type { EconomicDocumentDto } from '../pedidos/dto/economic-document.dto.js';
 
 export interface SubOrderRecord {
   id:string; pedido_id:string; bodega_id:string; estado:SubOrderState; subtotal:string; gastos_envio:string; impuestos:string; total:string;
@@ -21,6 +22,7 @@ export class SubpedidosRepository {
   async bodegaPuedeOperar(id:string):Promise<boolean>{const rows=await this.database.query<{allowed:boolean}>("SELECT EXISTS(SELECT 1 FROM bodega WHERE id=$1 AND estado IN ('aprobada','activa')) allowed",[id]);return rows[0]?.allowed??false;}
   async listar(bodegaId:string,page:number,pageSize:number):Promise<{items:SubOrderRecord[];total:number}>{const offset=(page-1)*pageSize;const [items,count]=await Promise.all([this.database.query<SubOrderRecord>(`${BASE} WHERE s.bodega_id=$1 ORDER BY s.fecha_ultimo_cambio_estado DESC,s.id LIMIT $2 OFFSET $3`,[bodegaId,pageSize,offset]),this.database.query<{total:number}>(`SELECT count(*)::int total FROM subpedido WHERE bodega_id=$1`,[bodegaId])]);return{items,total:count[0]?.total??0};}
   async obtener(id:string,bodegaId:string):Promise<OwnedResult>{const rows=await this.database.query<SubOrderRecord>(`${BASE} WHERE s.id=$1`,[id]);return this.owned(rows[0],bodegaId);}
+  async documento(id:string,bodegaId:string,tipo:'liquidacion_bodega'|'factura_comision'):Promise<EconomicDocumentDto|'foreign'|null>{const rows=await this.database.query<EconomicDocumentDto&{bodega_id:string}>(`SELECT d.tipo,d.numero_documento,d.pedido_id,d.subpedido_id,d.bodega_id,d.emisor_snapshot emisor,d.receptor_snapshot receptor,d.importes_snapshot importes,d.moneda,d.leyenda,d.emitido_at FROM documento_economico d WHERE d.subpedido_id=$1 AND d.tipo=$2 AND d.anulado_at IS NULL`,[id,tipo]);const row=rows[0];if(row===undefined)return null;if(row.bodega_id!==bodegaId)return'foreign';return{tipo:row.tipo,numero_documento:row.numero_documento,pedido_id:row.pedido_id,...(row.subpedido_id===undefined?{}:{subpedido_id:row.subpedido_id}),emisor:row.emisor,receptor:row.receptor,importes:row.importes,moneda:'EUR',leyenda:row.leyenda,emitido_at:new Date(row.emitido_at).toISOString()};}
   cambiarEstado(id:string,bodegaId:string,userId:string,destination:SubOrderState):Promise<TransitionResult>{return this.database.withTransaction(async c=>{
     const probeRows=await c.query<{id:string;pedido_id:string;bodega_id:string}>('SELECT id,pedido_id,bodega_id FROM subpedido WHERE id=$1',[id]);const probe=probeRows.rows[0];if(probe===undefined)return{kind:'missing'};if(probe.bodega_id!==bodegaId)return{kind:'foreign'};
     await c.query('SELECT id FROM pedido WHERE id=$1 FOR UPDATE',[probe.pedido_id]);

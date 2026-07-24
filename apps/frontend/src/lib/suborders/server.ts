@@ -3,6 +3,7 @@ import { apiRequest } from '@/lib/api/client';
 import { isUuid } from '@/lib/cart/contracts';
 import { readAccessToken, readSessionIdentity } from '@/lib/session/session';
 import type { SubOrderDetail, SubOrderPage, SubOrderState } from './contracts';
+import type { EconomicDocument } from '@/lib/orders/contracts';
 
 async function requiredWineryToken(): Promise<string> {
   const [identity, token] = await Promise.all([readSessionIdentity(), readAccessToken()]);
@@ -24,4 +25,9 @@ export async function getWinerySubOrder(id: string): Promise<SubOrderDetail> {
 export async function transitionWinerySubOrder(id: string, destination: SubOrderState): Promise<SubOrderDetail> {
   if (!isUuid(id)) throw new Error('SubPedido inválido.');
   return apiRequest<SubOrderDetail>(`/bodegas/yo/subpedidos/${encodeURIComponent(id)}/estado`, { method: 'PATCH', token: await requiredWineryToken(), body: { estado_destino: destination } });
+}
+
+export async function getWineryEconomicDocument(id:string,type:'liquidacion'|'factura-comision'):Promise<EconomicDocument>{
+  if(!isUuid(id))throw new Error('SubPedido inválido.');
+  return apiRequest<EconomicDocument>(`/bodegas/yo/subpedidos/${encodeURIComponent(id)}/${type}`,{method:'GET',token:await requiredWineryToken()});
 }

@@ -41,9 +41,9 @@ describe('approved OpenAPI contract', () => {
 
   it('keeps the approved surface unchanged', () => {
     expect(contract.openapi).toBe('3.1.0');
-    expect(Object.keys(contract.paths)).toHaveLength(42);
-    expect(allOperations).toHaveLength(51);
-    expect(new Set(allOperations.map((operation) => operation['x-teralya-api-code'])).size).toBe(51);
+    expect(Object.keys(contract.paths)).toHaveLength(47);
+    expect(allOperations).toHaveLength(56);
+    expect(new Set(allOperations.map((operation) => operation['x-teralya-api-code'])).size).toBe(56);
     expect(contract.paths['/health']).toBeUndefined();
     expect(contract.paths['/metrics']).toBeUndefined();
   });

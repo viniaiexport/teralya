@@ -217,6 +217,16 @@ export default async function BuyerOrderDetailPage({
           </p>
         </aside>
       </div>
+      {order.estado !== "pendiente_pago" && (
+        <p>
+          <Link
+            className="button secondary"
+            href={`/pedidos/${encodeURIComponent(order.id)}/justificante`}
+          >
+            Ver justificante de pago
+          </Link>
+        </p>
+      )}
       {order.puede_cancelar && <CancelOrderForm orderId={order.id} />}
       {!order.puede_cancelar &&
         order.cancelacion === undefined &&

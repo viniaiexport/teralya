@@ -99,7 +99,9 @@ jobs:
       - name: Apply approved PostgreSQL schema
         run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f docs/INF/teralya_schema_v1.5_APROBADO.sql
       - name: Reapply incremental migration idempotently
-        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/migrations/20260717_001_cierre_web.sql
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/migrations/20260717_001_cierre_web.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/migrations/20260724_002_pagos_connect_documentos.sql
       - run: npm run backend:check
       - uses: actions/setup-python@v5
         with:

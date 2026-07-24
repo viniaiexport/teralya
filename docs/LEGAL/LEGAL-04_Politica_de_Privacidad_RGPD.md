@@ -1,6 +1,6 @@
 # LEGAL-04 — Política de Privacidad (RGPD)
 
-**Teralya · Versión 1.0 · Julio 2026 · Preparado por Claude · Estado: APROBADO PARA LA VERSIÓN ACTUAL**
+**Teralya · Versión 1.1 · Julio 2026 · Estado: APROBADO PARA LA VERSIÓN ACTUAL**
 
 ## ⚠️ Aviso obligatorio
 
@@ -21,6 +21,7 @@ Documento aprobado para la versión actual, redactado a partir del Reglamento (U
 | Direcciones | Direcciones de envío y facturación propias del Comprador | Ejecución del contrato |
 | Datos de pedido | Carrito, pedidos, subpedidos, líneas de pedido | Ejecución del contrato |
 | Datos de pago | Referencia de sesión/pago de Stripe; Teralya no almacena datos de tarjeta | Ejecución del contrato; el propio procesamiento de tarjeta lo realiza Stripe como encargado |
+| Datos de cobro de Bodega | Identificador y estado de la cuenta Stripe Connect; Teralya no almacena datos bancarios | Ejecución del contrato con la Bodega |
 | Datos de sesión | Token de sesión HTTP Bearer, IP y agente de usuario en registros de auditoría | Interés legítimo de seguridad (art. 6.1.f) |
 | Incidencias | Descripción y estado de incidencias relacionadas con un pedido | Ejecución del contrato / interés legítimo |
 | Comunicaciones | Correos transaccionales (confirmación, recuperación de contraseña) | Ejecución del contrato |

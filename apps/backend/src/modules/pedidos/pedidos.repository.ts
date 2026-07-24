@@ -14,6 +14,7 @@ import type {
   OrderLine,
   OrderState,
 } from "./dto/pedidos.dto.js";
+import type { EconomicDocumentDto } from "./dto/economic-document.dto.js";
 
 export interface OrderRecord {
   id: string;
@@ -58,6 +59,10 @@ interface CancellationContext extends CancellationNotificationContext {
   stripeSessionId: string;
   stripeRefundId: string | null;
   attempt: number;
+  transferencias: {
+    id: string;
+    stripeTransferId: string;
+  }[];
 }
 
 interface CancellationOrderRow {
@@ -206,6 +211,38 @@ export class PedidosRepository {
     };
   }
 
+  async justificante(
+    owner: string,
+    id: string,
+  ): Promise<EconomicDocumentDto | "foreign" | null> {
+    const rows = await this.database.query<
+      EconomicDocumentDto & { comprador_id: string }
+    >(
+      `SELECT d.tipo,d.numero_documento,d.pedido_id,d.emisor_snapshot AS emisor,
+              d.receptor_snapshot AS receptor,d.importes_snapshot AS importes,
+              d.moneda,d.leyenda,d.emitido_at,p.comprador_id
+         FROM documento_economico d
+         JOIN pedido p ON p.id=d.pedido_id
+        WHERE d.pedido_id=$1 AND d.tipo='justificante_cliente'
+          AND d.anulado_at IS NULL`,
+      [id],
+    );
+    const row = rows[0];
+    if (row === undefined) return null;
+    if (row.comprador_id !== owner) return "foreign";
+    return {
+      tipo: row.tipo,
+      numero_documento: row.numero_documento,
+      pedido_id: row.pedido_id,
+      emisor: row.emisor,
+      receptor: row.receptor,
+      importes: row.importes,
+      moneda: "EUR",
+      leyenda: row.leyenda,
+      emitido_at: new Date(row.emitido_at).toISOString(),
+    };
+  }
+
   async prepararCancelacion(
     owner: string,
     id: string,
@@ -331,6 +368,23 @@ export class PedidosRepository {
           stripeSessionId: order.stripe_checkout_session_id,
           stripeRefundId: cancellation.stripe_refund_id,
           attempt: cancellation.intentos,
+          transferencias: (
+            await client.query<{
+              id: string;
+              stripe_transfer_id: string;
+            }>(
+              `SELECT id,stripe_transfer_id
+                 FROM transferencia_stripe
+                WHERE pago_id=$1 AND estado='transferida'
+                  AND stripe_transfer_id IS NOT NULL
+                ORDER BY created_at,id
+                FOR UPDATE`,
+              [order.pago_id],
+            )
+          ).rows.map((row) => ({
+            id: row.id,
+            stripeTransferId: row.stripe_transfer_id,
+          })),
         },
       };
     });
@@ -411,8 +465,15 @@ export class PedidosRepository {
         await client.query(
           `UPDATE pago
               SET estado='reembolsado',total_reembolsado=total_cobrado,
+                  total_repartido=0,
                   fecha_reembolso=coalesce(fecha_reembolso,now()),updated_at=now()
             WHERE id=$1`,
+          [context.pagoId],
+        );
+        await client.query(
+          `UPDATE documento_economico
+              SET anulado_at=coalesce(anulado_at,now())
+            WHERE pago_id=$1`,
           [context.pagoId],
         );
         order.pago_estado = "reembolsado";
@@ -420,6 +481,20 @@ export class PedidosRepository {
 
       return this.cancellationResult(order, updatedCancellation);
     });
+  }
+
+  async marcarTransferenciaRevertida(
+    id: string,
+    stripeReversalId: string,
+  ): Promise<void> {
+    await this.database.query(
+      `UPDATE transferencia_stripe
+          SET estado='revertida',stripe_reversal_id=$2,
+              reversion_estado='completada',revertida_at=coalesce(revertida_at,now()),
+              updated_at=now()
+        WHERE id=$1`,
+      [id, stripeReversalId],
+    );
   }
 
   async reclamarNotificacionCancelacion(input: {

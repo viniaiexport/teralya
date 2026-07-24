@@ -2,8 +2,8 @@ openapi: 3.1.0
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 info:
   title: Teralya API
-  version: 1.1.0
-  description: Contrato OpenAPI 3.1 del MVP. Derivado de INF-08 v2.6, INF-10 v1.1 e INF-10-A v1.1.
+  version: 1.2.0
+  description: Contrato OpenAPI 3.1 del MVP. Derivado de INF-08 v2.6, INF-10 v1.1, INF-10-A v1.1 y el addendum de pagos Stripe Connect aprobado el 24/07/2026.
   contact:
     name: Teralya
     url: https://teralya.es
@@ -7133,6 +7133,145 @@ paths:
         schema: *id001
         description: Identificador id
         example: 11111111-1111-4111-8111-111111111111
+  /bodegas/yo/stripe-connect/onboarding:
+    post:
+      operationId: api052
+      x-teralya-api-code: API-052
+      tags:
+      - Bodegas
+      summary: Iniciar o continuar el alta de Stripe Connect
+      description: Crea de forma idempotente la cuenta Express de la bodega y devuelve un enlace alojado por Stripe.
+      security:
+      - BearerOpaque: []
+      responses:
+        '200':
+          description: Enlace de onboarding y estado sincronizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StripeConnectOnboarding'
+        '401':
+          description: Authentication Required
+        '403':
+          description: Forbidden
+        '409':
+          description: La bodega no está aprobada o activa
+        '502':
+          description: Upstream Error
+        '503':
+          description: Service Unavailable
+  /bodegas/yo/stripe-connect:
+    get:
+      operationId: api053
+      x-teralya-api-code: API-053
+      tags:
+      - Bodegas
+      summary: Consultar el estado de Stripe Connect
+      description: Sincroniza y devuelve el estado operativo de la cuenta Express de la bodega.
+      security:
+      - BearerOpaque: []
+      responses:
+        '200':
+          description: Estado de la cuenta conectada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StripeConnectStatus'
+        '401':
+          description: Authentication Required
+        '403':
+          description: Forbidden
+        '502':
+          description: Upstream Error
+        '503':
+          description: Service Unavailable
+  /pedidos/{id}/justificante:
+    get:
+      operationId: api054
+      x-teralya-api-code: API-054
+      tags:
+      - Pedidos
+      summary: Consultar justificante de pago
+      description: Devuelve al comprador el justificante de la transacción, expresamente no válido como factura de compra del vino.
+      security:
+      - BearerOpaque: []
+      responses:
+        '200':
+          description: Justificante de pago
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EconomicDocument'
+        '401':
+          description: Authentication Required
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource Not Found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+        description: Identificador del Pedido
+  /bodegas/yo/subpedidos/{id}/liquidacion:
+    get:
+      operationId: api055
+      x-teralya-api-code: API-055
+      tags:
+      - SubPedidos
+      summary: Consultar liquidación de una bodega
+      description: Devuelve el desglose del vino neto, comisión, transporte e importe transferido.
+      security:
+      - BearerOpaque: []
+      responses:
+        '200':
+          description: Liquidación económica
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EconomicDocument'
+        '401':
+          description: Authentication Required
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource Not Found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+        description: Identificador del SubPedido
+  /bodegas/yo/subpedidos/{id}/factura-comision:
+    get:
+      operationId: api056
+      x-teralya-api-code: API-056
+      tags:
+      - SubPedidos
+      summary: Consultar factura de comisión
+      description: Devuelve el documento de comisión de intermediación. Su validez fiscal en producción exige datos fiscales verificados y la validación tributaria externa registrada.
+      security:
+      - BearerOpaque: []
+      responses:
+        '200':
+          description: Factura de comisión
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EconomicDocument'
+        '401':
+          description: Authentication Required
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource Not Found
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+        description: Identificador del SubPedido
 components:
   securitySchemes:
     BearerOpaque:
@@ -7144,6 +7283,93 @@ components:
       description: Identificador UUID de trazabilidad
       schema: *id001
   schemas:
+    StripeConnectStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        estado:
+          type: string
+          enum:
+          - no_iniciada
+          - pendiente
+          - en_revision
+          - activa
+          - restringida
+          - suspendida
+        cuenta_verificada:
+          type: boolean
+        cargos_habilitados:
+          type: boolean
+        cobros_habilitados:
+          type: boolean
+        puede_cobrar:
+          type: boolean
+        ultima_sincronizacion:
+          type: string
+          format: date-time
+      required:
+      - estado
+      - cuenta_verificada
+      - cargos_habilitados
+      - cobros_habilitados
+      - puede_cobrar
+    StripeConnectOnboarding:
+      allOf:
+      - $ref: '#/components/schemas/StripeConnectStatus'
+      - type: object
+        additionalProperties: false
+        properties:
+          onboarding_url:
+            type: string
+            format: uri
+          expires_at:
+            type: string
+            format: date-time
+        required:
+        - onboarding_url
+        - expires_at
+    EconomicDocument:
+      type: object
+      additionalProperties: false
+      properties:
+        tipo:
+          type: string
+          enum:
+          - justificante_cliente
+          - liquidacion_bodega
+          - factura_comision
+        numero_documento:
+          type: string
+          minLength: 1
+        pedido_id: *id001
+        subpedido_id: *id001
+        emisor:
+          type: object
+          additionalProperties: true
+        receptor:
+          type: object
+          additionalProperties: true
+        importes:
+          type: object
+          additionalProperties: true
+        moneda:
+          type: string
+          const: EUR
+        leyenda:
+          type: string
+        emitido_at:
+          type: string
+          format: date-time
+      required:
+      - tipo
+      - numero_documento
+      - pedido_id
+      - emisor
+      - receptor
+      - importes
+      - moneda
+      - leyenda
+      - emitido_at
     FieldError:
       type: object
       additionalProperties: false

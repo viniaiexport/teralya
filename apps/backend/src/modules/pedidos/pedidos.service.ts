@@ -22,6 +22,7 @@ import type {
   PageOrderSummary,
 } from "./dto/pedidos.dto.js";
 import { PedidosRepository } from "./pedidos.repository.js";
+import type { EconomicDocumentDto } from "./dto/economic-document.dto.js";
 
 @Injectable()
 export class PedidosService {
@@ -86,6 +87,19 @@ export class PedidosService {
     };
   }
 
+  async justificante(owner: string, id: string): Promise<EconomicDocumentDto> {
+    if (!isUUID(id)) this.notFound();
+    const result = await this.repository.justificante(owner, id);
+    if (result === null) this.notFound();
+    if (result === "foreign") {
+      throw new ForbiddenException({
+        code: "FORBIDDEN",
+        message: "El pedido pertenece a otro comprador.",
+      });
+    }
+    return result;
+  }
+
   async cancelar(owner: string, id: string): Promise<OrderCancellationResult> {
     if (!isUUID(id)) this.notFound();
     const prepared = await this.repository.prepararCancelacion(owner, id);
@@ -114,6 +128,21 @@ export class PedidosService {
     const { context } = prepared;
     let refund;
     try {
+      for (const transfer of context.transferencias) {
+        const reversal = await this.stripe.createTransferReversal({
+          transferId: transfer.stripeTransferId,
+          idempotencyKey: `teralya-reversal-${transfer.id}`,
+          metadata: {
+            pedido_id: context.pedidoId,
+            pago_id: context.pagoId,
+            cancelacion_id: context.cancelacionId,
+          },
+        });
+        await this.repository.marcarTransferenciaRevertida(
+          transfer.id,
+          reversal.id,
+        );
+      }
       if (context.stripeRefundId === null) {
         const paymentIntentId =
           await this.stripe.retrieveCheckoutSessionPaymentIntent(
