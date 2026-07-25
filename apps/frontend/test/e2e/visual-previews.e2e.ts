@@ -3,7 +3,8 @@ import {expect,test} from '@playwright/test';
 const wineId='11111111-1111-4111-8111-111111111111';
 const wineryId='22222222-2222-4222-8222-222222222222';
 
-test('genera las primeras vistas públicas de Teralya',async({page})=>{
+test('genera las primeras vistas públicas de Teralya',async({page,context})=>{
+  await context.addCookies([{name:'teralya_locale',value:'es',domain:'127.0.0.1',path:'/'}]);
   await page.setViewportSize({width:1440,height:1000});
   const previews=[
     {path:'/',heading:'El vino que eliges. La historia que recibes.',file:'01-portada.png'},
@@ -30,7 +31,8 @@ test('publica un sitemap con catálogo y bodegas',async({request})=>{
   expect(xml).toContain('/para-bodegas');
 });
 
-test('la portada no desborda ni depende de un vídeo externo en móvil',async({page})=>{
+test('la portada no desborda ni depende de un vídeo externo en móvil',async({page,context})=>{
+  await context.addCookies([{name:'teralya_locale',value:'es',domain:'127.0.0.1',path:'/'}]);
   await page.setViewportSize({width:393,height:852});
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'El vino que eliges. La historia que recibes.',exact:true})).toBeVisible();
