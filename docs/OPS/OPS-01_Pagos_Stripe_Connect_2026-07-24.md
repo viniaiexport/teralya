@@ -34,7 +34,7 @@
 - cuentas Connect de producción completadas por las Bodegas;
 - secretos live de Stripe y webhook separados de test;
 - desglose definitivo del transporte por Bodega cuando se cierre la decisión de envíos; hasta entonces staging distribuye el total de transporte proporcionalmente al vino de cada SubPedido;
-- cierre del gate de dependencias: Next.js se actualizó a 16.2.11, pero el árbol oficial todavía incorpora avisos de severidad alta en PostCSS 8.4.31 y Sharp 0.34.5 sin una actualización compatible publicada por Next.js;
+- gate de dependencias cerrado: PostCSS 8.5.23 y Sharp 0.35.3 quedan fijados mediante `overrides`; `npm audit --omit=dev --audit-level=high` devuelve 0 vulnerabilidades;
 - aprobación de Seguridad y cierre del resto de gates de OPS-01.
 
 La rama no autoriza despliegue en producción por sí sola.
