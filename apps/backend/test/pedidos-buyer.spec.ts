@@ -19,6 +19,7 @@ function setup() {
     obtener: vi.fn(),
     prepararCancelacion: vi.fn(),
     aplicarReembolso: vi.fn(),
+    marcarTransferenciaRevertida: vi.fn(),
     reclamarNotificacionCancelacion: vi
       .fn()
       .mockResolvedValue("44444444-4444-4444-8444-444444444444"),
@@ -28,6 +29,7 @@ function setup() {
     retrieveCheckoutSessionPaymentIntent: vi.fn(),
     createRefund: vi.fn(),
     retrieveRefund: vi.fn(),
+    createTransferReversal: vi.fn(),
   };
   const mail = { send: vi.fn() };
   return {
@@ -122,6 +124,7 @@ describe("API-051 cancelación contractual", () => {
     stripeSessionId: "cs_test_1",
     stripeRefundId: null,
     attempt: 1,
+    transferencias: [],
   };
   const completed = {
     pedido_id: ID,
@@ -164,6 +167,49 @@ describe("API-051 cancelación contractual", () => {
     );
     expect(repository.finalizarNotificacionCancelacion).toHaveBeenCalledWith(
       expect.objectContaining({ emailSent: true }),
+    );
+  });
+
+  it("revierte las transferencias antes de reembolsar el cobro", async () => {
+    const { repository, stripe, service } = setup();
+    const transfer = {
+      id: "55555555-5555-4555-8555-555555555555",
+      stripeTransferId: "tr_test_1",
+    };
+    repository.prepararCancelacion.mockResolvedValue({
+      kind: "ready",
+      context: { ...context, transferencias: [transfer] },
+    });
+    stripe.createTransferReversal.mockResolvedValue({
+      id: "trr_test_1",
+      transferId: transfer.stripeTransferId,
+      amountCents: 1000,
+    });
+    stripe.retrieveCheckoutSessionPaymentIntent.mockResolvedValue("pi_test_1");
+    stripe.createRefund.mockResolvedValue({
+      id: "re_test_1",
+      paymentIntentId: "pi_test_1",
+      status: "succeeded",
+    });
+    repository.aplicarReembolso.mockResolvedValue(completed);
+
+    await service.cancelar("u", ID);
+
+    expect(stripe.createTransferReversal).toHaveBeenCalledWith({
+      transferId: transfer.stripeTransferId,
+      idempotencyKey: `teralya-reversal-${transfer.id}`,
+      metadata: {
+        pedido_id: ID,
+        pago_id: context.pagoId,
+        cancelacion_id: context.cancelacionId,
+      },
+    });
+    expect(repository.marcarTransferenciaRevertida).toHaveBeenCalledWith(
+      transfer.id,
+      "trr_test_1",
+    );
+    expect(stripe.createTransferReversal.mock.invocationCallOrder[0]).toBeLessThan(
+      stripe.createRefund.mock.invocationCallOrder[0] as number,
     );
   });
 

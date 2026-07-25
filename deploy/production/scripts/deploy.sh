@@ -21,6 +21,8 @@ docker compose --env-file .env.production -f compose.yaml pull
 docker compose --env-file .env.production -f compose.yaml up -d postgres redis --wait --wait-timeout 120
 docker compose --env-file .env.production -f compose.yaml exec -T postgres \
   psql -U teralya -d teralya -v ON_ERROR_STOP=1 < database/migrations/20260717_001_cierre_web.sql
+docker compose --env-file .env.production -f compose.yaml exec -T postgres \
+  psql -U teralya -d teralya -v ON_ERROR_STOP=1 < database/migrations/20260724_002_pagos_connect_documentos.sql
 docker compose --env-file .env.production -f compose.yaml up -d --remove-orphans
 
 services=(postgres redis backend frontend caddy)

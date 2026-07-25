@@ -10,18 +10,25 @@ async function login(
   await page.getByRole("button", { name: "Entrar" }).click();
 }
 
-test("navega del inicio al catálogo y conserva filtros", async ({ page }) => {
+test("navega del inicio al catálogo y conserva filtros", async ({
+  page,
+  context,
+}) => {
+  await context.addCookies([
+    { name: "teralya_locale", value: "es", domain: "127.0.0.1", path: "/" },
+  ]);
   const response = await page.goto("/");
   expect(response?.headers()["x-content-type-options"]).toBe("nosniff");
   await expect(page.locator("main")).toHaveCount(1);
   await expect(
     page.getByRole("heading", {
-      name: "Descubre las bodegas que están construyendo Teralya.",
+      name: "El vino que eliges. La historia que recibes.",
+      exact: true,
     }),
   ).toBeVisible();
   await page
     .locator(".hero-actions")
-    .getByRole("link", { name: "Explorar vinos" })
+    .getByRole("link", { name: "Descubrir vinos" })
     .click();
   await expect(page.locator("main")).toHaveCount(1);
   await expect(
@@ -116,6 +123,7 @@ test("entra como comprador y cancela un pedido propio de forma directa", async (
       cancelButton.click(),
     ]);
   }
+  await page.reload();
   await expect(
     page.getByText(
       "El pedido está cancelado y el reembolso ha sido confirmado.",

@@ -2,12 +2,13 @@ import {beforeEach,describe,expect,it,vi} from 'vitest';
 vi.mock('server-only',()=>({}));
 const {apiRequest,readAccessToken,readSessionIdentity}=vi.hoisted(()=>({apiRequest:vi.fn(),readAccessToken:vi.fn(),readSessionIdentity:vi.fn()}));
 vi.mock('../src/lib/api/client',()=>({apiRequest}));vi.mock('../src/lib/session/session',()=>({readAccessToken,readSessionIdentity}));
-import {authorizeWineImageUpload,confirmWineImage,createWineryWine,deleteWineImage,getWineryProfile,getWineryWine,listWineryWines,requestWinePublication,updateWineImage,updateWineryProfile,updateWineryWine} from '../src/lib/winery/server';
+import {authorizeWineImageUpload,confirmWineImage,createWineryWine,deleteWineImage,getStripeConnectStatus,getWineryProfile,getWineryWine,listWineryWines,requestWinePublication,startStripeConnectOnboarding,updateWineImage,updateWineryProfile,updateWineryWine} from '../src/lib/winery/server';
 const id='44444444-4444-4444-8444-444444444444';
 const input={nombre_comercial:'Vino',precio:'12.50',moneda:'EUR' as const,stock_disponible:10,disponible_venta:true};
 beforeEach(()=>{vi.clearAllMocks();readSessionIdentity.mockResolvedValue({usuario_id:'u',rol:'bodega',bodega_id:'b'});readAccessToken.mockResolvedValue('token')});
 describe('contratos de perfil y vinos FE-007',()=>{
  it('consulta y actualiza perfil por API-031/API-006',async()=>{apiRequest.mockResolvedValue({id});await getWineryProfile();expect(apiRequest).toHaveBeenLastCalledWith('/bodegas/yo/perfil',{method:'GET',token:'token'});await updateWineryProfile({region:'Rioja'});expect(apiRequest).toHaveBeenLastCalledWith('/bodegas/yo/perfil',{method:'PATCH',token:'token',body:{region:'Rioja'}})});
+ it('consulta y vincula Stripe Connect por API-053/API-052',async()=>{apiRequest.mockResolvedValue({estado:'pendiente'});await getStripeConnectStatus();expect(apiRequest).toHaveBeenLastCalledWith('/bodegas/yo/stripe-connect',{method:'GET',token:'token'});await startStripeConnectOnboarding();expect(apiRequest).toHaveBeenLastCalledWith('/bodegas/yo/stripe-connect/onboarding',{method:'POST',token:'token'})});
  it('crea vino en borrador por API-007',async()=>{apiRequest.mockResolvedValue({id});await createWineryWine(input);expect(apiRequest).toHaveBeenCalledWith('/bodegas/yo/vinos',{method:'POST',token:'token',body:input})});
  it('lista y filtra vinos propios por API-032',async()=>{apiRequest.mockResolvedValue({items:[]});await listWineryWines(2,'borrador');expect(apiRequest).toHaveBeenCalledWith('/bodegas/yo/vinos?page=2&page_size=20&estado=borrador',{method:'GET',token:'token'})});
  it('consulta y reemplaza vino propio por API-033/API-008',async()=>{apiRequest.mockResolvedValue({id});await getWineryWine(id);expect(apiRequest).toHaveBeenLastCalledWith(`/bodegas/yo/vinos/${id}`,{method:'GET',token:'token'});await updateWineryWine(id,input);expect(apiRequest).toHaveBeenLastCalledWith(`/bodegas/yo/vinos/${id}`,{method:'PUT',token:'token',body:input})});

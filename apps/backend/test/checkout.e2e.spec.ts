@@ -50,6 +50,9 @@ class FakeStripe implements StripeGateway {
   retrieveCheckoutSessionPaymentIntent(id: string): Promise<string> {
     return Promise.resolve(`pi_${id}`);
   }
+  retrieveCheckoutSessionCharge(id: string): Promise<string> {
+    return Promise.resolve(`ch_${id}`);
+  }
   createRefund(input: {
     paymentIntentId: string;
   }): Promise<{ id: string; paymentIntentId: string; status: "succeeded" }> {
@@ -67,6 +70,54 @@ class FakeStripe implements StripeGateway {
       id,
       paymentIntentId: "pi_test",
       status: "succeeded",
+    });
+  }
+  createConnectedAccount(): Promise<{
+    id: string;
+    detailsSubmitted: boolean;
+    chargesEnabled: boolean;
+    payoutsEnabled: boolean;
+    country: string;
+    defaultCurrency: string;
+  }> {
+    return Promise.resolve({
+      id: "acct_test",
+      detailsSubmitted: true,
+      chargesEnabled: true,
+      payoutsEnabled: true,
+      country: "ES",
+      defaultCurrency: "eur",
+    });
+  }
+  createConnectedAccountLink(): Promise<{ url: string; expiresAt: number }> {
+    return Promise.resolve({
+      url: "https://connect.stripe.test/onboarding",
+      expiresAt: Math.floor(Date.now() / 1000) + 600,
+    });
+  }
+  retrieveConnectedAccount(): ReturnType<FakeStripe["createConnectedAccount"]> {
+    return this.createConnectedAccount();
+  }
+  createTransfer(input: {
+    amountCents: number;
+    currency: "eur";
+    destination: string;
+    sourceTransaction: string;
+  }): Promise<{
+    id: string;
+    amountCents: number;
+    currency: "eur";
+    destination: string;
+  }> {
+    return Promise.resolve({ id: "tr_test", ...input });
+  }
+  createTransferReversal(input: {
+    transferId: string;
+  }): Promise<{ id: string; transferId: string; amountCents: number }> {
+    return Promise.resolve({
+      id: "trr_test",
+      transferId: input.transferId,
+      amountCents: 0,
     });
   }
 }
@@ -108,6 +159,13 @@ describe("API016 checkout E2E", () => {
       `INSERT INTO bodega(nombre_comercial,estado,tipo,comision) VALUES('Checkout Bodega','aprobada','estandar',10) RETURNING id`,
     );
     winery = req(b.rows[0]).id;
+    await pool.query(
+      `INSERT INTO cuenta_stripe_connect(
+         bodega_id,stripe_account_id,estado_cuenta,cuenta_verificada,
+         cargos_habilitados,cobros_habilitados,pais,moneda
+       ) VALUES($1,'acct_checkout','activa',true,true,true,'ES','EUR')`,
+      [winery],
+    );
     const v = await pool.query<{ id: string }>(
       `INSERT INTO vino(bodega_id,nombre_comercial,precio,moneda,stock_disponible,disponible_venta,estado,fecha_publicacion) VALUES($1,'Checkout Wine',10,'EUR',20,true,'publicado',now()) RETURNING id`,
       [winery],

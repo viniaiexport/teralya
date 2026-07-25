@@ -1,6 +1,6 @@
 # LEGAL-03 — Términos y Condiciones de Uso
 
-**Teralya · Versión 1.1 · Julio 2026 · Preparado por Claude · Estado: APROBADO PARA LA VERSIÓN ACTUAL**
+**Teralya · Versión 1.2 · Julio 2026 · Estado: APROBADO PARA LA VERSIÓN ACTUAL**
 
 ## ⚠️ Aviso obligatorio
 
@@ -47,6 +47,11 @@ Estos Términos aplican a cualquier persona que navegue, se registre o compre en
 
 - El pago se procesa mediante Stripe Checkout. Teralya no almacena datos de tarjeta.
 - El cargo se confirma de forma asíncrona mediante el webhook de Stripe; si el stock ya no está disponible en el momento de la confirmación, el sistema revierte la operación de forma atómica y no permite stock negativo.
+- El Comprador realiza un único pago, aunque el Pedido incluya varias Bodegas. Stripe Connect distribuye después el importe correspondiente a cada una.
+- La comisión estándar de Teralya es el 15 % del importe del vino después de descuentos. El transporte se atribuye íntegramente a la Bodega correspondiente.
+- Teralya entrega al Comprador un justificante de la transacción del dinero. Ese justificante no es la factura de compra del vino.
+- La factura de la compraventa, cuando deba emitirse o el Comprador la solicite, corresponde exclusivamente a la Bodega vendedora.
+- Teralya entrega a cada Bodega una liquidación del SubPedido y factura a la Bodega su servicio de intermediación conforme al tratamiento fiscal aplicable.
 
 ## 7. Derecho de desistimiento y cancelación
 

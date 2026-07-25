@@ -4,12 +4,14 @@ import type { SessionActor } from '../../common/security/session.service.js';
 import type { SubOrderQueryDto } from './dto/subpedido-request.dto.js';
 import type { PageSubOrderSummary, SubOrderDetail, SubOrderState, SubOrderSummary, Tracking } from './dto/subpedido.dto.js';
 import { SubpedidosRepository, type OwnedResult, type SubOrderRecord, type TransitionResult } from './subpedidos.repository.js';
+import type { EconomicDocumentDto } from '../pedidos/dto/economic-document.dto.js';
 
 @Injectable()
 export class SubpedidosService {
   constructor(private readonly repository:SubpedidosRepository){}
   async listar(actor:SessionActor,query:SubOrderQueryDto):Promise<PageSubOrderSummary>{const bodegaId=await this.operationalBodega(actor);const result=await this.repository.listar(bodegaId,query.page,query.page_size);return{items:result.items.map(row=>this.summary(row)),page:query.page,page_size:query.page_size,total_items:result.total,total_pages:Math.ceil(result.total/query.page_size)};}
   async obtener(actor:SessionActor,id:string):Promise<SubOrderDetail>{this.validId(id);return this.detail(this.resolve(await this.repository.obtener(id,await this.operationalBodega(actor))));}
+  async documento(actor:SessionActor,id:string,tipo:'liquidacion_bodega'|'factura_comision'):Promise<EconomicDocumentDto>{this.validId(id);const result=await this.repository.documento(id,await this.operationalBodega(actor),tipo);if(result===null)this.notFound();if(result==='foreign')throw new ForbiddenException({code:'FORBIDDEN',message:'El subpedido pertenece a otra bodega.'});return result;}
   async cambiarEstado(actor:SessionActor,id:string,destination:SubOrderState):Promise<SubOrderDetail>{this.validId(id);const result=await this.repository.cambiarEstado(id,await this.operationalBodega(actor),actor.usuarioId,destination);if(result.kind==='conflict')throw new ConflictException({code:'CONFLICT',message:'La transición logística solicitada no está permitida.'});return this.detail(this.resolve(result));}
   private bodegaId(actor:SessionActor):string{if(actor.rol!=='bodega'||actor.bodegaId===undefined)throw new ForbiddenException({code:'FORBIDDEN',message:'La sesión no está asociada a una bodega.'});return actor.bodegaId;}
   private async operationalBodega(actor:SessionActor):Promise<string>{const id=this.bodegaId(actor);if(!await this.repository.bodegaPuedeOperar(id))throw new ForbiddenException({code:'FORBIDDEN',message:'La bodega no está validada para operar.'});return id;}
