@@ -3,7 +3,8 @@ jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 info:
   title: Teralya API
   version: 1.2.0
-  description: Contrato OpenAPI 3.1 del MVP. Derivado de INF-08 v2.6, INF-10 v1.1, INF-10-A v1.1 y el addendum de pagos Stripe Connect aprobado el 24/07/2026.
+  description: Contrato OpenAPI 3.1 del MVP. Derivado de INF-08 v2.6, INF-10 v1.1, INF-10-A v1.1 y el addendum de pagos Stripe
+    Connect aprobado el 24/07/2026.
   contact:
     name: Teralya
     url: https://teralya.es
@@ -7137,141 +7138,585 @@ paths:
     post:
       operationId: api052
       x-teralya-api-code: API-052
+      x-teralya-cu: []
+      x-teralya-pt:
+      - PT-BOD-002
       tags:
       - Bodegas
       summary: Iniciar o continuar el alta de Stripe Connect
-      description: Crea de forma idempotente la cuenta Express de la bodega y devuelve un enlace alojado por Stripe.
+      description: Crea de forma idempotente una única cuenta Express por Bodega, sincroniza su estado y devuelve un enlace
+        alojado por Stripe.
       security:
       - BearerOpaque: []
       responses:
         '200':
-          description: Enlace de onboarding y estado sincronizado
+          description: Operación completada
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/StripeConnectOnboarding'
+              examples:
+                success:
+                  value:
+                    estado: no_iniciada
+                    cuenta_verificada: true
+                    cargos_habilitados: true
+                    cobros_habilitados: true
+                    puede_cobrar: true
+                    onboarding_url: https://example.com/recurso
+                    expires_at: '2026-07-13T12:00:00Z'
         '401':
           description: Authentication Required
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+            WWW-Authenticate:
+              description: Desafío Bearer según RFC 6750
+              schema:
+                type: string
+                const: Bearer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/authentication-required
+                    title: Authentication Required
+                    status: 401
+                    detail: La solicitud no pudo completarse.
+                    code: AUTHENTICATION_REQUIRED
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '403':
           description: Forbidden
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/forbidden
+                    title: Forbidden
+                    status: 403
+                    detail: La solicitud no pudo completarse.
+                    code: FORBIDDEN
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
+        '404':
+          description: Resource Not Found
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/resource-not-found
+                    title: Resource Not Found
+                    status: 404
+                    detail: La solicitud no pudo completarse.
+                    code: RESOURCE_NOT_FOUND
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '409':
-          description: La bodega no está aprobada o activa
+          description: Conflict
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/conflict
+                    title: Conflict
+                    status: 409
+                    detail: La solicitud no pudo completarse.
+                    code: CONFLICT
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '502':
           description: Upstream Error
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/upstream-error
+                    title: Upstream Error
+                    status: 502
+                    detail: La solicitud no pudo completarse.
+                    code: UPSTREAM_ERROR
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: true
         '503':
           description: Service Unavailable
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/service-unavailable
+                    title: Service Unavailable
+                    status: 503
+                    detail: La solicitud no pudo completarse.
+                    code: SERVICE_UNAVAILABLE
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: true
   /bodegas/yo/stripe-connect:
     get:
       operationId: api053
       x-teralya-api-code: API-053
+      x-teralya-cu: []
+      x-teralya-pt:
+      - PT-BOD-002
       tags:
       - Bodegas
       summary: Consultar el estado de Stripe Connect
-      description: Sincroniza y devuelve el estado operativo de la cuenta Express de la bodega.
+      description: Sincroniza desde Stripe y devuelve el estado operativo de la cuenta Express de la Bodega.
       security:
       - BearerOpaque: []
       responses:
         '200':
-          description: Estado de la cuenta conectada
+          description: Operación completada
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/StripeConnectStatus'
+              examples:
+                success:
+                  value:
+                    estado: no_iniciada
+                    cuenta_verificada: true
+                    cargos_habilitados: true
+                    cobros_habilitados: true
+                    puede_cobrar: true
         '401':
           description: Authentication Required
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+            WWW-Authenticate:
+              description: Desafío Bearer según RFC 6750
+              schema:
+                type: string
+                const: Bearer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/authentication-required
+                    title: Authentication Required
+                    status: 401
+                    detail: La solicitud no pudo completarse.
+                    code: AUTHENTICATION_REQUIRED
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '403':
           description: Forbidden
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/forbidden
+                    title: Forbidden
+                    status: 403
+                    detail: La solicitud no pudo completarse.
+                    code: FORBIDDEN
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '502':
           description: Upstream Error
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/upstream-error
+                    title: Upstream Error
+                    status: 502
+                    detail: La solicitud no pudo completarse.
+                    code: UPSTREAM_ERROR
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: true
         '503':
           description: Service Unavailable
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/service-unavailable
+                    title: Service Unavailable
+                    status: 503
+                    detail: La solicitud no pudo completarse.
+                    code: SERVICE_UNAVAILABLE
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: true
   /pedidos/{id}/justificante:
     get:
       operationId: api054
       x-teralya-api-code: API-054
+      x-teralya-cu:
+      - CU-011
+      x-teralya-pt:
+      - PT-COM-007
       tags:
       - Pedidos
       summary: Consultar justificante de pago
-      description: Devuelve al comprador el justificante de la transacción, expresamente no válido como factura de compra del vino.
+      description: Devuelve al Comprador el justificante correlativo REC de la transacción. No es factura de compra del vino;
+        la factura corresponde a la Bodega vendedora.
       security:
       - BearerOpaque: []
       responses:
         '200':
-          description: Justificante de pago
+          description: Operación completada
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EconomicDocument'
+              examples:
+                success:
+                  value:
+                    tipo: justificante_cliente
+                    numero_documento: aaaaa
+                    pedido_id: 11111111-1111-4111-8111-111111111111
+                    emisor: {}
+                    receptor: {}
+                    importes: {}
+                    moneda: EUR
+                    leyenda: aaaaa
+                    emitido_at: '2026-07-13T12:00:00Z'
         '401':
           description: Authentication Required
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+            WWW-Authenticate:
+              description: Desafío Bearer según RFC 6750
+              schema:
+                type: string
+                const: Bearer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/authentication-required
+                    title: Authentication Required
+                    status: 401
+                    detail: La solicitud no pudo completarse.
+                    code: AUTHENTICATION_REQUIRED
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '403':
           description: Forbidden
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/forbidden
+                    title: Forbidden
+                    status: 403
+                    detail: La solicitud no pudo completarse.
+                    code: FORBIDDEN
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '404':
           description: Resource Not Found
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/resource-not-found
+                    title: Resource Not Found
+                    status: 404
+                    detail: La solicitud no pudo completarse.
+                    code: RESOURCE_NOT_FOUND
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
       parameters:
       - name: id
         in: path
         required: true
         schema: *id001
-        description: Identificador del Pedido
+        description: Identificador id
+        example: 11111111-1111-4111-8111-111111111111
   /bodegas/yo/subpedidos/{id}/liquidacion:
     get:
       operationId: api055
       x-teralya-api-code: API-055
+      x-teralya-cu:
+      - CU-018
+      x-teralya-pt:
+      - PT-BOD-008
       tags:
       - SubPedidos
-      summary: Consultar liquidación de una bodega
-      description: Devuelve el desglose del vino neto, comisión, transporte e importe transferido.
+      summary: Consultar liquidación de una Bodega
+      description: Devuelve a la Bodega propietaria el documento correlativo LIQ con vino bruto, descuentos, vino neto, transporte,
+        impuestos, comisión e importe transferido.
       security:
       - BearerOpaque: []
       responses:
         '200':
-          description: Liquidación económica
+          description: Operación completada
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EconomicDocument'
+              examples:
+                success:
+                  value:
+                    tipo: justificante_cliente
+                    numero_documento: aaaaa
+                    pedido_id: 11111111-1111-4111-8111-111111111111
+                    emisor: {}
+                    receptor: {}
+                    importes: {}
+                    moneda: EUR
+                    leyenda: aaaaa
+                    emitido_at: '2026-07-13T12:00:00Z'
         '401':
           description: Authentication Required
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+            WWW-Authenticate:
+              description: Desafío Bearer según RFC 6750
+              schema:
+                type: string
+                const: Bearer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/authentication-required
+                    title: Authentication Required
+                    status: 401
+                    detail: La solicitud no pudo completarse.
+                    code: AUTHENTICATION_REQUIRED
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '403':
           description: Forbidden
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/forbidden
+                    title: Forbidden
+                    status: 403
+                    detail: La solicitud no pudo completarse.
+                    code: FORBIDDEN
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '404':
           description: Resource Not Found
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/resource-not-found
+                    title: Resource Not Found
+                    status: 404
+                    detail: La solicitud no pudo completarse.
+                    code: RESOURCE_NOT_FOUND
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
       parameters:
       - name: id
         in: path
         required: true
         schema: *id001
-        description: Identificador del SubPedido
+        description: Identificador id
+        example: 11111111-1111-4111-8111-111111111111
   /bodegas/yo/subpedidos/{id}/factura-comision:
     get:
       operationId: api056
       x-teralya-api-code: API-056
+      x-teralya-cu:
+      - CU-018
+      x-teralya-pt:
+      - PT-BOD-008
       tags:
       - SubPedidos
       summary: Consultar factura de comisión
-      description: Devuelve el documento de comisión de intermediación. Su validez fiscal en producción exige datos fiscales verificados y la validación tributaria externa registrada.
+      description: Devuelve a la Bodega propietaria el documento correlativo FAC por la comisión de intermediación. Su validez
+        fiscal final exige datos verificados y validación tributaria externa.
       security:
       - BearerOpaque: []
       responses:
         '200':
-          description: Factura de comisión
+          description: Operación completada
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EconomicDocument'
+              examples:
+                success:
+                  value:
+                    tipo: justificante_cliente
+                    numero_documento: aaaaa
+                    pedido_id: 11111111-1111-4111-8111-111111111111
+                    emisor: {}
+                    receptor: {}
+                    importes: {}
+                    moneda: EUR
+                    leyenda: aaaaa
+                    emitido_at: '2026-07-13T12:00:00Z'
         '401':
           description: Authentication Required
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+            WWW-Authenticate:
+              description: Desafío Bearer según RFC 6750
+              schema:
+                type: string
+                const: Bearer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/authentication-required
+                    title: Authentication Required
+                    status: 401
+                    detail: La solicitud no pudo completarse.
+                    code: AUTHENTICATION_REQUIRED
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '403':
           description: Forbidden
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/forbidden
+                    title: Forbidden
+                    status: 403
+                    detail: La solicitud no pudo completarse.
+                    code: FORBIDDEN
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
         '404':
           description: Resource Not Found
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/XRequestId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                error:
+                  value:
+                    type: https://teralya.es/problems/resource-not-found
+                    title: Resource Not Found
+                    status: 404
+                    detail: La solicitud no pudo completarse.
+                    code: RESOURCE_NOT_FOUND
+                    request_id: 11111111-1111-4111-8111-111111111111
+                    retryable: false
       parameters:
       - name: id
         in: path
         required: true
         schema: *id001
-        description: Identificador del SubPedido
+        description: Identificador id
+        example: 11111111-1111-4111-8111-111111111111
 components:
   securitySchemes:
     BearerOpaque:
@@ -7283,93 +7728,6 @@ components:
       description: Identificador UUID de trazabilidad
       schema: *id001
   schemas:
-    StripeConnectStatus:
-      type: object
-      additionalProperties: false
-      properties:
-        estado:
-          type: string
-          enum:
-          - no_iniciada
-          - pendiente
-          - en_revision
-          - activa
-          - restringida
-          - suspendida
-        cuenta_verificada:
-          type: boolean
-        cargos_habilitados:
-          type: boolean
-        cobros_habilitados:
-          type: boolean
-        puede_cobrar:
-          type: boolean
-        ultima_sincronizacion:
-          type: string
-          format: date-time
-      required:
-      - estado
-      - cuenta_verificada
-      - cargos_habilitados
-      - cobros_habilitados
-      - puede_cobrar
-    StripeConnectOnboarding:
-      allOf:
-      - $ref: '#/components/schemas/StripeConnectStatus'
-      - type: object
-        additionalProperties: false
-        properties:
-          onboarding_url:
-            type: string
-            format: uri
-          expires_at:
-            type: string
-            format: date-time
-        required:
-        - onboarding_url
-        - expires_at
-    EconomicDocument:
-      type: object
-      additionalProperties: false
-      properties:
-        tipo:
-          type: string
-          enum:
-          - justificante_cliente
-          - liquidacion_bodega
-          - factura_comision
-        numero_documento:
-          type: string
-          minLength: 1
-        pedido_id: *id001
-        subpedido_id: *id001
-        emisor:
-          type: object
-          additionalProperties: true
-        receptor:
-          type: object
-          additionalProperties: true
-        importes:
-          type: object
-          additionalProperties: true
-        moneda:
-          type: string
-          const: EUR
-        leyenda:
-          type: string
-        emitido_at:
-          type: string
-          format: date-time
-      required:
-      - tipo
-      - numero_documento
-      - pedido_id
-      - emisor
-      - receptor
-      - importes
-      - moneda
-      - leyenda
-      - emitido_at
     FieldError:
       type: object
       additionalProperties: false
@@ -9412,6 +9770,94 @@ components:
       - recurso_relacionado
       - descripcion
       - updated_at
+    StripeConnectStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        estado: &id042
+          type: string
+          enum:
+          - no_iniciada
+          - pendiente
+          - en_revision
+          - activa
+          - restringida
+          - suspendida
+        cuenta_verificada: &id043
+          type: boolean
+        cargos_habilitados: &id044
+          type: boolean
+        cobros_habilitados: &id045
+          type: boolean
+        puede_cobrar: &id046
+          type: boolean
+        ultima_sincronizacion: *id025
+      required:
+      - estado
+      - cuenta_verificada
+      - cargos_habilitados
+      - cobros_habilitados
+      - puede_cobrar
+    StripeConnectOnboarding:
+      type: object
+      additionalProperties: false
+      properties:
+        estado: *id042
+        cuenta_verificada: *id043
+        cargos_habilitados: *id044
+        cobros_habilitados: *id045
+        puede_cobrar: *id046
+        ultima_sincronizacion: *id025
+        onboarding_url: *id016
+        expires_at: *id025
+      required:
+      - estado
+      - cuenta_verificada
+      - cargos_habilitados
+      - cobros_habilitados
+      - puede_cobrar
+      - onboarding_url
+      - expires_at
+    EconomicDocument:
+      type: object
+      additionalProperties: false
+      properties:
+        tipo:
+          type: string
+          enum:
+          - justificante_cliente
+          - liquidacion_bodega
+          - factura_comision
+        numero_documento:
+          type: string
+          minLength: 1
+        pedido_id: *id001
+        subpedido_id: *id001
+        emisor:
+          type: object
+          additionalProperties: true
+        receptor:
+          type: object
+          additionalProperties: true
+        importes:
+          type: object
+          additionalProperties: true
+        moneda:
+          type: string
+          const: EUR
+        leyenda:
+          type: string
+        emitido_at: *id025
+      required:
+      - tipo
+      - numero_documento
+      - pedido_id
+      - emisor
+      - receptor
+      - importes
+      - moneda
+      - leyenda
+      - emitido_at
     PageBodegaAdminSummary:
       type: object
       additionalProperties: false

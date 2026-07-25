@@ -397,6 +397,40 @@ incident_detail["properties"].update({"descripcion": T5000, "updated_at": DATETI
 incident_detail["required"] += ["descripcion", "updated_at"]
 add("IncidentDetail", incident_detail)
 
+stripe_connect_status_props = {
+    "estado": string(enum=[
+        "no_iniciada", "pendiente", "en_revision", "activa", "restringida", "suspendida",
+    ]),
+    "cuenta_verificada": boolean(),
+    "cargos_habilitados": boolean(),
+    "cobros_habilitados": boolean(),
+    "puede_cobrar": boolean(),
+    "ultima_sincronizacion": DATETIME,
+}
+stripe_connect_status_required = [
+    "estado", "cuenta_verificada", "cargos_habilitados", "cobros_habilitados", "puede_cobrar",
+]
+add("StripeConnectStatus", obj(stripe_connect_status_props, stripe_connect_status_required))
+add("StripeConnectOnboarding", obj(
+    {**stripe_connect_status_props, "onboarding_url": URI, "expires_at": DATETIME},
+    [*stripe_connect_status_required, "onboarding_url", "expires_at"],
+))
+add("EconomicDocument", obj({
+    "tipo": string(enum=["justificante_cliente", "liquidacion_bodega", "factura_comision"]),
+    "numero_documento": string(minLength=1),
+    "pedido_id": UUID,
+    "subpedido_id": UUID,
+    "emisor": {"type": "object", "additionalProperties": True},
+    "receptor": {"type": "object", "additionalProperties": True},
+    "importes": {"type": "object", "additionalProperties": True},
+    "moneda": {"type": "string", "const": "EUR"},
+    "leyenda": string(),
+    "emitido_at": DATETIME,
+}, [
+    "tipo", "numero_documento", "pedido_id", "emisor", "receptor",
+    "importes", "moneda", "leyenda", "emitido_at",
+]))
+
 
 def page_schema(item):
     return obj({
@@ -596,6 +630,36 @@ op(48,"POST","/bodegas/yo/vinos/{id}/imagenes","Imágenes","Confirmar imagen car
 op(49,"PATCH","/bodegas/yo/vinos/{id}/imagenes/{imagen_id}","Imágenes","Actualizar metadatos de imagen",200,"Image",[400,401,403,404,409,500],"ImagePatchRequest",params=[idp(),idp("imagen_id")])
 op(50,"DELETE","/bodegas/yo/vinos/{id}/imagenes/{imagen_id}","Imágenes","Desactivar imagen",204,None,[401,403,404,409,500],params=[idp(),idp("imagen_id")],success_status=204)
 op(51,"POST","/pedidos/{id}/cancelacion","Pedidos","Cancelar Pedido propio",200,"OrderCancellationResult",[401,403,404,409,500,502,503],params=[idp()])
+op(
+    52, "POST", "/bodegas/yo/stripe-connect/onboarding", "Bodegas",
+    "Iniciar o continuar el alta de Stripe Connect", 200, "StripeConnectOnboarding",
+    [401,403,404,409,502,503],
+    description="Crea de forma idempotente una única cuenta Express por Bodega, sincroniza su estado y devuelve un enlace alojado por Stripe.",
+)
+op(
+    53, "GET", "/bodegas/yo/stripe-connect", "Bodegas",
+    "Consultar el estado de Stripe Connect", 200, "StripeConnectStatus",
+    [401,403,502,503],
+    description="Sincroniza desde Stripe y devuelve el estado operativo de la cuenta Express de la Bodega.",
+)
+op(
+    54, "GET", "/pedidos/{id}/justificante", "Pedidos",
+    "Consultar justificante de pago", 200, "EconomicDocument",
+    [401,403,404], params=[idp()],
+    description="Devuelve al Comprador el justificante correlativo REC de la transacción. No es factura de compra del vino; la factura corresponde a la Bodega vendedora.",
+)
+op(
+    55, "GET", "/bodegas/yo/subpedidos/{id}/liquidacion", "SubPedidos",
+    "Consultar liquidación de una Bodega", 200, "EconomicDocument",
+    [401,403,404], params=[idp()],
+    description="Devuelve a la Bodega propietaria el documento correlativo LIQ con vino bruto, descuentos, vino neto, transporte, impuestos, comisión e importe transferido.",
+)
+op(
+    56, "GET", "/bodegas/yo/subpedidos/{id}/factura-comision", "SubPedidos",
+    "Consultar factura de comisión", 200, "EconomicDocument",
+    [401,403,404], params=[idp()],
+    description="Devuelve a la Bodega propietaria el documento correlativo FAC por la comisión de intermediación. Su validez fiscal final exige datos verificados y validación tributaria externa.",
+)
 
 add("StripeEvent", {
     "type": "object", "additionalProperties": True,
@@ -681,6 +745,11 @@ TRACE = {
     49: (["CU-016"], ["PT-BOD-005"]),
     50: (["CU-016", "CU-017", "CU-022", "CU-023"], ["PT-BOD-005", "PT-ADM-005"]),
     51: (["CU-033"], ["PT-COM-007"]),
+    52: ([], ["PT-BOD-002"]),
+    53: ([], ["PT-BOD-002"]),
+    54: (["CU-011"], ["PT-COM-007"]),
+    55: (["CU-018"], ["PT-BOD-008"]),
+    56: (["CU-018"], ["PT-BOD-008"]),
 }
 
 SEMANTICS = {
@@ -750,8 +819,8 @@ spec = {
     "openapi": "3.1.0",
     "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
     "info": {
-        "title": "Teralya API", "version": "1.1.0",
-        "description": "Contrato OpenAPI 3.1 del MVP. Derivado de INF-08 v2.6, INF-10 v1.1 e INF-10-A v1.1.",
+        "title": "Teralya API", "version": "1.2.0",
+        "description": "Contrato OpenAPI 3.1 del MVP. Derivado de INF-08 v2.6, INF-10 v1.1, INF-10-A v1.1 y el addendum de pagos Stripe Connect aprobado el 24/07/2026.",
         "contact": {"name": "Teralya", "url": "https://teralya.es"},
         "license": {"name": "Propietario — Teralya", "identifier": "LicenseRef-Teralya-Proprietary"},
     },

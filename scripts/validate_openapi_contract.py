@@ -13,8 +13,8 @@ HTTP = {"get", "post", "put", "patch", "delete", "options", "head", "trace"}
 PUBLIC = {1, 2, 3, 4, 5, 9, 10, 29, 30}
 PAGED = {9, 19, 21, 27, 32, 35, 37, 40}
 TAG_COUNTS = {
-    "Autenticación": 4, "Bodegas": 4, "Vinos": 7, "Carrito": 5, "Checkout": 3,
-    "Pedidos": 3, "SubPedidos": 3, "Administración": 13, "Sistema": 1,
+    "Autenticación": 4, "Bodegas": 6, "Vinos": 7, "Carrito": 5, "Checkout": 3,
+    "Pedidos": 4, "SubPedidos": 5, "Administración": 13, "Sistema": 1,
     "Direcciones": 4, "Imágenes": 4,
 }
 MANIFEST = """
@@ -69,6 +69,11 @@ MANIFEST = """
 049 PATCH /bodegas/yo/vinos/{id}/imagenes/{imagen_id}
 050 DELETE /bodegas/yo/vinos/{id}/imagenes/{imagen_id}
 051 POST /pedidos/{id}/cancelacion
+052 POST /bodegas/yo/stripe-connect/onboarding
+053 GET /bodegas/yo/stripe-connect
+054 GET /pedidos/{id}/justificante
+055 GET /bodegas/yo/subpedidos/{id}/liquidacion
+056 GET /bodegas/yo/subpedidos/{id}/factura-comision
 """
 EXPECTED = {int(c): (m.lower(), p) for c, m, p in (line.split() for line in MANIFEST.splitlines() if line)}
 errors = []
@@ -103,7 +108,7 @@ for path, item in doc.get("paths", {}).items():
         check(code not in operations, f"API-{code:03d} duplicada")
         operations[code] = (method, path, operation)
 
-check(set(operations) == set(range(1, 52)), "deben existir exactamente API-001..API-051")
+check(set(operations) == set(range(1, 57)), "deben existir exactamente API-001..API-056")
 for code, expected in EXPECTED.items():
     if code not in operations:
         continue
@@ -134,6 +139,10 @@ check("204" in operations[46][2]["responses"] and "204" in operations[50][2]["re
 check(operations[29][2].get("x-raw-body-required") is True, "API-029: falta body crudo")
 check(operations[29][2].get("security") == [], "API-029: debe usar Stripe-Signature obligatorio sin Bearer")
 check(set(operations[51][2]["responses"]) == {"200", "401", "403", "404", "409", "500", "502", "503"}, "API-051: respuestas incorrectas")
+check(set(operations[52][2]["responses"]) == {"200", "401", "403", "404", "409", "502", "503"}, "API-052: respuestas incorrectas")
+check(set(operations[53][2]["responses"]) == {"200", "401", "403", "502", "503"}, "API-053: respuestas incorrectas")
+for code in (54, 55, 56):
+    check(set(operations[code][2]["responses"]) == {"200", "401", "403", "404"}, f"API-{code:03d}: respuestas incorrectas")
 
 cart_merge = doc["components"]["schemas"]["CartMergeRequest"]["properties"]["items"]
 check(cart_merge.get("minItems") == 1 and cart_merge.get("maxItems") == 100, "CartMergeRequest.items debe admitir 1..100")
@@ -181,7 +190,17 @@ def walk(node, location="#"):
                 resolve_ref(doc, node["$ref"])
             except (KeyError, TypeError):
                 errors.append(f"{location}: $ref no resoluble {node['$ref']}")
-        if node.get("type") == "object" and location.startswith("#/components/schemas") and not location.startswith("#/components/schemas/StripeEvent"):
+        freeform_economic = location.startswith((
+            "#/components/schemas/EconomicDocument/properties/emisor",
+            "#/components/schemas/EconomicDocument/properties/receptor",
+            "#/components/schemas/EconomicDocument/properties/importes",
+        ))
+        if (
+            node.get("type") == "object"
+            and location.startswith("#/components/schemas")
+            and not location.startswith("#/components/schemas/StripeEvent")
+            and not freeform_economic
+        ):
             check(node.get("additionalProperties") is False, f"{location}: additionalProperties debe ser false")
         if {"subtotal", "gastos_envio", "impuestos", "total"} <= set(node) and all(isinstance(node[k], str) for k in ("subtotal", "gastos_envio", "impuestos", "total")):
             expected = float(node["subtotal"]) + float(node["gastos_envio"]) + float(node["impuestos"]) - float(node.get("descuentos", "0.00"))
@@ -199,4 +218,4 @@ if errors:
     for error in errors:
         print(f"- {error}")
     raise SystemExit(1)
-print(f"OK: {SOURCE} — 51 operaciones, 42 rutas, 11 módulos y {len(doc['components']['schemas'])} schemas")
+print(f"OK: {SOURCE} — 56 operaciones, 47 rutas, 11 módulos y {len(doc['components']['schemas'])} schemas")
