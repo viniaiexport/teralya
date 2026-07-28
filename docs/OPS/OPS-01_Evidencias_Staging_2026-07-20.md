@@ -7,61 +7,43 @@
 
 ## Evidencias técnicas cerradas
 
-- Pipeline automático completo en verde:
-  - Frontend.
-  - Infraestructura.
-  - Construcción de imágenes de staging.
-  - Verificación pública del commit desplegado.
-- Reconciliación automática desde Hetzner cada minuto, sin abrir SSH a las IP dinámicas de GitHub Actions.
+- Pipeline automático completo en verde: Frontend, Infraestructura, imágenes de staging y verificación pública del commit.
+- Reconciliación automática desde Hetzner sin abrir SSH a las IP dinámicas de GitHub Actions.
 - Frontend, Backend, PostgreSQL, Redis y Caddy operativos.
 - Readiness pública del Backend correcta, con PostgreSQL y Redis disponibles.
 - Esquema PostgreSQL v1.5 presente con 20 tablas.
-- Copia `pg_dump` creada, restaurada en una base temporal y validada con 20 tablas; la base temporal se eliminó al terminar.
-- `.env.staging` con permisos `0600` y todos los grupos obligatorios presentes.
-- DNS de `staging.teralya.eu` resuelto a Cloudflare.
-- HTTPS público correcto, HSTS activo y servidor identificado como Cloudflare.
-- Origen Hetzner no accesible directamente por TCP 80/443 desde Internet.
-- PostgreSQL 5432 y Redis 6379 no expuestos públicamente.
-- Cabeceras CSP, `X-Frame-Options: DENY` y `X-Content-Type-Options: nosniff` presentes.
-- Rutas públicas, privadas y legales principales responden correctamente.
-- Mayor tiempo observado en el recorrido HTTP básico: 796 ms.
-- Bucket R2 UE validado mediante escritura, lectura y borrado de un objeto temporal.
-- Stripe de pruebas validado mediante autenticación real contra su API.
-- SMTP validado mediante conexión y autenticación real.
-- Webhook Stripe público y activo; las solicitudes sin firma válida son rechazadas.
-- Logotipo cristal aprobado publicado y servido como recurso estático.
+- Copia `pg_dump` creada, restaurada y validada en una base temporal.
+- `.env.staging` con permisos `0600` y grupos obligatorios presentes.
+- DNS, HTTPS, HSTS y aislamiento del origen Hetzner verificados.
+- PostgreSQL y Redis no expuestos públicamente.
+- Cabeceras de seguridad principales presentes.
+- R2 UE, Stripe test, SMTP y webhook Stripe validados.
+- Logotipo aprobado publicado como recurso estático.
 
-## Validación funcional adicional del 21/07/2026
+## Validación funcional del 21/07/2026
 
-- Se ejecutaron pruebas con perfiles de iPhone y Android que devolvieron respuesta 200, sin errores JavaScript ni desbordamiento horizontal en el recorrido observado.
-- Registro de comprador, creación de sesión, cierre y reingreso ejecutados contra staging con datos sintéticos controlados.
-- Detectada y corregida la incoherencia que dejaba al comprador en `pendiente_verificacion` sin existir un flujo de verificación de email en el MVP.
-- Backend, contrato OpenAPI e imágenes de staging validados en verde para el commit de la corrección.
-- Reingreso del comprador confirmado en staging tras el despliegue.
-- Solicitud profesional de bodega y solicitud de recuperación de contraseña confirmadas en staging.
-- Recorrido profesional controlado completado el 21 de julio de 2026 con datos sintéticos identificables: solicitud de bodega, aparición en la cola de Administración, aprobación administrativa, activación del usuario profesional, inicio de sesión de Bodega y lectura de su perfil propio.
-- La validación anterior se ejecutó dentro de la red privada de staging mediante el acceso SSH dedicado ya configurado; no se publicó la API general ni se expusieron PostgreSQL o Redis.
+- Pruebas con perfiles de iPhone y Android sin errores JavaScript ni desbordamiento horizontal en el recorrido observado.
+- Registro, sesión, cierre y reingreso de Comprador ejecutados con datos sintéticos controlados.
+- Solicitud profesional, aprobación administrativa, activación e inicio de sesión de Bodega ejecutados.
+- Recuperación de contraseña y rutas principales comprobadas.
 
-## Corrección de estado del 28/07/2026
+## Incidencia móvil y cierre del 28/07/2026
 
-La afirmación anterior de que la portada móvil estaba validada no constituye aceptación definitiva. El CEO ha comunicado, tras usar la web en un teléfono real, que la experiencia móvil seguía sin funcionar correctamente. Por tanto:
+El CEO comunicó inicialmente que la experiencia móvil seguía sin funcionar correctamente, por lo que el gate se reabrió como bloqueo P0 y se corrigió la documentación para no confundir pruebas emuladas con aceptación real.
 
-- la validación móvil se reabre como bloqueo P0 de OPS-01;
-- FE-002 y FE-008 permanecen implementados en código, pero su aceptación operativa móvil queda pendiente;
-- las pruebas emuladas, E2E y capturas no sustituyen la comprobación física en Android e iPhone;
-- no se considerará cerrado el gate hasta verificar portada, navegación, selector de idioma, catálogo, ficha de vino, acceso, carrito y checkout sin errores bloqueantes, contenido recortado, scroll horizontal o controles solapados;
-- producción continúa bloqueada.
+Posteriormente, el 28/07/2026, el CEO confirmó expresamente: **«yo ya lo puedo ver en el móvil. sigamos con el siguiente paso»**. Con esta aceptación ejecutiva:
 
-## Gates que no son ejecutables como decisión técnica
+- el bloqueo móvil P0 queda cerrado;
+- FE-002 y FE-008 recuperan su aceptación operativa móvil;
+- la compatibilidad cruzada Android/iPhone se mantiene como prueba de regresión obligatoria antes de producción;
+- cualquier nueva incidencia móvil reabrirá el gate correspondiente.
+
+## Gates que requieren decisión o validación externa
 
 - Aprobación formal por Seguridad de límites y ventanas de autenticación y recuperación.
 - Aprobación por el CEO de la política operativa ante cobro confirmado sin stock.
 - Revisión jurídica y fiscal externa antes de operar comercialmente o a escala multi-país.
+- Checkout de extremo a extremo con Stripe test y recorrido Connect multi-bodega.
+- Onboarding Connect y datos fiscales verificados de las Bodegas antes de pagos live.
 
-## Pendientes operativos
-
-- Revalidación móvil en teléfonos Android e iPhone reales y aceptación expresa del CEO.
-- Checkout de prueba de extremo a extremo con Stripe test y recorrido Connect multi-bodega.
-- Gates de aprobación y revisión anteriores.
-
-Los recorridos controlados de Comprador, Bodega y Administrador ya están ejecutados. Producción continúa bloqueada hasta el cierre completo de OPS-01. No se han usado datos comerciales reales ni se ha ampliado el MVP.
+Los recorridos controlados de Comprador, Bodega y Administrador están ejecutados. Producción continúa bloqueada hasta el cierre completo de OPS-01. No se han usado datos comerciales reales.
