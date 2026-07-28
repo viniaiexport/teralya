@@ -9,7 +9,9 @@ En la estructura futura de Teralya, ChatGPT asumirá el rol de **CFO — Chief F
 
 El CFO centralizará el control financiero de la empresa bajo supervisión y aprobación del CEO.
 
-## Responsabilidades
+Claude + Code asumirá el rol de **CTO — Chief Technology Officer** cuando disponga de operación completa, acceso estable al repositorio y capacidad real de ejecutar, verificar y publicar cambios sin intervención del CEO.
+
+## Responsabilidades del CFO
 
 - Presupuesto anual, trimestral y mensual.
 - Control de tesorería, caja y previsiones.
@@ -23,12 +25,27 @@ El CFO centralizará el control financiero de la empresa bajo supervisión y apr
 - Control presupuestario de los subagentes y de su consumo de herramientas y modelos.
 - Alertas sobre desviaciones, sobrecostes, falta de liquidez y riesgos financieros.
 
+## Responsabilidades del CTO futuro
+
+- Mantenimiento integral de la página web y de la plataforma.
+- Desarrollo, corrección y evolución del frontend y backend.
+- Infraestructura, despliegues, dominios, seguridad, copias de respaldo y observabilidad.
+- Mantenimiento y operación de los agentes y subagentes técnicos.
+- Gestión de las IA de la plataforma para Compradores y Bodegas.
+- Creación y operación del agente supervisor encargado de entrenar, evaluar y auditar las IA.
+- Automatizaciones técnicas de emails, integraciones, APIs y herramientas internas.
+- Revisión de código, pruebas, CI, regresiones, parches y calidad técnica.
+- Resolución de incidencias y continuidad del servicio.
+- Control técnico del Teralya Control Room y de la comunicación entre agentes.
+
 ## Gobierno
 
 - El CEO conserva la aprobación final de presupuestos, gastos, inversiones, contrataciones y decisiones económicas.
 - El CFO no podrá comprometer fondos, contratar proveedores ni modificar presupuestos sin autorización del CEO.
 - Los subagentes de marketing, publicidad, SEO, GEO, redes sociales y blog estarán coordinados económicamente por el CFO porque generan gasto y deben operar dentro de presupuesto.
-- La dirección creativa o técnica de esos subagentes podrá delegarse, pero su coste, retorno y continuidad quedarán bajo control financiero del CFO.
+- El CTO dirigirá técnicamente la web, la plataforma, el mantenimiento, los agentes y las IA.
+- La dirección creativa podrá delegarse, pero el coste, retorno y continuidad quedarán bajo control financiero del CFO.
+- CFO y CTO reportarán al CEO y deberán coordinarse mediante el Teralya Control Room.
 
 ## Sistema financiero único
 
@@ -48,13 +65,14 @@ Ese sistema deberá incluir:
 
 ## Motivo
 
-Evitar dispersión de gastos, duplicidades, pagos olvidados, campañas sin control y falta de visibilidad financiera. La empresa necesita una única autoridad de consolidación económica, siempre subordinada al CEO.
+Evitar dispersión de gastos, duplicidades, pagos olvidados, campañas sin control y falta de visibilidad financiera, al tiempo que se mantiene una responsabilidad técnica única para la web, la plataforma y los agentes.
 
 ## Impacto
 
 - Corrige la denominación errónea FCO.
 - Formaliza el cargo futuro como CFO.
-- Amplía el organigrama financiero, no el MVP funcional de la plataforma.
+- Asigna al nuevo CTO todo el mantenimiento de la web, plataforma, infraestructura y agentes.
+- Amplía el organigrama interno, no el MVP funcional de la plataforma.
 - Obliga a diseñar un sistema financiero central y reportes periódicos.
 - Añade la futura coordinación presupuestaria de marketing, publicidad, SEO, GEO, redes y blog.
 
@@ -62,6 +80,7 @@ Evitar dispersión de gastos, duplicidades, pagos olvidados, campañas sin contr
 
 - Finalización de la etapa actual de CTO.
 - Transición técnica de CTO a Claude + Code, cuando sea operativamente viable.
+- Escritura real y estable de Claude en GitHub.
 - Diseño del sistema financiero central.
 - Política de aprobaciones del CEO.
 - Integración futura con facturación, bancos, Stripe, proveedores y asesoría.
