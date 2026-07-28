@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 7.3 · 28 de julio de 2026 · Puerta de entrada a la documentación oficial**
+**Versión 7.4 · 28 de julio de 2026 · Puerta de entrada a la documentación oficial**
 
 Este índice identifica las fuentes normativas vigentes, el documento actualmente en desarrollo y los bloqueos reales. Ningún documento histórico sustituye una versión posterior identificada aquí.
 
@@ -69,6 +69,14 @@ La incorporación definitiva del asistente de IA deberá registrarse como una nu
 
 La implantación del agente requerirá revisar LEGAL-04 antes de almacenar conversaciones o preferencias.
 
+## BIZ — Análisis de negocio y mercado
+
+| Código | Nombre | Versión | Estado | Ubicación |
+|---|---|---|---|---|
+| BIZ-00 | Contexto compartido para análisis de negocio y mercado | 1.0 | ℹ️ ANALÍTICO, NO NORMATIVO | docs/BIZ/BIZ-00_Contexto_Compartido_Analisis.md |
+
+Claude Code dispone además del agente persistente `.claude/agents/teralya-analyst.md`. Debe leer este índice y BIZ-00 antes de analizar negocio o mercado. Las hipótesis de catálogo, CAC o descuentos no constituyen decisiones aprobadas.
+
 ## UX
 
 | Código | Nombre | Versión | Estado | Ubicación |
@@ -99,12 +107,13 @@ Evidencias vigentes: `docs/OPS/OPS-01_Evidencias_Staging_2026-07-20.md`. El gate
 - Infraestructura de staging publicada y automatizada.
 - Versión móvil aceptada expresamente por el CEO en un teléfono real el 28/07/2026.
 - FE-001 a FE-008 cerrados en código y con el gate móvil P0 cerrado.
+- Contexto BIZ compartido y agente persistente de análisis integrados.
 
 ### Documento actualmente en desarrollo
 
 **AI-01 — Asistente de IA para clientes.** Su primera fase define recomendación, comparación y ayuda de compra conectadas exclusivamente al catálogo real de Teralya. No se inicia implementación hasta cerrar proveedor, privacidad, presupuesto, permisos y arquitectura.
 
-OPS-01 continúa en paralelo como validación operativa del entorno y de pagos, pero deja de tener un bloqueo móvil P0.
+OPS-01 continúa en paralelo como validación operativa del entorno y de pagos.
 
 ### Siguiente paso obligatorio
 
@@ -121,4 +130,4 @@ Completar la arquitectura funcional y técnica de AI-01 y, en paralelo, ejecutar
 
 ## Regla de continuidad
 
-CAP manda sobre INF. Los cambios de arquitectura requieren ADR. Los cambios económicos, de pagos, cancelación, carrito o logística requieren decisión registrada. AI-01 no se incorporará al producto ni al código hasta que su alcance y dependencias estén cerrados documentalmente y aprobados.
+CAP manda sobre INF. Los cambios de arquitectura requieren ADR. Los cambios económicos, de pagos, cancelación, carrito o logística requieren decisión registrada. AI-01 no se incorporará al producto ni al código hasta que su alcance y dependencias estén cerrados documentalmente y aprobados. BIZ informa decisiones, pero no las sustituye.
