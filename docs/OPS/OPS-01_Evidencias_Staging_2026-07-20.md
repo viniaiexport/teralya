@@ -1,7 +1,8 @@
 # OPS-01 — Evidencias de staging
 
-**Fecha:** 20/07/2026  
-**Commit desplegado:** `b02d07e39852f9811ae6e9deb05547bdedc4c59b`  
+**Fecha inicial:** 20/07/2026  
+**Última actualización:** 28/07/2026  
+**Commit inicialmente desplegado:** `b02d07e39852f9811ae6e9deb05547bdedc4c59b`  
 **Entorno:** `https://staging.teralya.eu`
 
 ## Evidencias técnicas cerradas
@@ -32,7 +33,7 @@
 
 ## Validación funcional adicional del 21/07/2026
 
-- Portada validada con perfiles reales de iPhone y Android: respuesta 200, sin errores JavaScript y sin desbordamiento horizontal.
+- Se ejecutaron pruebas con perfiles de iPhone y Android que devolvieron respuesta 200, sin errores JavaScript ni desbordamiento horizontal en el recorrido observado.
 - Registro de comprador, creación de sesión, cierre y reingreso ejecutados contra staging con datos sintéticos controlados.
 - Detectada y corregida la incoherencia que dejaba al comprador en `pendiente_verificacion` sin existir un flujo de verificación de email en el MVP.
 - Backend, contrato OpenAPI e imágenes de staging validados en verde para el commit de la corrección.
@@ -41,10 +42,26 @@
 - Recorrido profesional controlado completado el 21 de julio de 2026 con datos sintéticos identificables: solicitud de bodega, aparición en la cola de Administración, aprobación administrativa, activación del usuario profesional, inicio de sesión de Bodega y lectura de su perfil propio.
 - La validación anterior se ejecutó dentro de la red privada de staging mediante el acceso SSH dedicado ya configurado; no se publicó la API general ni se expusieron PostgreSQL o Redis.
 
+## Corrección de estado del 28/07/2026
+
+La afirmación anterior de que la portada móvil estaba validada no constituye aceptación definitiva. El CEO ha comunicado, tras usar la web en un teléfono real, que la experiencia móvil seguía sin funcionar correctamente. Por tanto:
+
+- la validación móvil se reabre como bloqueo P0 de OPS-01;
+- FE-002 y FE-008 permanecen implementados en código, pero su aceptación operativa móvil queda pendiente;
+- las pruebas emuladas, E2E y capturas no sustituyen la comprobación física en Android e iPhone;
+- no se considerará cerrado el gate hasta verificar portada, navegación, selector de idioma, catálogo, ficha de vino, acceso, carrito y checkout sin errores bloqueantes, contenido recortado, scroll horizontal o controles solapados;
+- producción continúa bloqueada.
+
 ## Gates que no son ejecutables como decisión técnica
 
 - Aprobación formal por Seguridad de límites y ventanas de autenticación y recuperación.
 - Aprobación por el CEO de la política operativa ante cobro confirmado sin stock.
 - Revisión jurídica y fiscal externa antes de operar comercialmente o a escala multi-país.
 
-Queda por completar el checkout de prueba de extremo a extremo con Stripe test y los gates de aprobación y revisión anteriores. Los recorridos controlados de Comprador, Bodega y Administrador ya están ejecutados. Producción continúa bloqueada hasta el cierre completo de OPS-01. No se han usado datos comerciales reales ni se ha ampliado el MVP.
+## Pendientes operativos
+
+- Revalidación móvil en teléfonos Android e iPhone reales y aceptación expresa del CEO.
+- Checkout de prueba de extremo a extremo con Stripe test y recorrido Connect multi-bodega.
+- Gates de aprobación y revisión anteriores.
+
+Los recorridos controlados de Comprador, Bodega y Administrador ya están ejecutados. Producción continúa bloqueada hasta el cierre completo de OPS-01. No se han usado datos comerciales reales ni se ha ampliado el MVP.
