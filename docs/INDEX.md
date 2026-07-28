@@ -1,6 +1,6 @@
 # Índice Maestro de Documentación — Teralya
 
-**Versión 7.4 · 28 de julio de 2026 · Puerta de entrada a la documentación oficial**
+**Versión 7.5 · 28 de julio de 2026 · Puerta de entrada a la documentación oficial**
 
 Este índice identifica las fuentes normativas vigentes, el documento actualmente en desarrollo y los bloqueos reales. Ningún documento histórico sustituye una versión posterior identificada aquí.
 
@@ -36,9 +36,12 @@ Este índice identifica las fuentes normativas vigentes, el documento actualment
 
 ## DECISION LOG
 
-| Código | Versión | Estado | Ubicación |
+| Código | Nombre | Estado | Ubicación |
 |---|---|---|---|
-| DLOG | 2.4, decisiones 0001–0030 | ✅ OFICIAL | docs/DECISION_LOG/Decision_Log.md |
+| DLOG | Decisiones 0001–0030 | ✅ OFICIAL | docs/DECISION_LOG/Decision_Log.md |
+| DLOG-0031 | CFO y control centralizado de gastos; separación CFO/CTO | ✅ APROBADA POR CEO | docs/DECISION_LOG/DLOG-0031_CFO_y_Control_Centralizado_de_Gastos.md |
+
+DLOG-0031 establece que ChatGPT asumirá en el futuro el rol de CFO y que Claude + Code asumirá el rol de CTO cuando pueda operar y publicar de extremo a extremo. El CFO centralizará finanzas y presupuesto; el CTO dirigirá web, plataforma, mantenimiento, infraestructura, agentes e IA técnica.
 
 La incorporación definitiva del asistente de IA deberá registrarse como una nueva decisión cuando AI-01 cierre proveedor, privacidad, presupuesto, permisos y alcance técnico.
 
@@ -89,6 +92,12 @@ Claude Code dispone además del agente persistente `.claude/agents/teralya-analy
 |---|---|---|---|---|
 | AI-01 | Asistente de IA para clientes | 1.0 | ▶ EN DESARROLLO | docs/AI/AI-01_v1.0_Asistente_IA_Clientes_EN_DESARROLLO.md |
 
+## ORG
+
+| Código | Nombre | Versión | Estado | Ubicación |
+|---|---|---|---|---|
+| ORG-01 | Teralya Control Room | 1.0 | ▶ EN DESARROLLO | docs/ORG/ORG-01_v1.0_Teralya_Control_Room_EN_DESARROLLO.md |
+
 ## OPS
 
 | Código | Nombre | Versión | Estado | Ubicación |
@@ -108,12 +117,13 @@ Evidencias vigentes: `docs/OPS/OPS-01_Evidencias_Staging_2026-07-20.md`. El gate
 - Versión móvil aceptada expresamente por el CEO en un teléfono real el 28/07/2026.
 - FE-001 a FE-008 cerrados en código y con el gate móvil P0 cerrado.
 - Contexto BIZ compartido y agente persistente de análisis integrados.
+- Gobierno futuro CFO/CTO aprobado en DLOG-0031.
 
 ### Documento actualmente en desarrollo
 
 **AI-01 — Asistente de IA para clientes.** Su primera fase define recomendación, comparación y ayuda de compra conectadas exclusivamente al catálogo real de Teralya. No se inicia implementación hasta cerrar proveedor, privacidad, presupuesto, permisos y arquitectura.
 
-OPS-01 continúa en paralelo como validación operativa del entorno y de pagos.
+OPS-01 continúa en paralelo como validación operativa del entorno y de pagos. ORG-01 continúa en paralelo como diseño del canal de coordinación entre agentes.
 
 ### Siguiente paso obligatorio
 
@@ -123,6 +133,7 @@ Completar la arquitectura funcional y técnica de AI-01 y, en paralelo, ejecutar
 
 - **AI-01:** proveedor de IA, presupuesto, política RGPD de conversaciones, acceso a pedidos, herramientas autorizadas, permisos y escalado a soporte humano.
 - **Pagos:** recorrido Connect multi-bodega en staging, onboarding y datos fiscales de las Bodegas.
+- **Control Room:** conexión bidireccional ChatGPT-Claude y escritura real de Claude.
 - **Seguridad:** aprobación formal de límites y ventanas de autenticación y recuperación.
 - **Operación:** decisión del CEO ante cobro confirmado sin stock.
 - **Legal/fiscal externo:** revisión antes de producción y ventas multi-país a escala.
