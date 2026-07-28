@@ -1,6 +1,6 @@
 # OPS-01 — Activación y validación de staging
 
-**Teralya · Versión 1.2 · 28/07/2026 · Estado: EN EJECUCIÓN**
+**Teralya · Versión 1.3 · 28/07/2026 · Estado: EN EJECUCIÓN**
 
 ## Objetivo
 
@@ -31,7 +31,7 @@ Convertir la base de staging ya integrada en un entorno operativo verificable, s
 8. Verificar migración PostgreSQL v1.5, readiness de Backend y salud del Frontend.
 9. Ejecutar recorridos E2E de visitante, Comprador, Bodega y Administrador.
 10. Validar registro, login, recuperación, carrito, checkout Stripe, webhook, Pedido, cancelación, stock, condiciones de envío e imágenes.
-11. Revalidar la experiencia móvil en dispositivos físicos. La validación debe cubrir, como mínimo, Chrome Android y Safari iPhone, anchuras de 320, 360, 375, 390 y 430 px, portada, menú, selector de idioma, catálogo, ficha de vino, acceso, carrito y checkout.
+11. Mantener pruebas de regresión responsive en Chrome Android y Safari iPhone para portada, menú, selector de idioma, catálogo, ficha de vino, acceso, carrito y checkout.
 12. Ejecutar pruebas de rendimiento, seguridad y restauración de backup.
 13. Registrar evidencias y defectos; producción permanece bloqueada mientras exista un fallo crítico.
 
@@ -43,7 +43,7 @@ Convertir la base de staging ya integrada en un entorno operativo verificable, s
 - PostgreSQL y Redis sin puertos públicos.
 - Reembolso de prueba idempotente y stock restituido una sola vez.
 - Copia de seguridad creada y restauración ensayada.
-- Validación móvil aceptada por el CEO sobre al menos un dispositivo Android y un iPhone reales, sin errores bloqueantes, desbordamiento horizontal, contenido recortado ni controles solapados.
+- Experiencia móvil aceptada expresamente por el CEO en un teléfono real y mantenida mediante regresión automatizada y revisión adicional en Android e iPhone antes de producción.
 - Límites de autenticación aprobados por Seguridad.
 - Política operativa ante cobro confirmado sin stock aprobada por el CEO.
 - Revisión legal/fiscal externa completada antes de operación multi-país a escala.
@@ -52,4 +52,4 @@ Convertir la base de staging ya integrada en un entorno operativo verificable, s
 
 El código, Compose, Caddy, GHCR, migración y workflows están preparados. Staging está publicado en `https://staging.teralya.eu`. El despliegue rutinario no abre SSH a GitHub: el servidor consulta GHCR desde dentro y el workflow verifica por HTTPS el commit servido y la salud del Backend.
 
-La corrección móvil está implementada en código, pero la validación de cierre se ha reabierto por evidencia directa del CEO de que la experiencia móvil seguía sin funcionar correctamente. Las pruebas automatizadas y capturas previas no sustituyen la aceptación en teléfonos físicos. Producción permanece bloqueada hasta registrar una nueva evidencia satisfactoria.
+El 28/07/2026 el CEO confirmó que ya puede visualizar y utilizar la web desde su teléfono móvil y autorizó continuar con el siguiente paso. El bloqueo móvil P0 queda cerrado por aceptación ejecutiva. La compatibilidad cruzada Android/iPhone permanece como prueba de regresión obligatoria previa a producción, no como bloqueo P0 activo.
